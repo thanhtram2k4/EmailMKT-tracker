@@ -17,7 +17,9 @@ const handle = await startWorker({
   concurrency: cfg.WORKER_CONCURRENCY,
   heartbeatIntervalMs: cfg.HEARTBEAT_INTERVAL_MS,
   buildId: cfg.BUILD_ID,
+  enableCrmSchedules: cfg.NOTION_MODE !== "disabled",
 });
+log.info({ notion_mode: cfg.NOTION_MODE, crm_schedules: cfg.NOTION_MODE !== "disabled" }, "worker schedules configured");
 
 let shuttingDown = false;
 async function shutdown(signal: string) {

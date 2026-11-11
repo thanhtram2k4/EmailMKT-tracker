@@ -1,0 +1,48 @@
+
+ RUN  v5.1.0 D:/AI Studio/Email MKT Tracker
+
+stderr | tests/integration/crm-sync.test.ts > R-SYNC-06 and partial failures > records data problems (unexpected property type) without failing the run
+[core] WARNING: Executable file detection not yet supported on 'win32'.
+Your pool doesn't have all of the error handlers! See: https://err.red/wpeh?v=0.18.0&method=connect
+
+ ❯ |integration| tests/integration/crm-sync.test.ts (22 tests | 1 failed | 21 skipped) 854ms
+   ❯ R-SYNC-06 and partial failures (6)
+     × records data problems (unexpected property type) without failing the run 853ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  |integration| tests/integration/crm-sync.test.ts > R-SYNC-06 and partial failures > records data problems (unexpected property type) without failing the run
+AssertionError: expected +0 to be 1 // Object.is equality
+
+- Expected
++ Received
+
+- 1
++ 0
+
+ ❯ tests/integration/crm-sync.test.ts:283:33
+    281|     const r = await full(ctx);
+    282|     expect(r.status).toBe("succeeded");
+    283|     expect(r.counts.dataIssues).toBe(1);
+       |                                 ^
+    284|     expect((await ctx.db.select().from(contacts))[0]).toMatchObject({ …
+    285|   });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 21 skipped (22)
+   Start at  01:21:32
+   Duration  7.09s (tests 62%, import 32%, transform 6%)
+
+file:///D:/AI%20Studio/Email%20MKT%20Tracker/node_modules/embedded-postgres/dist/index.js:393
+        done();
+        ^
+
+TypeError: done is not a function
+    at file:///D:/AI%20Studio/Email%20MKT%20Tracker/node_modules/embedded-postgres/dist/index.js:393:9
+    at Generator.next (<anonymous>)
+    at fulfilled (file:///D:/AI%20Studio/Email%20MKT%20Tracker/node_modules/embedded-postgres/dist/index.js:4:58)
+
+Node.js v24.18.1

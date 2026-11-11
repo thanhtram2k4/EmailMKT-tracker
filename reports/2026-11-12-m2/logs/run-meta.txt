@@ -1,0 +1,4 @@
+BUILD_ID=src-a3d4ec6dbe3a
+git_branch=m2-notion-crm base_commit=3f11649 (M2 changes uncommitted at test time; checkpoint commit follows)
+node=v24.18.1 npm=11.16.0 os=Windows 11 Pro 10.0.26300 (Git Bash) start_utc=2026-11-11T18:46:39Z
+end_utc=2026-11-11T18:48:28Z

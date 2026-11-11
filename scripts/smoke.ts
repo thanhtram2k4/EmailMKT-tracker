@@ -104,8 +104,43 @@ rows.push({
   notes: "No Google OAuth client configured (M0 prerequisite). Requires an interactive Google sign-in on a deployed environment.",
 });
 
+// S3 — Notion sync. MOCK variant runs only inside the isolated local stack (NOTION_MODE=mock):
+// it uses the same connection + sync code the worker uses, against the local mock server.
+const mockNotion = process.env.NOTION_MODE === "mock" && process.env.NOTION_API_BASE_URL && process.env.DATABASE_URL;
+if (mockNotion) {
+  await check("S3-mock", "Notion sync (mock server, synthetic data): contact count matches non-trashed pages; repeat sync creates nothing", "MOCK", async () => {
+    const { getConfig } = await import("../src/lib/config.ts");
+    const { getDb, closeDb } = await import("../src/lib/db/client.ts");
+    const { notionEnvFromConfig } = await import("../src/lib/crm/notion-env.ts");
+    const { connectExistingDatabase } = await import("../src/lib/crm/connection.ts");
+    const { syncContacts } = await import("../src/lib/crm/sync.ts");
+    const { contactStats } = await import("../src/lib/crm/queries.ts");
+    const env = notionEnvFromConfig(getConfig());
+    const db = getDb();
+    try {
+      const c = await connectExistingDatabase(db, env, { token: "mock-notion-token-not-a-secret", databaseIdOrUrl: "11111111-2222-4333-8444-555555555555", actor: "smoke" });
+      if (!c.ok) return { result: "FAIL", notes: `connect failed: ${c.error}` };
+      const r1 = await syncContacts(db, env, { mode: "full", trigger: "test", actor: "smoke" });
+      const r2 = await syncContacts(db, env, { mode: "full", trigger: "test", actor: "smoke" });
+      const pages = (await (await fetch(`${process.env.NOTION_API_BASE_URL}/__mock/pages`)).json()) as Array<{ inTrash: boolean }>;
+      const expected = pages.filter((p) => !p.inTrash).length;
+      const stats = await contactStats(db);
+      const ok = r1.status === "succeeded" && r2.status === "succeeded" && stats.active === expected && r2.counts.created === 0;
+      return { result: ok ? "PASS" : "FAIL", notes: `run1=${r1.status} created=${r1.counts.created}; run2=${r2.status} created=${r2.counts.created}; active contacts=${stats.active}, non-trashed mock pages=${expected}` };
+    } finally {
+      await closeDb();
+    }
+  });
+}
+rows.push({
+  id: "S3-live",
+  scenario: "Sync now against the separate Notion TEST database; counts match",
+  type: "LIVE",
+  result: "BLOCKED",
+  notes: "No Notion test database or connection token yet (see docs/NOTION_SETUP.md); live Notion access not authorized under M2.",
+});
+
 for (const [id, s, ms] of [
-  ["S3", "Notion sync now matches test database counts", "M2"],
   ["S4", "Preview as recipient with no unresolved fields", "M4"],
   ["S5", "Test send → simulator Delivery event; campaign metrics unchanged", "M4"],
   ["S6", "Send now to 3 simulator addresses → Sent 3 / Delivered 2 / Bounced 1", "M5"],

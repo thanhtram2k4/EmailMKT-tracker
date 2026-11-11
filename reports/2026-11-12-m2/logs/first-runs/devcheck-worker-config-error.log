@@ -1,0 +1,43 @@
+
+> email-mkt-tracker@0.1.0 dev:crm
+> concurrently -n web,worker,notion-mock -c blue,magenta,green "npm:dev" "npm:worker" "npm:notion:mock"
+
+[worker] 
+[worker] > email-mkt-tracker@0.1.0 worker
+[worker] > tsx src/worker/main.ts
+[worker] 
+[web] 
+[web] > email-mkt-tracker@0.1.0 dev
+[web] > next dev --port 3000
+[web] 
+[notion-mock] 
+[notion-mock] > email-mkt-tracker@0.1.0 notion:mock
+[notion-mock] > tsx scripts/notion-mock/server.ts
+[notion-mock] 
+[notion-mock] Mock Notion (SYNTHETIC data) listening on http://127.0.0.1:4010 — 40 pages
+[notion-mock] Token: mock-notion-token-not-a-secret  ·  database ID: 11111111-2222-4333-8444-555555555555
+[web] ⨯ Failed to start server
+[web] Error: listen EADDRINUSE: address already in use :::3000
+[web]     at new Promise (<anonymous>) {
+[web]   code: 'EADDRINUSE',
+[web]   errno: -4091,
+[web]   syscall: 'listen',
+[web]   address: '::',
+[web]   port: 3000
+[web] }
+[web] [?25h
+[web] npm run dev exited with code 1
+[worker] D:\AI Studio\Email MKT Tracker\src\lib\config.ts:188
+[worker]     throw new ConfigError(r.error.issues.map((i) => `${i.path.join(".") || "(root)"}: ${i.message}`));
+[worker]           ^
+[worker] 
+[worker] ConfigError: Invalid configuration:
+[worker]   - NOTION_API_BASE_URL: Invalid URL
+[worker]     at parseConfig (D:\AI Studio\Email MKT Tracker\src\lib\config.ts:188:11)
+[worker]     at getConfig (D:\AI Studio\Email MKT Tracker\src\lib\config.ts:200:14)
+[worker]     at <anonymous> (D:\AI Studio\Email MKT Tracker\src\worker\main.ts:11:13) {
+[worker]   issues: [ 'NOTION_API_BASE_URL: Invalid URL' ]
+[worker] }
+[worker] 
+[worker] Node.js v24.18.1
+[worker] npm run worker exited with code 1

@@ -14,6 +14,8 @@ const prod = {
   APP_BASE_URL: "https://app.example.com",
   GOOGLE_CLIENT_ID: "id",
   GOOGLE_CLIENT_SECRET: "secret",
+  // Required in production since M2 (encrypts the stored Notion token).
+  APP_ENCRYPTION_KEY: Buffer.alloc(32, 1).toString("base64url"),
 };
 
 function issues(env: Record<string, string | undefined>): string[] {
@@ -75,5 +77,46 @@ describe("config safety rules", () => {
     const i = issues({ ...base, BETTER_AUTH_SECRET: "short", ALLOWED_EMAIL_DOMAINS: "" }).join();
     expect(i).toMatch(/BETTER_AUTH_SECRET/);
     expect(i).toMatch(/ALLOWED_EMAIL_DOMAINS/);
+  });
+});
+
+describe("config: Notion access rules", () => {
+  const key = Buffer.alloc(32, 7).toString("base64url");
+  it("defaults to NOTION_MODE=disabled with no base URL", () => {
+    const c = parseConfig(base);
+    expect(c.NOTION_MODE).toBe("disabled");
+    expect(c.notionBaseUrl).toBeNull();
+  });
+  it("mock mode requires an encryption key and a loopback base URL", () => {
+    expect(issues({ ...base, NOTION_MODE: "mock" }).join()).toMatch(/APP_ENCRYPTION_KEY is required/);
+    expect(parseConfig({ ...base, NOTION_MODE: "mock", APP_ENCRYPTION_KEY: key }).notionBaseUrl).toBe("http://127.0.0.1:4010");
+    expect(issues({ ...base, NOTION_MODE: "mock", APP_ENCRYPTION_KEY: key, NOTION_API_BASE_URL: "https://api.notion.com" }).join()).toMatch(/loopback/);
+  });
+  it("mock mode is refused in production", () => {
+    expect(issues({ ...prod, NOTION_MODE: "mock", APP_ENCRYPTION_KEY: key }).join()).toMatch(/mock is not allowed in production/);
+  });
+  it("live mode requires NOTION_AUTHORIZATION_REF and the official API host", () => {
+    expect(issues({ ...base, NOTION_MODE: "live", APP_ENCRYPTION_KEY: key }).join()).toMatch(/NOTION_AUTHORIZATION_REF/);
+    expect(issues({ ...base, NOTION_MODE: "live", APP_ENCRYPTION_KEY: key, NOTION_AUTHORIZATION_REF: "x", NOTION_API_BASE_URL: "http://127.0.0.1:4010" }).join()).toMatch(/must use https:\/\/api.notion.com/);
+    const c = parseConfig({ ...base, NOTION_MODE: "live", APP_ENCRYPTION_KEY: key, NOTION_AUTHORIZATION_REF: "approved test DB 2026-11-12" });
+    expect(c.notionBaseUrl).toBe("https://api.notion.com");
+  });
+  it("rejects a malformed encryption key and requires one in staging/production", () => {
+    expect(issues({ ...base, APP_ENCRYPTION_KEY: "short" }).join()).toMatch(/32 random bytes/);
+    expect(issues({ ...prod, APP_ENCRYPTION_KEY: undefined }).join()).toMatch(/APP_ENCRYPTION_KEY is required/);
+  });
+});
+
+describe("config: blank values", () => {
+  it("treats KEY= (blank) as unset, as in .env.example (regression found by the M2 dev-flow check)", () => {
+    const c = parseConfig({ ...base, NOTION_MODE: "mock", APP_ENCRYPTION_KEY: Buffer.alloc(32, 7).toString("base64url"), NOTION_API_BASE_URL: "", NOTION_AUTHORIZATION_REF: "", SEND_AUTHORIZATION_REF: " " });
+    expect(c.notionBaseUrl).toBe("http://127.0.0.1:4010");
+    expect(c.NOTION_AUTHORIZATION_REF).toBeUndefined();
+  });
+  it("parses the committed .env.example (with a generated key) without errors", async () => {
+    const fs = await import("node:fs");
+    const env = Object.fromEntries([...fs.readFileSync(".env.example", "utf8").matchAll(/^([A-Z0-9_]+)=(.*)$/gm)].map((m) => [m[1], m[2]]));
+    expect(() => parseConfig({ ...env, BETTER_AUTH_SECRET: "x".repeat(40) })).not.toThrow();
+    expect(() => parseConfig({ ...env, BETTER_AUTH_SECRET: "x".repeat(40), NOTION_MODE: "mock", APP_ENCRYPTION_KEY: Buffer.alloc(32, 3).toString("base64url") })).not.toThrow();
   });
 });

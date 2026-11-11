@@ -1,0 +1,19 @@
+
+ RUN  v5.1.0 D:/AI Studio/Email MKT Tracker
+
+
+ Test Files  4 passed (4)
+      Tests  37 passed (37)
+   Start at  01:21:48
+   Duration  36.95s (tests 93%, import 6%)
+
+file:///D:/AI%20Studio/Email%20MKT%20Tracker/node_modules/embedded-postgres/dist/index.js:393
+        done();
+        ^
+
+TypeError: done is not a function
+    at file:///D:/AI%20Studio/Email%20MKT%20Tracker/node_modules/embedded-postgres/dist/index.js:393:9
+    at Generator.next (<anonymous>)
+    at fulfilled (file:///D:/AI%20Studio/Email%20MKT%20Tracker/node_modules/embedded-postgres/dist/index.js:4:58)
+
+Node.js v24.18.1

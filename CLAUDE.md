@@ -6,18 +6,23 @@ This is an internal email-marketing app for a single company. Campaigns go out t
 - Approved design: `docs/DESIGN.md`
 - Milestones, test checklists and decisions log: `docs/PLAN.md`
 - Legal and consent prerequisites: `docs/COMPLIANCE.md`
+- Connecting the real Notion test database: `docs/NOTION_SETUP.md`
 - Test evidence: `reports/`
 - How to run: `README.md`
 
 ## Status
-- **M1 (foundation) is implemented.** See `reports/2026-11-12-m1/report.md`.
-- **M2 and later are not authorized yet.**
+- **M1 (foundation) is implemented** and checkpointed as Git tag `m1-checkpoint`. See `reports/2026-11-12-m1/report.md`.
+- **M2 (Notion CRM) is implemented with mocks and synthetic data only.** See `reports/2026-11-12-m2/report.md`.
+- **M3 and later are not authorized yet.**
+- **Verified only locally:** Google OAuth, staging, CI and live Notion are unverified.
 
 Ask the user explicitly before any of these:
 - starting a new milestone
 - deploying
+- connecting to any real Notion workspace (`NOTION_MODE=live`) or importing real contacts
 - changing live Notion data
 - sending any real email
+- pushing to a remote or creating one
 
 Approving a plan or a document does not count as permission for any of them.
 
@@ -32,7 +37,8 @@ TypeScript on Node 22.18+ (developed on Node 24).
 - Sign-in: Better Auth 1.7 with Google, limited to the company domain and the staff allowlist. A dev magic link exists only when APP_ENV is local or test.
 - Logging: pino.
 - Tests: Vitest and Playwright.
-- Local Postgres: `embedded-postgres` (real PostgreSQL 17 binaries; no Docker needed).
+- Local Postgres: `embedded-postgres` (real PostgreSQL 17 binaries; no Docker needed). Its exit hooks are partly removed in `scripts/lib/embedded-pg.ts`, because they forced exit code 0.
+- Notion: API version pinned to `2026-03-11` (`src/lib/notion/`). The CRM sync, outbox, consent and eligibility code is in `src/lib/crm/`. The mock server is in `scripts/notion-mock/`.
 - Planned: SES v2 in ap-southeast-1, LiquidJS, Luxon, and hosting on Render in Singapore.
 
 ## Commands
@@ -40,8 +46,9 @@ TypeScript on Node 22.18+ (developed on Node 24).
 |---|---|
 | First-time setup | `npm install` · `npm run setup:local` · `npm run playwright:install` |
 | Local DB (keep this terminal open) | `npm run db:start` |
-| Migrate / staff | `npm run db:migrate` · `npm run staff:add -- a@b.com admin` |
-| Run | `npm run dev:all` (web on :3000 and worker) |
+| Migrate / staff | `npm run db:migrate` · `npm run staff:add -- admin@example.com admin` |
+| Run | `npm run dev:all` (web on :3000 and worker) · `npm run dev:crm` (plus the mock Notion server on :4010) |
+| Mock Notion control | `npm run notion:mock:ctl -- list` · `set <key> subscription=Subscribed` · `trash <key>` · `fault 503 3` |
 | Checks | `npm run lint` · `npm run typecheck` · `npm run test:unit` · `npm run test:integration` |
 | E2E / smoke | `npm run e2e` · `npm run smoke:local` (each starts an isolated stack, runs, then tears it down) |
 | New migration | edit `src/lib/db/schema.ts`, then `npm run db:generate` |
@@ -64,7 +71,34 @@ TypeScript on Node 22.18+ (developed on Node 24).
   - `src/lib/sending/guard.ts` (per-send decision);
   - `src/lib/sending/transport.ts` (factory).
 - **M1 contains no real transport.** The factory refuses to build one.
-- **Not permitted under the M1 authorization:** any real email sending or deployment.
+- **Not permitted under the M1 or M2 authorizations:** any real email sending or deployment.
+
+## CRM rules (M2; do not break)
+- **Identity is the Notion page id.** An email change keeps the same contact. Suppressions and consent follow the **address**.
+- **Notion owns** full name, greeting name, email, company, tags and the consent evidence reference. **The app owns** suppression and subscription state, consent records, last emailed and last engagement.
+- **Notion values and suppressions:**
+  - `Unsubscribed`, `Bounced` or `Complained` in Notion **adds** a suppression and records consent as withdrawn.
+  - `Subscribed` or blank never removes a suppression and never means consent. The app writes the suppressed value back through `notion_outbox`.
+- **Consent:**
+  - Imports never grant consent; contacts default to `unknown`. Only a staff entry with an evidence reference or note can grant, and a grant never lifts a suppression.
+  - DB constraints enforce this, and `suppressions` and `consent_records` are append-only (triggers).
+- **Sync safety:**
+  - The incremental cursor advances only after a complete listing with no page errors.
+  - Archiving missing pages happens only after a complete *full* listing.
+  - One sync at a time (advisory lock).
+- **Notion access:** `NOTION_MODE=live` requires `NOTION_AUTHORIZATION_REF`. The token lives only encrypted in the DB (`APP_ENCRYPTION_KEY`); never in env files, logs or Git.
+- **Notion retries:**
+  - 429 and 529 are always retried, using `Retry-After`.
+  - Other 5xx are retried only for reads and idempotent property writes.
+  - Creates are never retried.
+- **Tests use `scripts/notion-mock/` only.** All synthetic addresses are on reserved domains (`example.com/org/net`, `*.example`).
+
+## Windows process hygiene
+- Stopping a background task here does **not** stop its child processes (next, worker, postgres, mock server).
+- After any manual dev check:
+  - stop Postgres with `pg_ctl stop -D .local/postgres`;
+  - end the project's node processes;
+  - verify that no process or dev port (3000, 3100, 4010, 4011, 54321, 54331, 54332) is left.
 
 ## Invariants (do not break)
 - **Never resubscribe automatically.** Suppressions are never removed by sync or other automation. Notion "Subscribed" never overrides a suppression.
@@ -85,4 +119,5 @@ TypeScript on Node 22.18+ (developed on Node 24).
 - Take expected behavior from the brief and design, not from what the current code does.
 - For a bug, reproduce it before fixing (record failed reproductions too). Afterwards, rerun the original case and the affected regressions. Keep the first failure in the report.
 - Redact tokens, cookies, keys and contact emails in reports (`src/lib/redact.ts`, plus a manual check). Never send reports to anyone automatically.
-- Use only fixture addresses at reserved domains (`example.com`, `example.net`) in tests.
+- Use only fixture addresses at reserved domains (`example.com`, `example.net`, `example.org`, `*.example`) in tests.
+- Check exit codes as well as test output. A run that reports failures must exit non-zero (see the M2 report).

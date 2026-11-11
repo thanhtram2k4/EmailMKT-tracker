@@ -3,6 +3,8 @@ import { systemClock } from "../lib/clock";
 import { getConfig } from "../lib/config";
 import { getDb } from "../lib/db/client";
 import { checkHealth } from "../lib/health";
+import Link from "next/link";
+import { contactStats, syncOverview } from "../lib/crm/queries";
 import { AppHeader } from "./app-header";
 
 export const dynamic = "force-dynamic";
@@ -18,6 +20,7 @@ const SEND_MODE_TEXT: Record<string, string> = {
 export default async function Dashboard() {
   const staff = await requireStaff();
   const cfg = getConfig();
+  const [stats, sync] = await Promise.all([contactStats(getDb()), syncOverview(getDb())]);
   const health = await checkHealth(getDb(), {
     clock: systemClock,
     build: cfg.BUILD_ID,
@@ -44,7 +47,17 @@ export default async function Dashboard() {
       <section className="card">
         <h2>Welcome, {staff.name || staff.email}</h2>
         <p className="muted" style={{ margin: 0 }}>
-          Foundation build (M1). Contacts, templates, campaigns, scheduling and analytics arrive in later milestones.
+          M2: contacts are synchronized from the Notion CRM. Templates, campaigns, scheduling and analytics arrive in later milestones.
+        </p>
+      </section>
+
+      <section className="card" data-testid="crm-card">
+        <h2>CRM</h2>
+        <p style={{ margin: 0 }}>
+          <strong>{stats.active}</strong> active contacts · {stats.duplicates} duplicates · {stats.invalid + stats.missing} invalid/missing email ·{" "}
+          {stats.suppressions} suppressed addresses · NOTION_MODE={cfg.NOTION_MODE} · last sync:{" "}
+          {sync.latestRun ? `${sync.latestRun.status} (${sync.latestRun.mode})` : "never"} · <Link href="/contacts">Contacts</Link> ·{" "}
+          <Link href="/sync">Sync</Link>
         </p>
       </section>
 

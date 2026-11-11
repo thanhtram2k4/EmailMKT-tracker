@@ -15,6 +15,27 @@ export type AppEnv = (typeof APP_ENVS)[number];
 export const SEND_MODES = ["disabled", "mock", "simulator", "allowlist", "live"] as const;
 export type SendMode = (typeof SEND_MODES)[number];
 
+/**
+ * Notion access mode (mirrors the sending guard):
+ *  - disabled: no Notion calls at all (default);
+ *  - mock:     only a local mock server on a loopback address (synthetic data; never production);
+ *  - live:     the real Notion API (https://api.notion.com) — requires NOTION_AUTHORIZATION_REF,
+ *              i.e. a recorded approval to connect a specific (test) Notion database.
+ */
+export const NOTION_MODES = ["disabled", "mock", "live"] as const;
+export type NotionMode = (typeof NOTION_MODES)[number];
+export const NOTION_LIVE_BASE_URL = "https://api.notion.com";
+export const NOTION_MOCK_DEFAULT_BASE_URL = "http://127.0.0.1:4010";
+
+function isLoopbackUrl(u: string): boolean {
+  try {
+    const h = new URL(u).hostname;
+    return h === "127.0.0.1" || h === "localhost" || h === "::1" || h === "[::1]";
+  } catch {
+    return false;
+  }
+}
+
 const csv = z
   .string()
   .optional()
@@ -51,6 +72,13 @@ const schema = z
     WORKER_CONCURRENCY: z.coerce.number().int().min(1).max(20).default(2),
     HEARTBEAT_INTERVAL_MS: z.coerce.number().int().min(1000).default(15000),
     HEALTH_MAX_HEARTBEAT_AGE_S: z.coerce.number().int().min(5).default(60),
+    /** 32 random bytes, base64url. Encrypts secrets stored in the DB (Notion token). */
+    APP_ENCRYPTION_KEY: z.string().optional(),
+    APP_ENCRYPTION_KEY_ID: z.string().regex(/^[A-Za-z0-9_-]{1,16}$/).default("k1"),
+    NOTION_MODE: z.enum(NOTION_MODES).default("disabled"),
+    NOTION_API_BASE_URL: z.string().url().optional(),
+    NOTION_AUTHORIZATION_REF: z.string().optional(),
+    NOTION_RATE_LIMIT_RPS: z.coerce.number().positive().max(3).default(2.5),
   })
   .superRefine((c, ctx) => {
     const nonProd = c.APP_ENV !== "production";
@@ -89,6 +117,46 @@ const schema = z
         message: "The local dev sign-in can only be enabled when APP_ENV is local or test",
       });
     }
+    // ---- Notion access rules
+    const keyOk = Boolean(c.APP_ENCRYPTION_KEY && Buffer.from(c.APP_ENCRYPTION_KEY, "base64url").length === 32);
+    if (c.APP_ENCRYPTION_KEY && !keyOk) {
+      ctx.addIssue({ code: "custom", path: ["APP_ENCRYPTION_KEY"], message: "must be 32 random bytes encoded as base64url" });
+    }
+    if ((c.NOTION_MODE !== "disabled" || !nonProd || c.APP_ENV === "staging") && !c.APP_ENCRYPTION_KEY) {
+      ctx.addIssue({
+        code: "custom",
+        path: ["APP_ENCRYPTION_KEY"],
+        message: `APP_ENCRYPTION_KEY is required (NOTION_MODE=${c.NOTION_MODE}, APP_ENV=${c.APP_ENV})`,
+      });
+    }
+    if (c.NOTION_MODE === "mock") {
+      if (c.APP_ENV === "production") {
+        ctx.addIssue({ code: "custom", path: ["NOTION_MODE"], message: "NOTION_MODE=mock is not allowed in production" });
+      }
+      if (c.NOTION_API_BASE_URL && !isLoopbackUrl(c.NOTION_API_BASE_URL)) {
+        ctx.addIssue({
+          code: "custom",
+          path: ["NOTION_API_BASE_URL"],
+          message: "NOTION_MODE=mock only talks to a loopback mock server (127.0.0.1 / localhost)",
+        });
+      }
+    }
+    if (c.NOTION_MODE === "live") {
+      if (!c.NOTION_AUTHORIZATION_REF) {
+        ctx.addIssue({
+          code: "custom",
+          path: ["NOTION_AUTHORIZATION_REF"],
+          message: "NOTION_MODE=live requires NOTION_AUTHORIZATION_REF (record of approval to connect this Notion database)",
+        });
+      }
+      if (c.NOTION_API_BASE_URL && c.NOTION_API_BASE_URL.replace(/\/$/, "") !== NOTION_LIVE_BASE_URL) {
+        ctx.addIssue({ code: "custom", path: ["NOTION_API_BASE_URL"], message: `NOTION_MODE=live must use ${NOTION_LIVE_BASE_URL}` });
+      }
+    }
+    if (c.NOTION_MODE === "disabled" && c.NOTION_API_BASE_URL && !isLoopbackUrl(c.NOTION_API_BASE_URL) && c.NOTION_API_BASE_URL !== NOTION_LIVE_BASE_URL) {
+      ctx.addIssue({ code: "custom", path: ["NOTION_API_BASE_URL"], message: "unexpected Notion base URL" });
+    }
+
     const hasGoogle = Boolean(c.GOOGLE_CLIENT_ID && c.GOOGLE_CLIENT_SECRET);
     if (!nonProd || c.APP_ENV === "staging") {
       if (!hasGoogle) {
@@ -104,7 +172,7 @@ const schema = z
     }
   });
 
-export type AppConfig = z.output<typeof schema> & { googleEnabled: boolean };
+export type AppConfig = z.output<typeof schema> & { googleEnabled: boolean; notionBaseUrl: string | null };
 
 export class ConfigError extends Error {
   constructor(public readonly issues: string[]) {
@@ -115,11 +183,18 @@ export class ConfigError extends Error {
 
 /** Parse a raw env object. Exported for tests; app code uses getConfig(). */
 export function parseConfig(env: Record<string, string | undefined>): AppConfig {
-  const r = schema.safeParse(env);
+  // `KEY=` (blank) in an env file means "not set" — e.g. NOTION_API_BASE_URL= in .env.example.
+  const cleaned = Object.fromEntries(Object.entries(env).map(([k, v]) => [k, typeof v === "string" && v.trim() === "" ? undefined : v]));
+  const r = schema.safeParse(cleaned);
   if (!r.success) {
     throw new ConfigError(r.error.issues.map((i) => `${i.path.join(".") || "(root)"}: ${i.message}`));
   }
-  return { ...r.data, googleEnabled: Boolean(r.data.GOOGLE_CLIENT_ID && r.data.GOOGLE_CLIENT_SECRET) };
+  const d = r.data;
+  const notionBaseUrl =
+    d.NOTION_MODE === "disabled"
+      ? null
+      : (d.NOTION_API_BASE_URL ?? (d.NOTION_MODE === "live" ? NOTION_LIVE_BASE_URL : NOTION_MOCK_DEFAULT_BASE_URL)).replace(/\/$/, "");
+  return { ...d, googleEnabled: Boolean(d.GOOGLE_CLIENT_ID && d.GOOGLE_CLIENT_SECRET), notionBaseUrl };
 }
 
 let cached: AppConfig | undefined;

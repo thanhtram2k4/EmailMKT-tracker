@@ -1,0 +1,110 @@
+{
+  "baseUrl": "http://localhost:3100",
+  "env": "local-stack",
+  "startedAt": "2026-11-11T18:48:23.945Z",
+  "finishedAt": "2026-11-11T18:48:27.253Z",
+  "timezoneNote": "timestamps are UTC (ISO 8601); report converts to Asia/Ho_Chi_Minh (UTC+07:00)",
+  "counts": {
+    "PASS": 5,
+    "BLOCKED": 2,
+    "NOT RUN": 6
+  },
+  "rows": [
+    {
+      "id": "S1",
+      "scenario": "App and worker start; /healthz reports DB ok and worker heartbeat < 60 s",
+      "type": "MOCK",
+      "result": "PASS",
+      "notes": "HTTP 200; db=true; worker=true; heartbeat age=0s; build=src-a3d4ec6dbe3a",
+      "durationMs": 58
+    },
+    {
+      "id": "S2a",
+      "scenario": "Allowed staff account can sign in (dev identity provider)",
+      "type": "MOCK",
+      "result": "PASS",
+      "notes": "verify → 302 /; dashboard HTTP 200; shows signed-in user: true",
+      "durationMs": 281
+    },
+    {
+      "id": "S2b",
+      "scenario": "Outside-domain account is rejected (dev identity provider)",
+      "type": "MOCK",
+      "result": "PASS",
+      "notes": "verify → HTTP 302 → /access-denied?error=ACCESS_DENIED_WRONG_DOMAIN; session cookie set: false",
+      "durationMs": 39
+    },
+    {
+      "id": "S2c",
+      "scenario": "Company-domain account not on allowlist is rejected (dev identity provider)",
+      "type": "MOCK",
+      "result": "PASS",
+      "notes": "verify → HTTP 302 → /access-denied?error=ACCESS_DENIED_NOT_ALLOWLISTED; session cookie set: false",
+      "durationMs": 41
+    },
+    {
+      "id": "S2-live",
+      "scenario": "Google OAuth sign-in with a real company Workspace account (allowed) and an outside account (rejected)",
+      "type": "LIVE",
+      "result": "BLOCKED",
+      "notes": "No Google OAuth client configured (M0 prerequisite). Requires an interactive Google sign-in on a deployed environment."
+    },
+    {
+      "id": "S3-mock",
+      "scenario": "Notion sync (mock server, synthetic data): contact count matches non-trashed pages; repeat sync creates nothing",
+      "type": "MOCK",
+      "result": "PASS",
+      "notes": "run1=succeeded created=39; run2=succeeded created=0; active contacts=39, non-trashed mock pages=39",
+      "durationMs": 2831
+    },
+    {
+      "id": "S3-live",
+      "scenario": "Sync now against the separate Notion TEST database; counts match",
+      "type": "LIVE",
+      "result": "BLOCKED",
+      "notes": "No Notion test database or connection token yet (see docs/NOTION_SETUP.md); live Notion access not authorized under M2."
+    },
+    {
+      "id": "S4",
+      "scenario": "Preview as recipient with no unresolved fields",
+      "type": "-",
+      "result": "NOT RUN",
+      "notes": "Feature not implemented yet (M4)."
+    },
+    {
+      "id": "S5",
+      "scenario": "Test send → simulator Delivery event; campaign metrics unchanged",
+      "type": "-",
+      "result": "NOT RUN",
+      "notes": "Feature not implemented yet (M4)."
+    },
+    {
+      "id": "S6",
+      "scenario": "Send now to 3 simulator addresses → Sent 3 / Delivered 2 / Bounced 1",
+      "type": "-",
+      "result": "NOT RUN",
+      "notes": "Feature not implemented yet (M5)."
+    },
+    {
+      "id": "S7",
+      "scenario": "Scheduled send (+3 min, Asia/Ho_Chi_Minh) executes with browser closed",
+      "type": "-",
+      "result": "NOT RUN",
+      "notes": "Feature not implemented yet (M6)."
+    },
+    {
+      "id": "S8",
+      "scenario": "Open, click, unsubscribe recorded; redirect to snapshot URL",
+      "type": "-",
+      "result": "NOT RUN",
+      "notes": "Feature not implemented yet (M7)."
+    },
+    {
+      "id": "S9",
+      "scenario": "Cancelled scheduled campaign never dispatches",
+      "type": "-",
+      "result": "NOT RUN",
+      "notes": "Feature not implemented yet (M6)."
+    }
+  ]
+}

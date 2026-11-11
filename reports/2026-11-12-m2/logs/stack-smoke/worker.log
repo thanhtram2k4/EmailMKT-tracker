@@ -1,0 +1,5 @@
+{"level":"info","time":"2026-11-11T18:48:23.541Z","service":"worker","env":"test","build":"src-a3d4ec6dbe3a","env":"test","send_mode":"disabled","msg":"starting worker"}
+{"level":"warn","time":"2026-11-11T18:48:23.593Z","service":"worker","env":"test","build":"src-a3d4ec6dbe3a","worker_id":"worker-Thanh-Tram-24844-834a018a","gw":{},"msg":"Executable file detection not yet supported on 'win32'."}
+{"level":"info","time":"2026-11-11T18:48:23.732Z","service":"worker","env":"test","build":"src-a3d4ec6dbe3a","worker_id":"worker-Thanh-Tram-24844-834a018a","concurrency":2,"msg":"worker started"}
+{"level":"info","time":"2026-11-11T18:48:23.732Z","service":"worker","env":"test","build":"src-a3d4ec6dbe3a","notion_mode":"mock","crm_schedules":true,"msg":"worker schedules configured"}
+{"level":"info","time":"2026-11-11T18:48:23.764Z","service":"worker","env":"test","build":"src-a3d4ec6dbe3a","worker_id":"worker-Thanh-Tram-24844-834a018a","gw":{},"msg":"Worker connected and looking for jobs... (task names: 'system_probe', 'crm_sync', 'notion_outbox_flush')"}

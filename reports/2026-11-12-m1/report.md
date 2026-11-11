@@ -156,3 +156,13 @@ Before the checkpoint commit, test-only fixture addresses at non-reserved domain
 - Smoke S3–S9: NOT RUN.
 
 M1 is a locally verified foundation only.
+
+## Addendum: corrections found during M2 (2026-11-12)
+1. **Integration exit codes were unreliable.**
+   - `embedded-postgres` registers `async-exit-hook`, which calls `process.exit(0)` on `beforeExit`. That overrode Vitest's exit code, so a *failing* integration run exited 0.
+   - The integration results in this report were genuinely observed passes: each test is marked ✓ in [logs/integration.log](logs/integration.log). But the "exit 0" there would not have revealed a failure.
+   - Fixed in M2, with evidence in the M2 report.
+2. **"No servers left running" (manual checks section) was incorrect.**
+   - The developer-setup check left `db:start`, `next dev` and the worker running. They were found and stopped during M2.
+   - Cause: on Windows, stopping a background task does not stop its child processes, and the port check used then did not detect them.
+   - Process listings are now part of every manual check.

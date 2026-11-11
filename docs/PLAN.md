@@ -19,6 +19,14 @@ Legend: `[ ]` todo · `[x]` done (with a link to evidence) · results are PASS /
 | 2026-11-12 | Local Postgres uses `embedded-postgres` (real PostgreSQL 17 binaries, project-local). Docker Desktop is installed but its daemon was not running, and starting it was out of scope | Implementation |
 | 2026-11-12 | The local/test-only dev sign-in uses the Better Auth magic-link plugin, with the link returned on screen and never emailed. It goes through the same domain and allowlist gate as Google, and is rejected at startup in staging and production | Implementation |
 | 2026-11-12 | Legal and consent verification is a prerequisite for enabling real customer campaigns ([COMPLIANCE.md](COMPLIANCE.md) gate). Nothing is confirmed by the company yet | User |
+| 2026-11-12 | M1 checkpointed in local Git: commit `3f11649`, tag `m1-checkpoint`. No remote, no push | User and implementation |
+| 2026-11-12 | **M2 authorized** with synthetic contacts and mocked Notion only. No live CRM, no real contacts, no deployment, no email | User |
+| 2026-11-12 | SES for campaigns plus Gmail as the Phase 2 option is a **confirmed** decision (re-confirmed when M2 was authorized) | User |
+| 2026-11-12 | Consent records are append-only per address and purpose. Imports default to **unknown** and can never grant consent (app rule plus DB constraint). Granted consent requires a staff entry with evidence and never lifts a suppression | User and implementation |
+| 2026-11-12 | Eligibility requires recorded marketing consent by default (setting `crm.require_marketing_consent`, default true). **Pending counsel**; enforced at send time from M5 | Implementation (proposal) |
+| 2026-11-12 | `NOTION_MODE=disabled\|mock\|live`. `live` requires `NOTION_AUTHORIZATION_REF` and the official API host. `mock` is loopback only and refused in production. The Notion token is entered in the admin UI and stored AES-256-GCM-encrypted (`APP_ENCRYPTION_KEY`); it is never an env var | Implementation |
+| 2026-11-12 | Notion API version pinned to 2026-03-11 after re-verifying the official docs (query is `POST /v1/data_sources/{id}/query`; 10,000-result cap per query handled) | Implementation |
+| 2026-11-12 | Client pacing set to 2.5 req/s with burst 1, so there are at most about 3 requests in any second. Found by an M2 test; the earlier burst of 3 could exceed a strict 3/s | Implementation |
 
 ## Open items (need user input)
 - [ ] Confirm assumptions A1–A7 ([DESIGN.md](DESIGN.md) "Assumptions")
@@ -40,7 +48,7 @@ Legend: `[ ]` todo · `[x]` done (with a link to evidence) · results are PASS /
   - [ ] IAM principal limited to `ses:SendEmail` on the identity, plus `ses:GetAccount`
   - [ ] S3 bucket for images
 - [ ] DNS: SPF, DKIM, DMARC (`p=none` with `rua`); app, tracking and From subdomains; Google Postmaster Tools
-- [ ] Notion internal integration (read, update, insert); CRM database or parent page shared with it; a **separate test database**
+- [ ] Notion internal connection (read, update, insert; no user information) by a Workspace Owner; a **separate TEST page or database** shared with it. Exact steps: [NOTION_SETUP.md](NOTION_SETUP.md)
 - [ ] Render account with staging and production
 - [ ] Test inboxes: personal Gmail, Outlook, iPhone with Apple Mail; 20–50 sample contacts (missing greeting names, duplicates, diacritics)
 
@@ -64,9 +72,13 @@ Legend: `[ ]` todo · `[x]` done (with a link to evidence) · results are PASS /
 
 **Carried to M0/M2:** Google OAuth client (Internal), a staging environment, a live Google sign-in check, and a first CI run once a repository remote exists.
 
+**Corrections to M1, found during M2** (details in the M2 report):
+- Integration-test failures exited **0**: `embedded-postgres`'s exit hook overrode Vitest's exit code. M1's integration tests did genuinely pass (each result was observed), but a failure would not have failed CI. **Fixed in M2.**
+- The M1 report said no servers were left running after the developer check. That was wrong: the `db:start`, `next dev` and worker processes were still running and were stopped during M2. On Windows, stopping a background task does not stop its child processes.
+
 ## Pending compliance changes (proposals; not approved scope)
 Proposed in [COMPLIANCE.md](COMPLIANCE.md) §6, to be adopted only after counsel review and the user's confirmation:
-- consent-record fields (M2)
+- consent-record fields (M2): **schema implemented.** The disclosed-frequency field and the data-subject lookup tool are still open
 - `[QC]`/`[AD]` subject prefix (M4/M5)
 - sender identity and opt-out footer (M3/M5)
 - refusal-confirmation email (M5)
@@ -74,22 +86,27 @@ Proposed in [COMPLIANCE.md](COMPLIANCE.md) §6, to be adopted only after counsel
 - per-contact tracking consent (M7)
 - data-subject request workflow (M8)
 
-## M2: Notion CRM
-- [ ] Connect the integration; token encrypted at rest
-- [ ] Create the CRM database (fixed schema) **or** map an existing database (property types validated)
-- [ ] Full sync, incremental sync (`last_edited_time` with a 5-minute overlap, every 10 minutes), "Sync now", nightly reconcile (trashed pages → archived)
-- [ ] Identity by Notion page ID; normalized email; duplicate and invalid detection; Data issues screen
-- [ ] Subscription rules: Notion "Unsubscribed" → add suppression; Notion "Subscribed" never removes a suppression
-- [ ] Outbox writer: about 2.5 requests/s, honours `Retry-After`, backs off on 5xx/529
-- [ ] Contacts screen with filters
+## M2: Notion CRM — implemented 2026-11-12 with mocks and synthetic data (evidence: [reports/2026-11-12-m2/report.md](../reports/2026-11-12-m2/report.md))
+- [x] Connect the integration; token encrypted at rest (AES-256-GCM with associated data, versioned key, rotation support; only the last 4 characters are shown)
+- [x] Create the CRM database (fixed schema) **or** map an existing database (property types validated; mapping suggested in English or Vietnamese; admin reviews and saves)
+- [x] Full sync, incremental sync (`last_edited_time` with a 5-minute overlap, every 10 minutes), "Sync now", nightly full reconcile (19:00 UTC = 02:00 Asia/Ho_Chi_Minh): trashed or missing pages are archived, never deleted
+- [x] Identity by Notion page ID; normalized email (trim plus lowercase); NFC-normalized Vietnamese text; duplicate and invalid detection; Data issues screen; admin chooses a duplicate's primary
+- [x] Subscription rules: Notion `Unsubscribed`/`Bounced`/`Complained` adds a suppression and records consent as withdrawn. Notion `Subscribed` or blank never removes a suppression; the app writes the suppressed value back through the outbox
+- [x] Consent records: append-only; status, source, effective and recorded time, recorder, evidence reference and note, consent text version. Imports never grant (DB constraint)
+- [x] Outbox writer: shared 2.5 req/s limiter, honours `Retry-After`, backs off on 5xx/529, coalesces per page, race-safe, failures visible on the Sync screen
+- [x] Contacts screen with filters (search, tag, state, issue, suppression, consent, eligibility), Vietnamese collation; contact detail with consent history; Sync screen (runs, counts, errors, outbox)
+- [x] Sync status and error reporting: `sync_runs` (status, counts, cursor, error), `sync_issues` (page-level data and processing problems), audit events
+- [x] Local mock Notion server, 40 synthetic contacts, control CLI (`npm run notion:mock`, `npm run notion:mock:ctl`)
+- [x] Setup guide for the real test database: [NOTION_SETUP.md](NOTION_SETUP.md)
 
-**Acceptance:**
-- [ ] Repeated syncs create no duplicate contacts (R-SYNC-01)
-- [ ] Pages sharing an email are flagged and excluded from audiences (R-SYNC-02)
-- [ ] An email change keeps the same contact (R-SYNC-03); a trashed page is archived (R-SYNC-04)
-- [ ] A suppressed contact marked "Subscribed" in Notion stays suppressed, and Notion is rewritten (R-SYNC-05)
-- [ ] A simulated 429 backs off and the sync succeeds (R-SYNC-06, MOCK)
-- [ ] A live sync against the test database matches the counts (S3, LIVE)
+**Acceptance (observed 2026-11-12; all MOCK except S3-live):**
+- [x] R-SYNC-01: repeated syncs create no duplicate contacts, consent or suppression rows. **PASS (MOCK)**
+- [x] R-SYNC-02: pages sharing an email are flagged and excluded from audiences until a primary is chosen. **PASS (MOCK)**
+- [x] R-SYNC-03: an email change keeps the same contact; the old suppressed address stays suppressed and is flagged. **PASS (MOCK)**
+- [x] R-SYNC-04: trashed pages are archived; pages missing from a complete full listing are archived; incremental syncs never archive; restored pages reactivate. **PASS (MOCK)**
+- [x] R-SYNC-05: a suppressed contact marked `Subscribed` in Notion stays suppressed and Notion is rewritten; this is echo-free. **PASS (MOCK)**
+- [x] R-SYNC-06: simulated 429 (`Retry-After`) and 5xx are backed off and the sync succeeds; exhausted retries end partial, with the cursor kept and nothing archived. **PASS (MOCK)**
+- [ ] S3-live: a live sync against the separate Notion test database matches the counts. **BLOCKED** (no test database or token; live access not authorized)
 
 ## M3: Editor spike → templates
 - [ ] Spike: both real templates × (click-to-edit, GrapesJS). Edit headline, paragraph, image, link and button; export; DOM diff; test sends to Gmail web and Android, Outlook desktop and web, iOS Mail → `reports/<date>-editor-spike/`

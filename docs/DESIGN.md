@@ -7,6 +7,15 @@ Baseline: `PROJECT_BRIEF.md` rev 2. Status: approved plan. M1 was authorized and
 > - Local development uses `embedded-postgres` instead of Docker.
 > - A local/test-only dev sign-in exists. It is rejected at startup in staging and production.
 > - Assumption A3: the legal research is in [COMPLIANCE.md](COMPLIANCE.md). The Decree 91 subject label is `[QC]` or `[AD]`, not "[ADV]". Compliance is a gate before real customer campaigns can be enabled.
+> - **M2 (CRM):**
+>   - §3.1 is extended:
+>     - `consent_records` (append-only per address and purpose; imports default to unknown and never grant);
+>     - `duplicate_resolutions`, `sync_state` and `sync_issues`;
+>     - `suppressions` made append-only by trigger.
+>   - Contact `state` is `active` or `archived`. Duplicate and invalid status are separate fields (`is_duplicate`, `email_status`) rather than extra states.
+>   - Eligibility for audiences also requires recorded marketing consent by default (`crm.require_marketing_consent`, pending counsel). M5 must re-check suppression and consent at send time.
+>   - Notion API version `2026-03-11` (data sources). The 10,000-result query cap is handled by time-ordered chunking.
+>   - Notion access modes `disabled`, `mock` and `live`. The token is encrypted in the DB; see [NOTION_SETUP.md](NOTION_SETUP.md).
 
 ## Context
 

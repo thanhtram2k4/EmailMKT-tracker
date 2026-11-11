@@ -1,0 +1,949 @@
+{
+  "config": {
+    "argv": [
+      "C:\\Program Files\\nodejs\\node.exe",
+      "D:\\AI Studio\\Email MKT Tracker\\node_modules\\@playwright\\test\\cli.js",
+      "test"
+    ],
+    "configFile": "D:\\AI Studio\\Email MKT Tracker\\playwright.config.ts",
+    "rootDir": "D:/AI Studio/Email MKT Tracker/tests/e2e",
+    "failOnFlakyTests": false,
+    "forbidOnly": false,
+    "fullyParallel": false,
+    "globalSetup": null,
+    "globalTeardown": null,
+    "globalTimeout": 0,
+    "grep": {},
+    "grepInvert": null,
+    "maxFailures": 0,
+    "metadata": {
+      "actualWorkers": 1
+    },
+    "preserveOutput": "always",
+    "projects": [
+      {
+        "outputDir": "D:/AI Studio/Email MKT Tracker/test-results",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 1
+        },
+        "id": "chromium",
+        "name": "chromium",
+        "testDir": "D:/AI Studio/Email MKT Tracker/tests/e2e",
+        "testIgnore": [],
+        "testMatch": [
+          "**/*.@(spec|test).?(c|m)[jt]s?(x)"
+        ],
+        "timeout": 30000
+      }
+    ],
+    "filteredProjects": [
+      {
+        "grep": {},
+        "grepInvert": null,
+        "outputDir": "D:\\AI Studio\\Email MKT Tracker\\test-results",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 1
+        },
+        "name": "chromium",
+        "testDir": "D:\\AI Studio\\Email MKT Tracker\\tests\\e2e",
+        "snapshotDir": "D:\\AI Studio\\Email MKT Tracker\\tests\\e2e",
+        "testIgnore": [],
+        "testMatch": "**/*.@(spec|test).?(c|m)[jt]s?(x)",
+        "timeout": 30000,
+        "use": {
+          "baseURL": "http://localhost:3100",
+          "trace": "on",
+          "screenshot": "on",
+          "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/158.0.8127.18 Safari/537.36",
+          "viewport": {
+            "width": 1280,
+            "height": 720
+          },
+          "screen": {
+            "width": 1920,
+            "height": 1080
+          },
+          "deviceScaleFactor": 1,
+          "isMobile": false,
+          "hasTouch": false,
+          "defaultBrowserType": "chromium"
+        },
+        "dependencies": [],
+        "ignoreSnapshots": false,
+        "__projectId": "chromium"
+      }
+    ],
+    "quiet": false,
+    "reporter": [
+      [
+        "list",
+        null
+      ],
+      [
+        "json",
+        {
+          "outputFile": "test-results/e2e-results.json"
+        }
+      ],
+      [
+        "html",
+        {
+          "open": "never"
+        }
+      ]
+    ],
+    "reportSlowTests": {
+      "max": 5,
+      "threshold": 300000
+    },
+    "shard": null,
+    "tags": [],
+    "updateSnapshots": "default",
+    "updateSourceMethod": "patch",
+    "version": "1.65.0",
+    "workers": 1,
+    "webServer": null
+  },
+  "suites": [
+    {
+      "title": "auth.spec.ts",
+      "file": "auth.spec.ts",
+      "column": 0,
+      "line": 0,
+      "specs": [
+        {
+          "title": "unauthenticated visitors are redirected to sign-in",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 30000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "chromium",
+              "projectName": "chromium",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 425,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-11T18:47:48.156Z",
+                  "annotations": [],
+                  "attachments": [
+                    {
+                      "name": "screenshot",
+                      "contentType": "image/png",
+                      "path": "D:\\AI Studio\\Email MKT Tracker\\test-results\\auth-unauthenticated-visitors-are-redirected-to-sign-in-chromium\\test-finished-1.png"
+                    },
+                    {
+                      "name": "trace",
+                      "contentType": "application/zip",
+                      "path": "D:\\AI Studio\\Email MKT Tracker\\test-results\\auth-unauthenticated-visitors-are-redirected-to-sign-in-chromium\\trace.zip"
+                    }
+                  ]
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "d748ac400d08b85935ef-651397f8ef7257858efb",
+          "file": "auth.spec.ts",
+          "line": 20,
+          "column": 1
+        },
+        {
+          "title": "allowlisted admin signs in, sees role and admin page, signs out",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 30000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "chromium",
+              "projectName": "chromium",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 1113,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-11T18:47:48.715Z",
+                  "annotations": [],
+                  "attachments": [
+                    {
+                      "name": "screenshot",
+                      "contentType": "image/png",
+                      "path": "D:\\AI Studio\\Email MKT Tracker\\test-results\\auth-allowlisted-admin-sig-9a119-le-and-admin-page-signs-out-chromium\\test-finished-1.png"
+                    },
+                    {
+                      "name": "trace",
+                      "contentType": "application/zip",
+                      "path": "D:\\AI Studio\\Email MKT Tracker\\test-results\\auth-allowlisted-admin-sig-9a119-le-and-admin-page-signs-out-chromium\\trace.zip"
+                    }
+                  ]
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "d748ac400d08b85935ef-c44676b584cce836e55d",
+          "file": "auth.spec.ts",
+          "line": 26,
+          "column": 1
+        },
+        {
+          "title": "allowlisted member signs in but cannot open the admin page",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 30000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "chromium",
+              "projectName": "chromium",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 548,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-11T18:47:49.875Z",
+                  "annotations": [],
+                  "attachments": [
+                    {
+                      "name": "screenshot",
+                      "contentType": "image/png",
+                      "path": "D:\\AI Studio\\Email MKT Tracker\\test-results\\auth-allowlisted-member-si-3b950--cannot-open-the-admin-page-chromium\\test-finished-1.png"
+                    },
+                    {
+                      "name": "trace",
+                      "contentType": "application/zip",
+                      "path": "D:\\AI Studio\\Email MKT Tracker\\test-results\\auth-allowlisted-member-si-3b950--cannot-open-the-admin-page-chromium\\trace.zip"
+                    }
+                  ]
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "d748ac400d08b85935ef-82220bbb5ff5047ae5ec",
+          "file": "auth.spec.ts",
+          "line": 46,
+          "column": 1
+        },
+        {
+          "title": "s***@example.com is rejected (ACCESS_DENIED_NOT_ALLOWLISTED)",
+          "ok": true,
+          "tags": [
+            "example.com"
+          ],
+          "tests": [
+            {
+              "timeout": 30000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "chromium",
+              "projectName": "chromium",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 481,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-11T18:47:50.450Z",
+                  "annotations": [],
+                  "attachments": [
+                    {
+                      "name": "screenshot",
+                      "contentType": "image/png",
+                      "path": "D:\\AI Studio\\Email MKT Tracker\\test-results\\auth-stranger-example-com--b9b69-ESS-DENIED-NOT-ALLOWLISTED--chromium\\test-finished-1.png"
+                    },
+                    {
+                      "name": "trace",
+                      "contentType": "application/zip",
+                      "path": "D:\\AI Studio\\Email MKT Tracker\\test-results\\auth-stranger-example-com--b9b69-ESS-DENIED-NOT-ALLOWLISTED--chromium\\trace.zip"
+                    }
+                  ]
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "d748ac400d08b85935ef-9939a0fb3420d17cfa3d",
+          "file": "auth.spec.ts",
+          "line": 60,
+          "column": 3
+        },
+        {
+          "title": "o***@example.net is rejected (ACCESS_DENIED_WRONG_DOMAIN)",
+          "ok": true,
+          "tags": [
+            "example.net"
+          ],
+          "tests": [
+            {
+              "timeout": 30000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "chromium",
+              "projectName": "chromium",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 491,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-11T18:47:50.959Z",
+                  "annotations": [],
+                  "attachments": [
+                    {
+                      "name": "screenshot",
+                      "contentType": "image/png",
+                      "path": "D:\\AI Studio\\Email MKT Tracker\\test-results\\auth-outsider-example-net--8ee01-ACCESS-DENIED-WRONG-DOMAIN--chromium\\test-finished-1.png"
+                    },
+                    {
+                      "name": "trace",
+                      "contentType": "application/zip",
+                      "path": "D:\\AI Studio\\Email MKT Tracker\\test-results\\auth-outsider-example-net--8ee01-ACCESS-DENIED-WRONG-DOMAIN--chromium\\trace.zip"
+                    }
+                  ]
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "d748ac400d08b85935ef-33ffdd779c9afe4de57e",
+          "file": "auth.spec.ts",
+          "line": 60,
+          "column": 3
+        },
+        {
+          "title": "r***@example.com is rejected (ACCESS_DENIED_DISABLED)",
+          "ok": true,
+          "tags": [
+            "example.com"
+          ],
+          "tests": [
+            {
+              "timeout": 30000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "chromium",
+              "projectName": "chromium",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 573,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-11T18:47:51.479Z",
+                  "annotations": [],
+                  "attachments": [
+                    {
+                      "name": "screenshot",
+                      "contentType": "image/png",
+                      "path": "D:\\AI Studio\\Email MKT Tracker\\test-results\\auth-revoked-example-com-is-rejected-ACCESS-DENIED-DISABLED--chromium\\test-finished-1.png"
+                    },
+                    {
+                      "name": "trace",
+                      "contentType": "application/zip",
+                      "path": "D:\\AI Studio\\Email MKT Tracker\\test-results\\auth-revoked-example-com-is-rejected-ACCESS-DENIED-DISABLED--chromium\\trace.zip"
+                    }
+                  ]
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "d748ac400d08b85935ef-8252b497b4b8eb838d55",
+          "file": "auth.spec.ts",
+          "line": 60,
+          "column": 3
+        },
+        {
+          "title": "revoking a signed-in member ends the session and blocks the next sign-in",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 30000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "chromium",
+              "projectName": "chromium",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 1621,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-11T18:47:52.083Z",
+                  "annotations": [],
+                  "attachments": [
+                    {
+                      "name": "screenshot",
+                      "contentType": "image/png",
+                      "path": "D:\\AI Studio\\Email MKT Tracker\\test-results\\auth-revoking-a-signed-in--b7cbb-and-blocks-the-next-sign-in-chromium\\test-finished-1.png"
+                    },
+                    {
+                      "name": "trace",
+                      "contentType": "application/zip",
+                      "path": "D:\\AI Studio\\Email MKT Tracker\\test-results\\auth-revoking-a-signed-in--b7cbb-and-blocks-the-next-sign-in-chromium\\trace.zip"
+                    }
+                  ]
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "d748ac400d08b85935ef-536ea14aaa5a53a76003",
+          "file": "auth.spec.ts",
+          "line": 70,
+          "column": 1
+        },
+        {
+          "title": "healthz reports database and worker",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 30000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "chromium",
+              "projectName": "chromium",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 41,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-11T18:47:53.744Z",
+                  "annotations": [],
+                  "attachments": [
+                    {
+                      "name": "trace",
+                      "contentType": "application/zip",
+                      "path": "D:\\AI Studio\\Email MKT Tracker\\test-results\\auth-healthz-reports-database-and-worker-chromium\\trace.zip"
+                    }
+                  ]
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "d748ac400d08b85935ef-71190e9071e936a62660",
+          "file": "auth.spec.ts",
+          "line": 90,
+          "column": 1
+        }
+      ]
+    },
+    {
+      "title": "crm.spec.ts",
+      "file": "crm.spec.ts",
+      "column": 0,
+      "line": 0,
+      "specs": [],
+      "suites": [
+        {
+          "title": "CRM with mock Notion (synthetic data)",
+          "file": "crm.spec.ts",
+          "line": 43,
+          "column": 15,
+          "specs": [
+            {
+              "title": "admin connects the mock Notion database and reviews the mapping",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [
+                    {
+                      "type": "serial",
+                      "location": {
+                        "file": "D:\\AI Studio\\Email MKT Tracker\\tests\\e2e\\crm.spec.ts",
+                        "line": 43,
+                        "column": 15
+                      }
+                    }
+                  ],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 2999,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-11-11T18:47:53.816Z",
+                      "annotations": [
+                        {
+                          "type": "serial",
+                          "location": {
+                            "file": "D:\\AI Studio\\Email MKT Tracker\\tests\\e2e\\crm.spec.ts",
+                            "line": 43,
+                            "column": 15
+                          }
+                        }
+                      ],
+                      "attachments": [
+                        {
+                          "name": "screenshot",
+                          "contentType": "image/png",
+                          "path": "D:\\AI Studio\\Email MKT Tracker\\test-results\\crm-CRM-with-mock-Notion-s-3b96a-ase-and-reviews-the-mapping-chromium\\test-finished-1.png"
+                        },
+                        {
+                          "name": "trace",
+                          "contentType": "application/zip",
+                          "path": "D:\\AI Studio\\Email MKT Tracker\\test-results\\crm-CRM-with-mock-Notion-s-3b96a-ase-and-reviews-the-mapping-chromium\\trace.zip"
+                        }
+                      ]
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "1b49a9ede2a2b64a34c9-ddedcf065f38fff90fa5",
+              "file": "crm.spec.ts",
+              "line": 44,
+              "column": 3
+            },
+            {
+              "title": "first sync imports the synthetic contacts with issues flagged",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [
+                    {
+                      "type": "serial",
+                      "location": {
+                        "file": "D:\\AI Studio\\Email MKT Tracker\\tests\\e2e\\crm.spec.ts",
+                        "line": 43,
+                        "column": 15
+                      }
+                    }
+                  ],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 2098,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-11-11T18:47:56.891Z",
+                      "annotations": [
+                        {
+                          "type": "serial",
+                          "location": {
+                            "file": "D:\\AI Studio\\Email MKT Tracker\\tests\\e2e\\crm.spec.ts",
+                            "line": 43,
+                            "column": 15
+                          }
+                        }
+                      ],
+                      "attachments": [
+                        {
+                          "name": "screenshot",
+                          "contentType": "image/png",
+                          "path": "D:\\AI Studio\\Email MKT Tracker\\test-results\\crm-CRM-with-mock-Notion-s-660be-ontacts-with-issues-flagged-chromium\\test-finished-1.png"
+                        },
+                        {
+                          "name": "trace",
+                          "contentType": "application/zip",
+                          "path": "D:\\AI Studio\\Email MKT Tracker\\test-results\\crm-CRM-with-mock-Notion-s-660be-ontacts-with-issues-flagged-chromium\\trace.zip"
+                        }
+                      ]
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "1b49a9ede2a2b64a34c9-e24941786f90e059d633",
+              "file": "crm.spec.ts",
+              "line": 63,
+              "column": 3
+            },
+            {
+              "title": "data issues: duplicates can be resolved by choosing a primary",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [
+                    {
+                      "type": "serial",
+                      "location": {
+                        "file": "D:\\AI Studio\\Email MKT Tracker\\tests\\e2e\\crm.spec.ts",
+                        "line": 43,
+                        "column": 15
+                      }
+                    }
+                  ],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 834,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-11-11T18:47:59.059Z",
+                      "annotations": [
+                        {
+                          "type": "serial",
+                          "location": {
+                            "file": "D:\\AI Studio\\Email MKT Tracker\\tests\\e2e\\crm.spec.ts",
+                            "line": 43,
+                            "column": 15
+                          }
+                        }
+                      ],
+                      "attachments": [
+                        {
+                          "name": "screenshot",
+                          "contentType": "image/png",
+                          "path": "D:\\AI Studio\\Email MKT Tracker\\test-results\\crm-CRM-with-mock-Notion-s-e1592-olved-by-choosing-a-primary-chromium\\test-finished-1.png"
+                        },
+                        {
+                          "name": "trace",
+                          "contentType": "application/zip",
+                          "path": "D:\\AI Studio\\Email MKT Tracker\\test-results\\crm-CRM-with-mock-Notion-s-e1592-olved-by-choosing-a-primary-chromium\\trace.zip"
+                        }
+                      ]
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "1b49a9ede2a2b64a34c9-a04463aece2b18906ac2",
+              "file": "crm.spec.ts",
+              "line": 85,
+              "column": 3
+            },
+            {
+              "title": "consent: imported contacts are unknown; a grant needs evidence and is recorded by staff",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [
+                    {
+                      "type": "serial",
+                      "location": {
+                        "file": "D:\\AI Studio\\Email MKT Tracker\\tests\\e2e\\crm.spec.ts",
+                        "line": 43,
+                        "column": 15
+                      }
+                    }
+                  ],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 904,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-11-11T18:47:59.933Z",
+                      "annotations": [
+                        {
+                          "type": "serial",
+                          "location": {
+                            "file": "D:\\AI Studio\\Email MKT Tracker\\tests\\e2e\\crm.spec.ts",
+                            "line": 43,
+                            "column": 15
+                          }
+                        }
+                      ],
+                      "attachments": [
+                        {
+                          "name": "screenshot",
+                          "contentType": "image/png",
+                          "path": "D:\\AI Studio\\Email MKT Tracker\\test-results\\crm-CRM-with-mock-Notion-s-eabb2-ce-and-is-recorded-by-staff-chromium\\test-finished-1.png"
+                        },
+                        {
+                          "name": "trace",
+                          "contentType": "application/zip",
+                          "path": "D:\\AI Studio\\Email MKT Tracker\\test-results\\crm-CRM-with-mock-Notion-s-eabb2-ce-and-is-recorded-by-staff-chromium\\trace.zip"
+                        }
+                      ]
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "1b49a9ede2a2b64a34c9-f2e47a1c6e98e952b700",
+              "file": "crm.spec.ts",
+              "line": 99,
+              "column": 3
+            },
+            {
+              "title": "a 'resubscribe' in Notion never removes the suppression and is corrected in Notion",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [
+                    {
+                      "type": "serial",
+                      "location": {
+                        "file": "D:\\AI Studio\\Email MKT Tracker\\tests\\e2e\\crm.spec.ts",
+                        "line": 43,
+                        "column": 15
+                      }
+                    }
+                  ],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 1505,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-11-11T18:48:00.885Z",
+                      "annotations": [
+                        {
+                          "type": "serial",
+                          "location": {
+                            "file": "D:\\AI Studio\\Email MKT Tracker\\tests\\e2e\\crm.spec.ts",
+                            "line": 43,
+                            "column": 15
+                          }
+                        }
+                      ],
+                      "attachments": [
+                        {
+                          "name": "screenshot",
+                          "contentType": "image/png",
+                          "path": "D:\\AI Studio\\Email MKT Tracker\\test-results\\crm-CRM-with-mock-Notion-s-f4620--and-is-corrected-in-Notion-chromium\\test-finished-1.png"
+                        },
+                        {
+                          "name": "trace",
+                          "contentType": "application/zip",
+                          "path": "D:\\AI Studio\\Email MKT Tracker\\test-results\\crm-CRM-with-mock-Notion-s-f4620--and-is-corrected-in-Notion-chromium\\trace.zip"
+                        }
+                      ]
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "1b49a9ede2a2b64a34c9-5c3fdd50fd62b56931fd",
+              "file": "crm.spec.ts",
+              "line": 121,
+              "column": 3
+            },
+            {
+              "title": "a repeated full sync creates nothing new",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [
+                    {
+                      "type": "serial",
+                      "location": {
+                        "file": "D:\\AI Studio\\Email MKT Tracker\\tests\\e2e\\crm.spec.ts",
+                        "line": 43,
+                        "column": 15
+                      }
+                    }
+                  ],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 1484,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-11-11T18:48:02.447Z",
+                      "annotations": [
+                        {
+                          "type": "serial",
+                          "location": {
+                            "file": "D:\\AI Studio\\Email MKT Tracker\\tests\\e2e\\crm.spec.ts",
+                            "line": 43,
+                            "column": 15
+                          }
+                        }
+                      ],
+                      "attachments": [
+                        {
+                          "name": "screenshot",
+                          "contentType": "image/png",
+                          "path": "D:\\AI Studio\\Email MKT Tracker\\test-results\\crm-CRM-with-mock-Notion-s-926a6-ll-sync-creates-nothing-new-chromium\\test-finished-1.png"
+                        },
+                        {
+                          "name": "trace",
+                          "contentType": "application/zip",
+                          "path": "D:\\AI Studio\\Email MKT Tracker\\test-results\\crm-CRM-with-mock-Notion-s-926a6-ll-sync-creates-nothing-new-chromium\\trace.zip"
+                        }
+                      ]
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "1b49a9ede2a2b64a34c9-1492d964c19cb4d7b51b",
+              "file": "crm.spec.ts",
+              "line": 138,
+              "column": 3
+            },
+            {
+              "title": "members can read contacts but cannot change settings or consent",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [
+                    {
+                      "type": "serial",
+                      "location": {
+                        "file": "D:\\AI Studio\\Email MKT Tracker\\tests\\e2e\\crm.spec.ts",
+                        "line": 43,
+                        "column": 15
+                      }
+                    }
+                  ],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 843,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-11-11T18:48:03.983Z",
+                      "annotations": [
+                        {
+                          "type": "serial",
+                          "location": {
+                            "file": "D:\\AI Studio\\Email MKT Tracker\\tests\\e2e\\crm.spec.ts",
+                            "line": 43,
+                            "column": 15
+                          }
+                        }
+                      ],
+                      "attachments": [
+                        {
+                          "name": "screenshot",
+                          "contentType": "image/png",
+                          "path": "D:\\AI Studio\\Email MKT Tracker\\test-results\\crm-CRM-with-mock-Notion-s-91840--change-settings-or-consent-chromium\\test-finished-1.png"
+                        },
+                        {
+                          "name": "trace",
+                          "contentType": "application/zip",
+                          "path": "D:\\AI Studio\\Email MKT Tracker\\test-results\\crm-CRM-with-mock-Notion-s-91840--change-settings-or-consent-chromium\\trace.zip"
+                        }
+                      ]
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "1b49a9ede2a2b64a34c9-cf509ed17465e103453f",
+              "file": "crm.spec.ts",
+              "line": 149,
+              "column": 3
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "errors": [],
+  "stats": {
+    "startTime": "2026-11-11T18:47:47.770Z",
+    "duration": 17239.728,
+    "expected": 15,
+    "skipped": 0,
+    "unexpected": 0,
+    "flaky": 0
+  }
+}

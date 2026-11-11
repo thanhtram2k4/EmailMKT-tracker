@@ -61,3 +61,21 @@ table { width: 100%; border-collapse: collapse; font-size: 14px; }
 th, td { text-align: left; padding: 8px 6px; border-bottom: 1px solid var(--border); vertical-align: top; }
 .table-wrap { overflow-x: auto; }
 code { font-size: 13px; }
+
+/* M2: CRM screens */
+.shell.wide { max-width: 1240px; }
+.page-title { font-size: 22px; margin: 0 0 8px; letter-spacing: -0.01em; }
+.stats { display: flex; flex-wrap: wrap; gap: 8px 20px; margin: 12px 0 16px; color: var(--muted); }
+.stats strong { color: var(--text); font-size: 18px; margin-right: 4px; }
+.filters { display: flex; flex-wrap: wrap; gap: 12px; align-items: flex-end; }
+.filters label, .stack label, .row label { display: flex; flex-direction: column; gap: 4px; font-size: 13px; color: var(--muted); }
+.stack { display: flex; flex-direction: column; gap: 12px; margin-top: 12px; }
+input[type="text"], input:not([type]), input[type="password"], input[type="date"], select {
+  font: inherit; padding: 7px 10px; border: 1px solid var(--border); border-radius: 8px; background: var(--bg); color: var(--text); min-width: 0; max-width: 100%;
+}
+.stack input { width: 100%; max-width: 520px; }
+.reasons { display: inline-flex; flex-wrap: wrap; gap: 4px; }
+.pill.warn { color: var(--warn); border-color: var(--warn); }
+.group { border-top: 1px solid var(--border); padding-top: 12px; margin-top: 12px; }
+ul.plain { margin: 0; padding-left: 18px; }
+h3 { font-size: 15px; margin: 16px 0 4px; }

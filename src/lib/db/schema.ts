@@ -9,11 +9,13 @@ import {
   bigserial,
   boolean,
   index,
+  integer,
   jsonb,
   pgEnum,
   pgTable,
   text,
   timestamp,
+  uniqueIndex,
   uuid,
 } from "drizzle-orm/pg-core";
 
@@ -149,3 +151,225 @@ export const systemProbes = pgTable("system_probes", {
   workerId: text("worker_id").notNull(),
   jobId: text("job_id").notNull(),
 });
+
+// ================================================================ M2: CRM (Notion)
+// Field ownership (DESIGN §3.3): Notion owns full name, greeting name, email, company, tags.
+// The app owns suppression/subscription state, consent records, last emailed/engagement.
+
+const emptyTextArray = sql`'{}'::text[]`;
+
+export const contactState = pgEnum("contact_state", ["active", "archived"]);
+export const emailStatus = pgEnum("email_status", ["valid", "invalid", "missing"]);
+
+export const contacts = pgTable(
+  "contacts",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    /** Stable identity: the Notion page id. An email change keeps the same contact. */
+    notionPageId: text("notion_page_id").notNull().unique(),
+    notionUrl: text("notion_url"),
+    fullName: text("full_name"),
+    greetingName: text("greeting_name"),
+    email: text("email"),
+    emailNormalized: text("email_normalized"),
+    emailStatus: emailStatus("email_status").notNull(),
+    emailInvalidReason: text("email_invalid_reason"),
+    company: text("company"),
+    tags: text("tags").array().notNull().default(emptyTextArray),
+    state: contactState("state").notNull().default("active"),
+    archivedAt: ts("archived_at"),
+    archivedReason: text("archived_reason"),
+    /** Data-quality issue codes (see src/lib/crm/contact-validation.ts). */
+    issues: text("issues").array().notNull().default(emptyTextArray),
+    isDuplicate: boolean("is_duplicate").notNull().default(false),
+    /** Last values seen in Notion for app-managed / evidence columns (read-only mirrors). */
+    notionSubscriptionValue: text("notion_subscription_value"),
+    notionConsentEvidence: text("notion_consent_evidence"),
+    notionLastEditedAt: ts("notion_last_edited_at"),
+    firstSyncedAt: ts("first_synced_at").notNull().defaultNow(),
+    lastSyncedAt: ts("last_synced_at").notNull().defaultNow(),
+    lastSyncRunId: uuid("last_sync_run_id"),
+    // App-owned engagement fields (written from M5/M7, mirrored to Notion).
+    lastEmailedAt: ts("last_emailed_at"),
+    lastEngagementAt: ts("last_engagement_at"),
+    createdAt: ts("created_at").notNull().defaultNow(),
+    updatedAt: ts("updated_at").notNull().defaultNow(),
+  },
+  (t) => [index("contacts_email_normalized_idx").on(t.emailNormalized), index("contacts_state_idx").on(t.state)],
+);
+
+/** Admin decision for a duplicate email group: which Notion page is the primary contact. */
+export const duplicateResolutions = pgTable("duplicate_resolutions", {
+  emailNormalized: text("email_normalized").primaryKey(),
+  primaryContactId: uuid("primary_contact_id")
+    .notNull()
+    .references(() => contacts.id),
+  decidedBy: text("decided_by").notNull(),
+  decidedAt: ts("decided_at").notNull().defaultNow(),
+  note: text("note"),
+});
+
+export const suppressionReason = pgEnum("suppression_reason", [
+  "unsubscribe",
+  "hard_bounce",
+  "complaint",
+  "manual",
+  "notion_unsubscribed",
+]);
+
+/**
+ * Suppression list keyed by normalized email (follows the address, not the Notion page).
+ * Rows can never be updated or deleted (DB trigger): sync and imports can only ADD suppressions.
+ */
+export const suppressions = pgTable("suppressions", {
+  emailNormalized: text("email_normalized").primaryKey(),
+  reason: suppressionReason("reason").notNull(),
+  source: text("source").notNull(),
+  /** Raw Notion value that caused it, when source = notion_sync. */
+  notionValue: text("notion_value"),
+  contactId: uuid("contact_id"),
+  campaignId: uuid("campaign_id"),
+  createdAt: ts("created_at").notNull().defaultNow(),
+  createdBy: text("created_by").notNull(),
+  note: text("note"),
+});
+
+export const consentPurpose = pgEnum("consent_purpose", ["marketing_email", "email_tracking"]);
+export const consentStatus = pgEnum("consent_status", ["unknown", "granted", "refused", "withdrawn"]);
+export const consentSource = pgEnum("consent_source", [
+  "notion_import",
+  "notion_unsubscribe",
+  "staff_entry",
+  "unsubscribe_link",
+  "system",
+]);
+
+/**
+ * Append-only consent history per address and purpose (DB trigger blocks UPDATE/DELETE).
+ * Current state = latest row by id for (email_normalized, purpose); no row = unknown.
+ * Imports never create `granted` rows — consent can only be granted by an explicit staff entry
+ * with evidence (or, later, a consent form). See docs/COMPLIANCE.md.
+ */
+export const consentRecords = pgTable(
+  "consent_records",
+  {
+    id: bigserial("id", { mode: "number" }).primaryKey(),
+    emailNormalized: text("email_normalized").notNull(),
+    contactId: uuid("contact_id").references(() => contacts.id),
+    purpose: consentPurpose("purpose").notNull(),
+    status: consentStatus("status").notNull(),
+    source: consentSource("source").notNull(),
+    /** When consent was given/refused/withdrawn according to the evidence (may precede recordedAt). */
+    effectiveAt: ts("effective_at"),
+    recordedAt: ts("recorded_at").notNull().defaultNow(),
+    recordedBy: text("recorded_by").notNull(),
+    /** Pointer to evidence: form submission id, document URL, ticket, Notion "Consent evidence" value. */
+    evidenceRef: text("evidence_ref"),
+    evidenceNote: text("evidence_note"),
+    consentTextVersion: text("consent_text_version"),
+    correlationId: text("correlation_id"),
+  },
+  (t) => [index("consent_records_lookup_idx").on(t.emailNormalized, t.purpose, t.id)],
+);
+
+export const notionConnectionStatus = pgEnum("notion_connection_status", ["connected", "disconnected"]);
+
+/** Single Notion workspace connection (row id "default"). The token is stored encrypted only. */
+export const notionConnection = pgTable("notion_connection", {
+  id: text("id").primaryKey(),
+  status: notionConnectionStatus("status").notNull(),
+  tokenCiphertext: text("token_ciphertext"),
+  /** Last 4 characters only, for display. */
+  tokenHint: text("token_hint"),
+  apiVersion: text("api_version").notNull(),
+  databaseId: text("database_id"),
+  dataSourceId: text("data_source_id"),
+  databaseTitle: text("database_title"),
+  /** App field → Notion property name. */
+  mapping: jsonb("mapping"),
+  connectedBy: text("connected_by"),
+  connectedAt: ts("connected_at"),
+  updatedAt: ts("updated_at").notNull().defaultNow(),
+  lastVerifiedAt: ts("last_verified_at"),
+  lastError: text("last_error"),
+});
+
+export const syncMode = pgEnum("sync_mode", ["full", "incremental"]);
+export const syncTrigger = pgEnum("sync_trigger", ["manual", "schedule", "nightly", "test"]);
+export const syncStatus = pgEnum("sync_status", ["running", "succeeded", "partial", "failed", "skipped"]);
+
+export const syncRuns = pgTable(
+  "sync_runs",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    mode: syncMode("mode").notNull(),
+    trigger: syncTrigger("trigger").notNull(),
+    status: syncStatus("status").notNull(),
+    startedAt: ts("started_at").notNull().defaultNow(),
+    finishedAt: ts("finished_at"),
+    cursorBefore: ts("cursor_before"),
+    cursorAfter: ts("cursor_after"),
+    counts: jsonb("counts"),
+    errorCode: text("error_code"),
+    errorMessage: text("error_message"),
+    requestedBy: text("requested_by").notNull(),
+    correlationId: text("correlation_id"),
+  },
+  (t) => [index("sync_runs_started_idx").on(t.startedAt)],
+);
+
+/** Singleton sync cursor state (row id "notion"). */
+export const syncState = pgTable("sync_state", {
+  id: text("id").primaryKey(),
+  incrementalCursor: ts("incremental_cursor"),
+  lastFullSyncAt: ts("last_full_sync_at"),
+  lastSuccessAt: ts("last_success_at"),
+  updatedAt: ts("updated_at").notNull().defaultNow(),
+});
+
+/** Page-level problems found during a sync run (data issues and processing errors). */
+export const syncIssues = pgTable(
+  "sync_issues",
+  {
+    id: bigserial("id", { mode: "number" }).primaryKey(),
+    runId: uuid("run_id")
+      .notNull()
+      .references(() => syncRuns.id),
+    notionPageId: text("notion_page_id"),
+    contactId: uuid("contact_id"),
+    /** "data" (bad/unexpected value in Notion) or "error" (processing failure). */
+    severity: text("severity").notNull(),
+    code: text("code").notNull(),
+    message: text("message").notNull(),
+    createdAt: ts("created_at").notNull().defaultNow(),
+  },
+  (t) => [index("sync_issues_run_idx").on(t.runId)],
+);
+
+export const outboxStatus = pgEnum("outbox_status", ["pending", "done", "failed"]);
+
+/**
+ * Writes from the app to Notion (app-owned fields only), processed by the worker with rate
+ * limiting and retries. At most one pending write per (page, kind): newer values replace older.
+ */
+export const notionOutbox = pgTable(
+  "notion_outbox",
+  {
+    id: bigserial("id", { mode: "number" }).primaryKey(),
+    notionPageId: text("notion_page_id").notNull(),
+    kind: text("kind").notNull(),
+    payload: jsonb("payload").notNull(),
+    reason: text("reason"),
+    status: outboxStatus("status").notNull().default("pending"),
+    attempts: integer("attempts").notNull().default(0),
+    nextAttemptAt: ts("next_attempt_at").notNull().defaultNow(),
+    lastError: text("last_error"),
+    createdAt: ts("created_at").notNull().defaultNow(),
+    updatedAt: ts("updated_at").notNull().defaultNow(),
+    doneAt: ts("done_at"),
+  },
+  (t) => [
+    uniqueIndex("notion_outbox_one_pending_idx").on(t.notionPageId, t.kind).where(sql`status = 'pending'`),
+    index("notion_outbox_due_idx").on(t.status, t.nextAttemptAt),
+  ],
+);

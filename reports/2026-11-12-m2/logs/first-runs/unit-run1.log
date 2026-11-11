@@ -1,0 +1,107 @@
+
+ RUN  v5.1.0 D:/AI Studio/Email MKT Tracker
+
+ ❯ |unit| tests/unit/config.test.ts (18 tests | 1 failed) 29ms
+   ❯ config safety rules (13)
+     × accepts SEND_MODE=live only in production 9ms
+{"level":"warn","time":"2026-11-11T18:17:26.930Z","service":"web","env":"unknown","build":"dev","component":"notion-client","method":"GET","path":"/v1/data_sources/f1bdfd9a-3510-47e7-980e-8e94f0e3766b","status":429,"code":"rate_limited","attempt":1,"retryable":true,"retry_after_ms":1000,"msg":"notion request failed"}
+{"level":"warn","time":"2026-11-11T18:17:26.934Z","service":"web","env":"unknown","build":"dev","component":"notion-client","method":"GET","path":"/v1/data_sources/f1bdfd9a-3510-47e7-980e-8e94f0e3766b","status":429,"code":"rate_limited","attempt":1,"retryable":true,"retry_after_ms":1000,"msg":"notion request failed"}
+{"level":"warn","time":"2026-11-11T18:17:26.938Z","service":"web","env":"unknown","build":"dev","component":"notion-client","method":"GET","path":"/v1/data_sources/f1bdfd9a-3510-47e7-980e-8e94f0e3766b","status":429,"code":"rate_limited","attempt":1,"retryable":true,"retry_after_ms":1000,"msg":"notion request failed"}
+{"level":"warn","time":"2026-11-11T18:17:26.939Z","service":"web","env":"unknown","build":"dev","component":"notion-client","method":"GET","path":"/v1/data_sources/f1bdfd9a-3510-47e7-980e-8e94f0e3766b","status":429,"code":"rate_limited","attempt":1,"retryable":true,"retry_after_ms":1000,"msg":"notion request failed"}
+{"level":"warn","time":"2026-11-11T18:17:26.940Z","service":"web","env":"unknown","build":"dev","component":"notion-client","method":"GET","path":"/v1/data_sources/f1bdfd9a-3510-47e7-980e-8e94f0e3766b","status":429,"code":"rate_limited","attempt":1,"retryable":true,"retry_after_ms":1000,"msg":"notion request failed"}
+{"level":"warn","time":"2026-11-11T18:17:26.940Z","service":"web","env":"unknown","build":"dev","component":"notion-client","method":"GET","path":"/v1/data_sources/f1bdfd9a-3510-47e7-980e-8e94f0e3766b","status":429,"code":"rate_limited","attempt":1,"retryable":true,"retry_after_ms":1000,"msg":"notion request failed"}
+{"level":"warn","time":"2026-11-11T18:17:26.941Z","service":"web","env":"unknown","build":"dev","component":"notion-client","method":"GET","path":"/v1/data_sources/f1bdfd9a-3510-47e7-980e-8e94f0e3766b","status":429,"code":"rate_limited","attempt":1,"retryable":true,"retry_after_ms":1000,"msg":"notion request failed"}
+{"level":"warn","time":"2026-11-11T18:17:26.942Z","service":"web","env":"unknown","build":"dev","component":"notion-client","method":"GET","path":"/v1/data_sources/f1bdfd9a-3510-47e7-980e-8e94f0e3766b","status":429,"code":"rate_limited","attempt":1,"retryable":true,"retry_after_ms":1000,"msg":"notion request failed"}
+{"level":"warn","time":"2026-11-11T18:17:26.942Z","service":"web","env":"unknown","build":"dev","component":"notion-client","method":"GET","path":"/v1/data_sources/f1bdfd9a-3510-47e7-980e-8e94f0e3766b","status":429,"code":"rate_limited","attempt":1,"retryable":true,"retry_after_ms":1000,"msg":"notion request failed"}
+{"level":"warn","time":"2026-11-11T18:17:26.954Z","service":"web","env":"unknown","build":"dev","component":"notion-client","method":"POST","path":"/v1/data_sources/fc8a48fd-8c98-4460-842c-fc8b55739af7/query","status":429,"code":"rate_limited","attempt":1,"retryable":true,"retry_after_ms":7000,"msg":"notion request failed"}
+{"level":"warn","time":"2026-11-11T18:17:26.955Z","service":"web","env":"unknown","build":"dev","component":"notion-client","method":"POST","path":"/v1/data_sources/fc8a48fd-8c98-4460-842c-fc8b55739af7/query","status":429,"code":"rate_limited","attempt":2,"retryable":true,"retry_after_ms":7000,"msg":"notion request failed"}
+{"level":"warn","time":"2026-11-11T18:17:26.956Z","service":"web","env":"unknown","build":"dev","component":"notion-client","method":"GET","path":"/v1/data_sources/27841d63-7924-4058-b107-2d7612aaa10e","status":529,"code":"service_overload","attempt":1,"retryable":true,"msg":"notion request failed"}
+{"level":"warn","time":"2026-11-11T18:17:26.965Z","service":"web","env":"unknown","build":"dev","component":"notion-client","method":"GET","path":"/v1/data_sources/27841d63-7924-4058-b107-2d7612aaa10e","status":503,"code":"service_unavailable","attempt":1,"retryable":true,"msg":"notion request failed"}
+{"level":"warn","time":"2026-11-11T18:17:26.966Z","service":"web","env":"unknown","build":"dev","component":"notion-client","method":"GET","path":"/v1/data_sources/27841d63-7924-4058-b107-2d7612aaa10e","status":503,"code":"service_unavailable","attempt":2,"retryable":true,"msg":"notion request failed"}
+{"level":"warn","time":"2026-11-11T18:17:26.976Z","service":"web","env":"unknown","build":"dev","component":"notion-client","method":"GET","path":"/v1/data_sources/27841d63-7924-4058-b107-2d7612aaa10e","status":503,"code":"service_unavailable","attempt":3,"retryable":true,"msg":"notion request failed"}
+{"level":"warn","time":"2026-11-11T18:17:26.981Z","service":"web","env":"unknown","build":"dev","component":"notion-client","method":"GET","path":"/v1/data_sources/8802cc2b-5e84-4fb0-b9a9-411d8b546e56","status":502,"code":"bad_gateway","attempt":1,"retryable":true,"msg":"notion request failed"}
+{"level":"warn","time":"2026-11-11T18:17:26.981Z","service":"web","env":"unknown","build":"dev","component":"notion-client","method":"GET","path":"/v1/data_sources/8802cc2b-5e84-4fb0-b9a9-411d8b546e56","status":502,"code":"bad_gateway","attempt":2,"retryable":true,"msg":"notion request failed"}
+{"level":"warn","time":"2026-11-11T18:17:26.982Z","service":"web","env":"unknown","build":"dev","component":"notion-client","method":"GET","path":"/v1/data_sources/8802cc2b-5e84-4fb0-b9a9-411d8b546e56","status":502,"code":"bad_gateway","attempt":3,"retryable":true,"msg":"notion request failed"}
+{"level":"warn","time":"2026-11-11T18:17:26.982Z","service":"web","env":"unknown","build":"dev","component":"notion-client","method":"GET","path":"/v1/data_sources/8802cc2b-5e84-4fb0-b9a9-411d8b546e56","status":502,"code":"bad_gateway","attempt":4,"retryable":true,"msg":"notion request failed"}
+{"level":"warn","time":"2026-11-11T18:17:26.983Z","service":"web","env":"unknown","build":"dev","component":"notion-client","method":"GET","path":"/v1/data_sources/8802cc2b-5e84-4fb0-b9a9-411d8b546e56","status":502,"code":"bad_gateway","attempt":5,"retryable":true,"msg":"notion request failed"}
+{"level":"warn","time":"2026-11-11T18:17:26.986Z","service":"web","env":"unknown","build":"dev","component":"notion-client","method":"GET","path":"/v1/data_sources/2de0d18d-831d-4b24-b053-1bb32c529791","status":401,"code":"unauthorized","attempt":1,"retryable":false,"msg":"notion request failed"}
+{"level":"warn","time":"2026-11-11T18:17:26.987Z","service":"web","env":"unknown","build":"dev","component":"notion-client","method":"GET","path":"/v1/data_sources/does-not-exist","status":404,"code":"object_not_found","attempt":1,"retryable":false,"msg":"notion request failed"}
+{"level":"warn","time":"2026-11-11T18:17:26.987Z","service":"web","env":"unknown","build":"dev","component":"notion-client","method":"POST","path":"/v1/data_sources/2de0d18d-831d-4b24-b053-1bb32c529791/query","status":400,"code":"validation_error","attempt":1,"retryable":false,"msg":"notion request failed"}
+{"level":"warn","time":"2026-11-11T18:17:26.989Z","service":"web","env":"unknown","build":"dev","component":"notion-client","method":"GET","path":"/v1/data_sources/6cdb8dd9-3b8f-4876-9395-449dce1eb5d1","attempt":1,"err":"fetch failed (simulated network error)","msg":"notion request transport error"}
+{"level":"warn","time":"2026-11-11T18:17:26.989Z","service":"web","env":"unknown","build":"dev","component":"notion-client","method":"GET","path":"/v1/data_sources/6cdb8dd9-3b8f-4876-9395-449dce1eb5d1","attempt":2,"err":"fetch failed (simulated network error)","msg":"notion request transport error"}
+{"level":"warn","time":"2026-11-11T18:17:26.990Z","service":"web","env":"unknown","build":"dev","component":"notion-client","method":"POST","path":"/v1/databases","attempt":1,"err":"fetch failed (simulated network error)","msg":"notion request transport error"}
+{"level":"warn","time":"2026-11-11T18:17:26.992Z","service":"web","env":"unknown","build":"dev","component":"notion-client","method":"POST","path":"/v1/databases","status":503,"code":"service_unavailable","attempt":1,"retryable":false,"msg":"notion request failed"}
+{"level":"warn","time":"2026-11-11T18:17:26.993Z","service":"web","env":"unknown","build":"dev","component":"notion-client","method":"GET","path":"/v1/data_sources/337dc7a0-c276-4086-9d00-841288cb5282","status":429,"code":"rate_limited","attempt":1,"retryable":true,"retry_after_ms":600000,"msg":"notion request failed"}
+ ❯ |unit| tests/unit/notion-client.test.ts (10 tests | 2 failed) 125ms
+   ❯ token bucket (2)
+     × keeps the client under a server-enforced 3 req/s limit (no 429s) 79ms
+   ❯ retry policy (8)
+     × retries network errors on reads, but reports an uncertain outcome for non-idempotent creates 3ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 3 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  |unit| tests/unit/config.test.ts > config safety rules > accepts SEND_MODE=live only in production
+AssertionError: expected [ Array(1) ] to deeply equal []
+
+- Expected
++ Received
+
+- []
++ [
++   "APP_ENCRYPTION_KEY: APP_ENCRYPTION_KEY is required (NOTION_MODE=disabled, APP_ENV=production)",
++ ]
+
+ ❯ tests/unit/config.test.ts:43:52
+     41|
+     42|   it("accepts SEND_MODE=live only in production", () => {
+     43|     expect(issues({ ...prod, SEND_MODE: "live" })).toEqual([]);
+       |                                                    ^
+     44|   });
+     45|
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/3]⎯
+
+ FAIL  |unit| tests/unit/notion-client.test.ts > token bucket > keeps the client under a server-enforced 3 req/s limit (no 429s)
+AssertionError: expected [ { method: 'GET', …(4) }, …(8) ] to have a length of +0 but got 9
+
+- Expected
++ Received
+
+- 0
++ 9
+
+ ❯ tests/unit/notion-client.test.ts:31:59
+     29|     const { client, fake, dataSourceId } = setup({ enforceRps: 3 });
+     30|     for (let i = 0; i < 30; i++) await client.retrieveDataSource(dataS…
+     31|     expect(fake.requests.filter((r) => r.status === 429)).toHaveLength…
+       |                                                           ^
+     32|     expect(client.stats.rateLimited).toBe(0);
+     33|   });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/3]⎯
+
+ FAIL  |unit| tests/unit/notion-client.test.ts > retry policy > retries network errors on reads, but reports an uncertain outcome for non-idempotent creates
+AssertionError: expected 1 to be +0 // Object.is equality
+
+- Expected
++ Received
+
+- 0
++ 1
+
+ ❯ tests/unit/notion-client.test.ts:79:57
+     77|     fake.faults.push({ method: "POST", pathIncludes: "/v1/databases", …
+     78|     await expect(client.createDatabase({ parent: { page_id: "parent" }…
+     79|     expect(fake.countRequests("POST", "/v1/databases")).toBe(0); // th…
+       |                                                         ^
+     80|   });
+     81|
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/3]⎯
+
+
+ Test Files  2 failed | 7 passed (9)
+      Tests  3 failed | 94 passed (97)
+   Start at  01:17:26
+   Duration  975ms (import 76%, transform 16%, tests 6%, worker 2%)
+

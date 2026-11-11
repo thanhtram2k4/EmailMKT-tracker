@@ -11,7 +11,8 @@ import { systemClock, type Clock } from "../lib/clock";
 import { getDb } from "../lib/db/client";
 import { workerHeartbeats } from "../lib/db/schema";
 import { getLogger } from "../lib/logger";
-import { makeTaskList } from "./tasks";
+import type { NotionEnv } from "../lib/crm/notion-env";
+import { CRM_CRONTAB, makeTaskList } from "./tasks";
 
 export type WorkerHandle = { workerId: string; runner: Runner; stop: () => Promise<void> };
 
@@ -23,6 +24,9 @@ export async function startWorker(opts: {
   clock?: Clock;
   workerId?: string;
   pollIntervalMs?: number;
+  /** Register the CRM cron schedules (sync every 10 min, nightly full, outbox every minute). */
+  enableCrmSchedules?: boolean;
+  notionEnv?: () => NotionEnv;
 }): Promise<WorkerHandle> {
   const clock = opts.clock ?? systemClock;
   const workerId = opts.workerId ?? `worker-${os.hostname()}-${process.pid}-${randomUUID().slice(0, 8)}`;
@@ -63,7 +67,8 @@ export async function startWorker(opts: {
     noHandleSignals: true,
     pollInterval: opts.pollIntervalMs ?? 2000,
     logger: gwLogger,
-    taskList: makeTaskList({ workerId, databaseUrl: opts.databaseUrl }),
+    taskList: makeTaskList({ workerId, databaseUrl: opts.databaseUrl, notionEnv: opts.notionEnv }),
+    ...(opts.enableCrmSchedules ? { crontab: CRM_CRONTAB } : {}),
   });
   log.info({ concurrency: opts.concurrency }, "worker started");
 

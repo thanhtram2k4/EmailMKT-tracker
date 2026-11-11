@@ -5,7 +5,25 @@
  */
 import EmbeddedPostgres from "embedded-postgres";
 import fs from "node:fs";
+import { createRequire } from "node:module";
 import path from "node:path";
+
+/*
+ * embedded-postgres registers `async-exit-hook`, which listens to Node's `beforeExit` (and IPC
+ * "message") events and then calls process.exit(0). That OVERRIDES a failing process.exitCode —
+ * e.g. Vitest reporting failed tests would exit 0 (found during M2, see the M2 test report).
+ * Its "exit" hook also calls an undefined callback ("done is not a function") once the beforeExit
+ * path no longer pre-empts it, which crashes the process with code 1 after successful runs.
+ * Every caller here stops its cluster explicitly, so we remove those three hooks; the
+ * SIGINT/SIGTERM/SIGHUP/SIGBREAK clean-up hooks (non-zero exit codes) are kept.
+ */
+{
+  const require = createRequire(import.meta.url);
+  const hook = require("async-exit-hook") as { unhookEvent?: (e: string) => void; hookedEvents?: () => string[] };
+  for (const ev of ["beforeExit", "message", "exit"]) {
+    if (hook.hookedEvents?.().includes(ev)) hook.unhookEvent?.(ev);
+  }
+}
 
 export interface LocalPgOptions {
   /** Directory for the cluster's data files, relative to the repo root. */

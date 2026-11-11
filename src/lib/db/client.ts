@@ -2,7 +2,7 @@ import { drizzle, type NodePgDatabase } from "drizzle-orm/node-postgres";
 import pg from "pg";
 import * as schema from "./schema";
 
-export type Db = NodePgDatabase<typeof schema>;
+export type Db = NodePgDatabase<typeof schema> & { $client: pg.Pool };
 
 type Holder = { pool?: pg.Pool; db?: Db; url?: string };
 // Survive Next.js dev hot reloads without leaking pools.

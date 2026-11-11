@@ -9,6 +9,7 @@
  * Used by `npm run e2e` and `npm run smoke:local`.
  */
 import { spawn, type ChildProcess } from "node:child_process";
+import { randomBytes } from "node:crypto";
 import fs from "node:fs";
 import path from "node:path";
 import { localDatabaseUrl, startLocalPostgres } from "./lib/embedded-pg.ts";
@@ -33,6 +34,7 @@ if (!cmd.length) {
 fs.mkdirSync(logDir, { recursive: true });
 
 const baseUrl = `http://localhost:${appPort}`;
+const mockPort = Number(opt("--notion-mock-port", "4011"));
 const dbName = "emt_stack";
 const databaseUrl = localDatabaseUrl(pgPort, dbName);
 const appEnv: NodeJS.ProcessEnv = {
@@ -50,6 +52,13 @@ const appEnv: NodeJS.ProcessEnv = {
   BUILD_ID: process.env.BUILD_ID ?? "local-stack",
   HEARTBEAT_INTERVAL_MS: "5000",
   PORT: String(appPort),
+  // M2: CRM against the local mock Notion server (synthetic data, loopback only).
+  NOTION_MODE: "mock",
+  NOTION_API_BASE_URL: `http://127.0.0.1:${mockPort}`,
+  NOTION_MOCK_PORT: String(mockPort),
+  NOTION_AUTHORIZATION_REF: "",
+  APP_ENCRYPTION_KEY: randomBytes(32).toString("base64url"),
+  APP_ENCRYPTION_KEY_ID: "k1",
 };
 
 const children: ChildProcess[] = [];
@@ -106,6 +115,16 @@ try {
     console.log("[stack] building web app (next build)…");
     const b = run("build", [bin("next/dist/bin/next"), "build"], appEnv, { capture: true });
     if ((await waitExit(b)) !== 0) throw new Error("next build failed (see build.log)");
+  }
+  run("notion-mock", [bin("tsx/dist/cli.mjs"), "scripts/notion-mock/server.ts"], appEnv, { capture: true });
+  for (let i = 0; ; i++) {
+    try {
+      if ((await fetch(`http://127.0.0.1:${mockPort}/__mock/pages`)).ok) break;
+    } catch {
+      /* not up yet */
+    }
+    if (i > 60) throw new Error("mock Notion server did not start (see notion-mock.log)");
+    await new Promise((r) => setTimeout(r, 500));
   }
   run("web", [bin("next/dist/bin/next"), "start", "--port", String(appPort)], { ...appEnv, SERVICE_NAME: "web" }, { capture: true });
   run("worker", [bin("tsx/dist/cli.mjs"), "src/worker/main.ts"], { ...appEnv, SERVICE_NAME: "worker" }, { capture: true });
