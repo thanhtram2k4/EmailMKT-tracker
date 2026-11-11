@@ -1,0 +1,5 @@
+{"level":"info","time":"2026-11-11T17:53:45.128Z","service":"worker","env":"test","build":"src-32b211b2cd00","env":"test","send_mode":"disabled","msg":"starting worker"}
+{"level":"warn","time":"2026-11-11T17:53:45.186Z","service":"worker","env":"test","build":"src-32b211b2cd00","worker_id":"worker-Thanh-Tram-24016-02a57211","gw":{},"msg":"Executable file detection not yet supported on 'win32'."}
+{"level":"info","time":"2026-11-11T17:53:45.226Z","service":"worker","env":"test","build":"src-32b211b2cd00","worker_id":"worker-Thanh-Tram-24016-02a57211","gw":{},"msg":"Failed to read crontab file 'D:\\AI Studio\\Email MKT Tracker/crontab'; cron is disabled"}
+{"level":"info","time":"2026-11-11T17:53:45.229Z","service":"worker","env":"test","build":"src-32b211b2cd00","worker_id":"worker-Thanh-Tram-24016-02a57211","concurrency":2,"msg":"worker started"}
+{"level":"info","time":"2026-11-11T17:53:45.266Z","service":"worker","env":"test","build":"src-32b211b2cd00","worker_id":"worker-Thanh-Tram-24016-02a57211","gw":{},"msg":"Worker connected and looking for jobs... (task names: 'system_probe')"}

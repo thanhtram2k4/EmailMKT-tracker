@@ -1,0 +1,8 @@
+▲ Next.js 16.4.6
+- Local:         http://localhost:3100
+- Network:       http://172.16.0.2:3100
+✓ Ready in 303ms
+✓ Running next.config.ts took 58ms
+{"level":"warn","time":"2026-11-11T17:39:32.577Z","service":"web","env":"test","build":"local-stack","reason":"not_allowlisted","stage":"user.create","msg":"sign-in denied"}
+{"level":"warn","time":"2026-11-11T17:39:33.211Z","service":"web","env":"test","build":"local-stack","reason":"wrong_domain","stage":"user.create","msg":"sign-in denied"}
+{"level":"warn","time":"2026-11-11T17:39:33.816Z","service":"web","env":"test","build":"local-stack","reason":"disabled","stage":"user.create","msg":"sign-in denied"}

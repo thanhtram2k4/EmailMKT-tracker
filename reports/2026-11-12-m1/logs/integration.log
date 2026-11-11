@@ -1,0 +1,43 @@
+
+ RUN  v5.1.0 D:/AI Studio/Email MKT Tracker
+
+stderr | tests/integration/worker.test.ts
+[core] WARNING: Executable file detection not yet supported on 'win32'.
+Your pool doesn't have all of the error handlers! See: https://err.red/wpeh?v=0.18.0&method=connect
+
+stderr | tests/integration/worker.test.ts > background worker > runs a job that was queued while no worker was running
+[core] WARNING: Executable file detection not yet supported on 'win32'.
+
+ ✓ |integration| tests/integration/worker.test.ts > background worker > reports degraded health when no worker has ever run 59ms
+ ✓ |integration| tests/integration/worker.test.ts > background worker > runs a job that was queued while no worker was running 825ms
+ ✓ |integration| tests/integration/worker.test.ts > background worker > runs a job queued during downtime after a worker restart 651ms
+ ✓ |integration| tests/integration/worker.test.ts > background worker > executes each queued job once even with two workers running 369ms
+ ✓ |integration| tests/integration/worker.test.ts > background worker > flags a stale heartbeat as degraded (controlled clock) 2ms
+stderr | tests/integration/auth-gate.test.ts
+[core] WARNING: Executable file detection not yet supported on 'win32'.
+Your pool doesn't have all of the error handlers! See: https://err.red/wpeh?v=0.18.0&method=connect
+
+ ✓ |integration| tests/integration/auth-gate.test.ts > staff sign-in gate > lets an allowlisted admin sign in and creates a session cookie 98ms
+ ✓ |integration| tests/integration/auth-gate.test.ts > staff sign-in gate > lets an allowlisted member sign in (address normalized) 13ms
+ ✓ |integration| tests/integration/auth-gate.test.ts > staff sign-in gate > rejects a company-domain account that is not on the allowlist 11ms
+ ✓ |integration| tests/integration/auth-gate.test.ts > staff sign-in gate > rejects an outside-domain account and correlates the audit row with the request id 10ms
+ ✓ |integration| tests/integration/auth-gate.test.ts > staff sign-in gate > rejects a revoked staff member 9ms
+ ✓ |integration| tests/integration/auth-gate.test.ts > staff sign-in gate > revoking an existing user ends their sessions and blocks the next sign-in 15ms
+ ✓ |integration| tests/integration/auth-gate.test.ts > staff sign-in gate > records audit entries for successful sign-ins and staff changes 1ms
+stderr | tests/integration/database.test.ts
+[core] WARNING: Executable file detection not yet supported on 'win32'.
+Your pool doesn't have all of the error handlers! See: https://err.red/wpeh?v=0.18.0&method=connect
+
+ ✓ |integration| tests/integration/database.test.ts > database migrations > creates application, auth and worker schemas 141ms
+stderr | tests/integration/database.test.ts > database migrations > is idempotent when re-run
+[core] WARNING: Executable file detection not yet supported on 'win32'.
+Your pool doesn't have all of the error handlers! See: https://err.red/wpeh?v=0.18.0&method=connect
+
+ ✓ |integration| tests/integration/database.test.ts > database migrations > is idempotent when re-run 180ms
+ ✓ |integration| tests/integration/database.test.ts > database migrations > enforces an append-only audit log at the database level 79ms
+
+ Test Files  3 passed (3)
+      Tests  15 passed (15)
+   Start at  00:52:43
+   Duration  14.10s (tests 76%, import 23%, transform 1%)
+

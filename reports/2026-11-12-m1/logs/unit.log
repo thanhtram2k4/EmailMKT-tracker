@@ -1,0 +1,48 @@
+
+ RUN  v5.1.0 D:/AI Studio/Email MKT Tracker
+
+ ✓ |unit| tests/unit/redact.test.ts > evidence redaction > masks email addresses but keeps the domain 2ms
+ ✓ |unit| tests/unit/redact.test.ts > evidence redaction > masks bearer [REDACTED], cookies, AWS keys, Notion and Google tokens 1ms
+ ✓ |unit| tests/unit/clock.test.ts > FixedClock > is controllable for time-dependent tests 3ms
+ ✓ |unit| tests/unit/config.test.ts > config safety rules > defaults SEND_MODE to disabled and normalizes domains 7ms
+ ✓ |unit| tests/unit/config.test.ts > config safety rules > rejects SEND_MODE=live when APP_ENV=local 1ms
+ ✓ |unit| tests/unit/config.test.ts > config safety rules > rejects SEND_MODE=live when APP_ENV=test 0ms
+ ✓ |unit| tests/unit/config.test.ts > config safety rules > rejects SEND_MODE=live when APP_ENV=staging 0ms
+ ✓ |unit| tests/unit/config.test.ts > config safety rules > accepts SEND_MODE=live only in production 0ms
+ ✓ |unit| tests/unit/config.test.ts > config safety rules > rejects SEND_MODE=mock in production 0ms
+ ✓ |unit| tests/unit/config.test.ts > config safety rules > requires SEND_AUTHORIZATION_REF for SEND_MODE=simulator 0ms
+ ✓ |unit| tests/unit/config.test.ts > config safety rules > requires SEND_AUTHORIZATION_REF for SEND_MODE=allowlist 0ms
+ ✓ |unit| tests/unit/config.test.ts > config safety rules > requires a non-empty allowlist for SEND_MODE=allowlist 0ms
+ ✓ |unit| tests/unit/config.test.ts > config safety rules > refuses the dev sign-in when APP_ENV=staging 0ms
+ ✓ |unit| tests/unit/config.test.ts > config safety rules > refuses the dev sign-in when APP_ENV=production 0ms
+ ✓ |unit| tests/unit/config.test.ts > config safety rules > requires Google OAuth and https in staging/production 0ms
+ ✓ |unit| tests/unit/config.test.ts > config safety rules > rejects short secrets and missing domains 0ms
+ ✓ |unit| tests/unit/access.test.ts > identity checks (domain + verified email) > accepts a verified company address, case-insensitively 2ms
+ ✓ |unit| tests/unit/access.test.ts > identity checks (domain + verified email) > rejects unverified emails before anything else 1ms
+ ✓ |unit| tests/unit/access.test.ts > identity checks (domain + verified email) > rejects a***@gmail.com as wrong_domain 0ms
+ ✓ |unit| tests/unit/access.test.ts > identity checks (domain + verified email) > rejects a***@example.com.evil.io as wrong_domain 0ms
+ ✓ |unit| tests/unit/access.test.ts > identity checks (domain + verified email) > rejects a***@sub.example.com as wrong_domain 0ms
+ ✓ |unit| tests/unit/access.test.ts > identity checks (domain + verified email) > rejects a***@notexample.com as wrong_domain 0ms
+ ✓ |unit| tests/unit/access.test.ts > identity checks (domain + verified email) > rejects e***@gmail.com as wrong_domain 0ms
+ ✓ |unit| tests/unit/access.test.ts > identity checks (domain + verified email) > rejects noat as wrong_domain 0ms
+ ✓ |unit| tests/unit/access.test.ts > identity checks (domain + verified email) > helpers 0ms
+ ✓ |unit| tests/unit/sending-guard.test.ts > sending guard: customer campaigns > never allows customer campaigns from APP_ENV=local with a real transport 2ms
+ ✓ |unit| tests/unit/sending-guard.test.ts > sending guard: customer campaigns > never allows customer campaigns from APP_ENV=test with a real transport 0ms
+ ✓ |unit| tests/unit/sending-guard.test.ts > sending guard: customer campaigns > never allows customer campaigns from APP_ENV=staging with a real transport 0ms
+ ✓ |unit| tests/unit/sending-guard.test.ts > sending guard: customer campaigns > requires production + live + admin enablement 1ms
+ ✓ |unit| tests/unit/sending-guard.test.ts > sending guard: customer campaigns > refuses customer campaigns in production when SEND_MODE is not live 0ms
+ ✓ |unit| tests/unit/sending-guard.test.ts > sending guard: test and integration sends > disabled refuses everything 0ms
+ ✓ |unit| tests/unit/sending-guard.test.ts > sending guard: test and integration sends > mock is allowed outside production and never selects a real transport 0ms
+ ✓ |unit| tests/unit/sending-guard.test.ts > sending guard: test and integration sends > simulator requires authorization and simulator-only recipients 0ms
+ ✓ |unit| tests/unit/sending-guard.test.ts > sending guard: test and integration sends > allowlist requires authorization and allowlisted recipients only (case-insensitive) 0ms
+ ✓ |unit| tests/unit/sending-guard.test.ts > sending guard: test and integration sends > live is production-only, and production test sends are still allowlist-restricted 0ms
+ ✓ |unit| tests/unit/sending-guard.test.ts > sending guard: test and integration sends > refuses an empty recipient list 0ms
+ ✓ |unit| tests/unit/sending-guard.test.ts > transport factory (M1) > returns the mock transport only when the guard selects mock 1ms
+ ✓ |unit| tests/unit/sending-guard.test.ts > transport factory (M1) > refuses to build any real transport in M1, even when the guard would allow it 1ms
+ ✓ |unit| tests/unit/sending-guard.test.ts > transport factory (M1) > propagates guard refusals 0ms
+
+ Test Files  5 passed (5)
+      Tests  39 passed (39)
+   Start at  00:52:41
+   Duration  591ms (import 87%, transform 6%, tests 4%, worker 3%)
+

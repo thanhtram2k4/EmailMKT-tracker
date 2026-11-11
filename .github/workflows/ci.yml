@@ -1,0 +1,39 @@
+# CI: lint, typecheck, unit, integration (embedded PostgreSQL) and E2E (local stack).
+# No secrets are used. Nothing is deployed and no email is sent (SEND_MODE=disabled).
+name: ci
+on:
+  push:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    env:
+      PLAYWRIGHT_BROWSERS_PATH: "0"
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci
+      - run: npm run lint
+      - run: npm run typecheck
+      - run: npm run test:unit
+      - run: npm run test:integration
+      - run: npx playwright install --with-deps chromium-headless-shell
+      - run: npm run e2e
+      - name: Upload E2E evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: e2e-evidence
+          path: |
+            playwright-report/
+            test-results/
+            .local/logs/e2e/
+          retention-days: 14

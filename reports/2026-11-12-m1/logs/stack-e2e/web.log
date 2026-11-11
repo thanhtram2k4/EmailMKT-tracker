@@ -1,0 +1,13 @@
+▲ Next.js 16.4.6
+- Local:         http://localhost:3100
+- Network:       http://172.16.0.2:3100
+✓ Ready in 220ms
+✓ Running next.config.ts took 61ms
+{"level":"info","time":"2026-11-11T17:53:16.594Z","service":"web","env":"test","build":"src-32b211b2cd00","env":"test","send_mode":"disabled","google":false,"msg":"web server configuration validated"}
+{"level":"info","time":"2026-11-11T17:53:20.319Z","service":"web","env":"test","build":"src-32b211b2cd00","request_id":"ffe60a16-8016-4115-a713-ebea38be7cc6","role":"admin","msg":"sign-in succeeded"}
+{"level":"info","time":"2026-11-11T17:53:21.472Z","service":"web","env":"test","build":"src-32b211b2cd00","request_id":"425c3fab-33dd-4095-8f10-b3492f35bd23","role":"member","msg":"sign-in succeeded"}
+{"level":"warn","time":"2026-11-11T17:53:22.144Z","service":"web","env":"test","build":"src-32b211b2cd00","request_id":"a0debfc5-0ef5-4862-acba-8118c35a204c","reason":"not_allowlisted","stage":"user.create","msg":"sign-in denied"}
+{"level":"warn","time":"2026-11-11T17:53:22.714Z","service":"web","env":"test","build":"src-32b211b2cd00","request_id":"3be7f456-7580-49f3-87c6-35eb0d93a030","reason":"wrong_domain","stage":"user.create","msg":"sign-in denied"}
+{"level":"warn","time":"2026-11-11T17:53:23.259Z","service":"web","env":"test","build":"src-32b211b2cd00","request_id":"49d3bf01-6d06-4e2b-b481-47e46f947b81","reason":"disabled","stage":"user.create","msg":"sign-in denied"}
+{"level":"info","time":"2026-11-11T17:53:23.859Z","service":"web","env":"test","build":"src-32b211b2cd00","request_id":"a9fdb685-a5bb-4dc1-ada0-279784fb8a48","role":"member","msg":"sign-in succeeded"}
+{"level":"warn","time":"2026-11-11T17:53:24.906Z","service":"web","env":"test","build":"src-32b211b2cd00","request_id":"9422a599-ab24-46e2-b145-3c2a23b46f60","reason":"disabled","stage":"session.create","msg":"sign-in denied"}
