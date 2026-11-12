@@ -1,0 +1,58 @@
+
+ RUN  v5.1.0 D:/AI Studio/Email MKT Tracker
+
+ ❯ |unit| tests/unit/templates.test.ts (21 tests | 1 failed) 93ms
+   ❯ structure-preserving parse/serialize (7)
+     × fixture B: a no-edit save is identical after normalizing only cosmetic differences 19ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  |unit| tests/unit/templates.test.ts > structure-preserving parse/serialize > fixture B: a no-edit save is identical after normalizing only cosmetic differences
+AssertionError: expected '\n\n<html lang="vi">\n<head>\n<meta c…' to be '\n\n<html lang="vi">\n<head>\n<meta c…' // Object.is equality
+
+- Expected
++ Received
+
+@@ -16,11 +16,11 @@
+
+  </head>
+  <body>
+  <div class="wrap" style="max-width:600px;margin:0 auto;padding:24px;background:#ffffff url('https://cdn.example/bg-pattern.png') repeat">
+    <div style="text-align:center">
+-     <img src="images/logo-relative.png" alt="" width="120">
++     <img src="images/logo-relative.png" alt width="120">
+      <img src="http://cdn.example/banner-http.png" width="600" style="width:100%;height:auto">
+    </div>
+    <h1 style="font-size:28px;color:#d9480f;margin:16px 0 8px">⚡ Flash sale 48 giờ cho {{ full_name }}!</h1>
+    <p style="font-size:16px;line-height:1.5;color:#333">Chào {{greeting_name}}, cuối tuần này <b>mọi sản phẩm</b> giảm đến <span style="font-size:20px;color:#d9480f">50%</span>. Mã giảm giá riêng của {{ ten_khach }}: <code>FLASH50</code>.</p>
+    <p style="font-size:14px;color:#555">Áp dụng cho {{ company | defaul: "khách hàng thân thiết" }} đến hết Chủ nhật.</p>
+@@ -40,11 +40,11 @@
+    Gửi
+    
+    
+    
+    <div style="padding:4px">Style với URL javascript</div>
+-   <img src="https://tracker.example/open.gif?u=someone%40example.com" width="1" height="1" alt="">
++   <img src="https://tracker.example/open.gif?u=someone%40example.com" width="1" height="1" alt>
+    <p style="font-size:11px;color:#888">Shop Mẫu (tổng hợp) · Hà Nội · <a href="mailto:h***@shop.example">h***@shop.example</a> · <a href="tel:+84240000000">024 0000 0000</a> · <a href="#">Hủy đăng ký</a></p>
+  </div>
+  </body>
+  </html>
+
+
+ ❯ tests/unit/templates.test.ts:27:27
+     25|     // And the only raw differences are the documented cosmetic ones.
+     26|     const cosmetic = (s: string) => s.replace(/\s*\/>/g, ">").replace(…
+     27|     expect(cosmetic(out)).toBe(cosmetic(html));
+       |                           ^
+     28|   });
+     29|
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 20 passed (21)
+   Start at  12:22:06
+   Duration  1.06s (import 72%, transform 16%, tests 11%, worker 1%)
+

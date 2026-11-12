@@ -1,0 +1,137 @@
+{
+  "input": "synthetic-b",
+  "kind": "fixture",
+  "regions": 18,
+  "sanitize": [
+    "Removed elements: <svg>×1, <form>×1, <input>×1, <button>×1, <iframe>×1, <object>×1, <script>×2",
+    "Removed event-handler attributes: 3",
+    "Blocked URLs: a[href]=javascript:alert('xss')",
+    "Meta refresh removed: 1",
+    "Unsafe CSS removed: 1 style attribute(s), 0 style block(s)",
+    "Outlook conditional comments kept: 0 (dropped as unsafe: 0)",
+    "Ordinary HTML comments removed: 1"
+  ],
+  "findings": [
+    "error image: relative URL — will not load in an email; must be re-hosted at an absolute https URL",
+    "warning image: missing alt text",
+    "warning image: http (not https) — may be blocked or warned about",
+    "warning image: missing alt text",
+    "error image: relative URL — will not load in an email; must be re-hosted at an absolute https URL",
+    "warning image: inline tracking pixel (data URI)",
+    "error image: relative URL — will not load in an email; must be re-hosted at an absolute https URL",
+    "warning image: third-party tracking pixel",
+    "warning link: empty or '#' link",
+    "info link: http (not https)",
+    "warning link: link text shows \"www.ngan-hang-that.example\" but goes to \"shop.example\"",
+    "warning link: empty or '#' link",
+    "info structure: Responsive @media rules present in <style> (some clients ignore <style>)",
+    "warning structure: External stylesheet (e.g. web font) — most email clients ignore it; keep fallbacks",
+    "error merge: unknown field: {{ ten_khach }}",
+    "error merge: unknown filter: {{ company | defaul: \"khách hàng thân thiết\" }}",
+    "warning merge: no fallback text: {{ full_name }}",
+    "warning merge: no fallback text: {{greeting_name}}"
+  ],
+  "mergeFieldsV1": [
+    "{{ company | defaul: \"khách hàng thân thiết\" }}",
+    "{{ full_name }}",
+    "{{ greeting_name | default: 'Bạn' }}",
+    "{{ ten_khach }}",
+    "{{greeting_name}}"
+  ],
+  "msoMarkersV1": 0,
+  "bytesV1": 2995,
+  "unsupportedInlineWarning": null,
+  "editsMade": [
+    "text",
+    "image",
+    "button",
+    "link"
+  ],
+  "mergeFieldsV2": [
+    "{{ company | defaul: \"khách hàng thân thiết\" }}",
+    "{{ email | url_encode }}",
+    "{{ full_name }}",
+    "{{ greeting_name | default: \"Quý khách\" }}",
+    "{{ greeting_name | default: 'Bạn' }}",
+    "{{ ten_khach }}",
+    "{{greeting_name}}"
+  ],
+  "inlineStyledSpansV1": 1,
+  "inlineStyledSpansV2": 1,
+  "msoMarkersV2": 0,
+  "bytesV2": 3132,
+  "plainTextChars": 628,
+  "missingWithoutFallback_noGreeting": "⚠ Missing values without fallback: greeting_name",
+  "missingWithoutFallback_noCompany": "⚠ Missing values without fallback: greeting_name",
+  "brokenImagesInBrowserPreview": "2 image(s) failed to load in this browser preview",
+  "rendering": {
+    "v1_vs_v2_640": {
+      "changedPixels": 67753,
+      "ratio": 0.1176,
+      "heightA": 900,
+      "heightB": 900
+    },
+    "raw_vs_v1_640": {
+      "changedPixels": 4612,
+      "ratio": 0.008,
+      "heightA": 900,
+      "heightB": 900
+    },
+    "v1_vs_v2_375": {
+      "changedPixels": 73309,
+      "ratio": 0.186,
+      "heightA": 1051,
+      "heightB": 1118
+    },
+    "raw_vs_v1_375": {
+      "changedPixels": 2924,
+      "ratio": 0.0074,
+      "heightA": 1227,
+      "heightB": 1051
+    }
+  },
+  "grapesjs": {
+    "bytes": 6001,
+    "msoMarkers": 0,
+    "msoMarkersExpected": 0,
+    "vmlPresent": false,
+    "vmlExpected": false,
+    "mergeFieldsSame": true,
+    "mergeFieldsExported": [
+      "{{ company | defaul: \"khách hàng thân thiết\" }}",
+      "{{ full_name }}",
+      "{{ greeting_name | default: 'Bạn' }}",
+      "{{ ten_khach }}",
+      "{{greeting_name}}"
+    ],
+    "bodyStyleTagsInBody": 0,
+    "idAttributesAdded": 16,
+    "classAttributes": 4,
+    "classAttributesV1": 4,
+    "roleAttributes": 0,
+    "roleAttributesV1": 0,
+    "rendering": {
+      "v1_vs_grapesjs_noedit_640": {
+        "changedPixels": 79530,
+        "ratio": 0.1381,
+        "heightA": 900,
+        "heightB": 944
+      },
+      "v1_vs_grapesjs_noedit_375": {
+        "changedPixels": 45,
+        "ratio": 0.0001,
+        "heightA": 1051,
+        "heightB": 1051
+      }
+    },
+    "savedContainsEdit": true,
+    "savedMergeFields": [
+      "{{ company | defaul: \"khách hàng thân thiết\" }}",
+      "{{ full_name }}",
+      "{{ greeting_name | default: 'Bạn' }}",
+      "{{ ten_khach }}",
+      "{{greeting_name}}"
+    ],
+    "savedMsoMarkers": 0
+  }
+}

@@ -1,0 +1,152 @@
+
+ RUN  v5.1.0 D:/AI Studio/Email MKT Tracker
+
+ ✓ |unit| tests/unit/secrets.test.ts > secret encryption (AES-256-GCM) > round-trips and never contains the plaintext 7ms
+ ✓ |unit| tests/unit/secrets.test.ts > secret encryption (AES-256-GCM) > uses a fresh IV each time 2ms
+ ✓ |unit| tests/unit/secrets.test.ts > secret encryption (AES-256-GCM) > rejects tampering, the wrong purpose and the wrong key 3ms
+ ✓ |unit| tests/unit/secrets.test.ts > secret encryption (AES-256-GCM) > supports rotation with a previous key 1ms
+ ✓ |unit| tests/unit/secrets.test.ts > secret encryption (AES-256-GCM) > validates key material 1ms
+ ✓ |unit| tests/unit/notion-client.test.ts > token bucket > allows a burst of 3, then paces at the configured rate 5ms
+ ✓ |unit| tests/unit/notion-client.test.ts > token bucket > keeps the client under a server-enforced 3 req/s limit (no 429s) 102ms
+{"level":"warn","time":"2026-11-12T05:37:41.999Z","service":"web","env":"unknown","build":"dev","component":"notion-client","method":"POST","path":"/v1/data_sources/0c893028-c046-4135-af03-ad276b6e8f18/query","status":429,"code":"rate_limited","attempt":1,"retryable":true,"retry_after_ms":7000,"msg":"notion request failed"}
+{"level":"warn","time":"2026-11-12T05:37:42.003Z","service":"web","env":"unknown","build":"dev","component":"notion-client","method":"POST","path":"/v1/data_sources/0c893028-c046-4135-af03-ad276b6e8f18/query","status":429,"code":"rate_limited","attempt":2,"retryable":true,"retry_after_ms":7000,"msg":"notion request failed"}
+{"level":"warn","time":"2026-11-12T05:37:42.005Z","service":"web","env":"unknown","build":"dev","component":"notion-client","method":"GET","path":"/v1/data_sources/9c81c311-16c6-440c-82dc-204db80de6dc","status":529,"code":"service_overload","attempt":1,"retryable":true,"msg":"notion request failed"}
+{"level":"warn","time":"2026-11-12T05:37:42.006Z","service":"web","env":"unknown","build":"dev","component":"notion-client","method":"GET","path":"/v1/data_sources/9c81c311-16c6-440c-82dc-204db80de6dc","status":503,"code":"service_unavailable","attempt":1,"retryable":true,"msg":"notion request failed"}
+{"level":"warn","time":"2026-11-12T05:37:42.007Z","service":"web","env":"unknown","build":"dev","component":"notion-client","method":"GET","path":"/v1/data_sources/9c81c311-16c6-440c-82dc-204db80de6dc","status":503,"code":"service_unavailable","attempt":2,"retryable":true,"msg":"notion request failed"}
+{"level":"warn","time":"2026-11-12T05:37:42.007Z","service":"web","env":"unknown","build":"dev","component":"notion-client","method":"GET","path":"/v1/data_sources/9c81c311-16c6-440c-82dc-204db80de6dc","status":503,"code":"service_unavailable","attempt":3,"retryable":true,"msg":"notion request failed"}
+{"level":"warn","time":"2026-11-12T05:37:42.010Z","service":"web","env":"unknown","build":"dev","component":"notion-client","method":"GET","path":"/v1/data_sources/209c5708-c625-4c34-91d6-9bda195345c1","status":502,"code":"bad_gateway","attempt":1,"retryable":true,"msg":"notion request failed"}
+{"level":"warn","time":"2026-11-12T05:37:42.011Z","service":"web","env":"unknown","build":"dev","component":"notion-client","method":"GET","path":"/v1/data_sources/209c5708-c625-4c34-91d6-9bda195345c1","status":502,"code":"bad_gateway","attempt":2,"retryable":true,"msg":"notion request failed"}
+{"level":"warn","time":"2026-11-12T05:37:42.011Z","service":"web","env":"unknown","build":"dev","component":"notion-client","method":"GET","path":"/v1/data_sources/209c5708-c625-4c34-91d6-9bda195345c1","status":502,"code":"bad_gateway","attempt":3,"retryable":true,"msg":"notion request failed"}
+{"level":"warn","time":"2026-11-12T05:37:42.012Z","service":"web","env":"unknown","build":"dev","component":"notion-client","method":"GET","path":"/v1/data_sources/209c5708-c625-4c34-91d6-9bda195345c1","status":502,"code":"bad_gateway","attempt":4,"retryable":true,"msg":"notion request failed"}
+{"level":"warn","time":"2026-11-12T05:37:42.012Z","service":"web","env":"unknown","build":"dev","component":"notion-client","method":"GET","path":"/v1/data_sources/209c5708-c625-4c34-91d6-9bda195345c1","status":502,"code":"bad_gateway","attempt":5,"retryable":true,"msg":"notion request failed"}
+{"level":"warn","time":"2026-11-12T05:37:42.019Z","service":"web","env":"unknown","build":"dev","component":"notion-client","method":"GET","path":"/v1/data_sources/666e25c3-446f-43cc-8c02-c76437289e2e","status":401,"code":"unauthorized","attempt":1,"retryable":false,"msg":"notion request failed"}
+{"level":"warn","time":"2026-11-12T05:37:42.022Z","service":"web","env":"unknown","build":"dev","component":"notion-client","method":"GET","path":"/v1/data_sources/does-not-exist","status":404,"code":"object_not_found","attempt":1,"retryable":false,"msg":"notion request failed"}
+{"level":"warn","time":"2026-11-12T05:37:42.028Z","service":"web","env":"unknown","build":"dev","component":"notion-client","method":"POST","path":"/v1/data_sources/666e25c3-446f-43cc-8c02-c76437289e2e/query","status":400,"code":"validation_error","attempt":1,"retryable":false,"msg":"notion request failed"}
+{"level":"warn","time":"2026-11-12T05:37:42.032Z","service":"web","env":"unknown","build":"dev","component":"notion-client","method":"GET","path":"/v1/data_sources/8ab654b2-5d2a-466c-9d8d-299230c02062","attempt":1,"err":"fetch failed (simulated network error)","msg":"notion request transport error"}
+{"level":"warn","time":"2026-11-12T05:37:42.032Z","service":"web","env":"unknown","build":"dev","component":"notion-client","method":"GET","path":"/v1/data_sources/8ab654b2-5d2a-466c-9d8d-299230c02062","attempt":2,"err":"fetch failed (simulated network error)","msg":"notion request transport error"}
+{"level":"warn","time":"2026-11-12T05:37:42.036Z","service":"web","env":"unknown","build":"dev","component":"notion-client","method":"POST","path":"/v1/databases","attempt":1,"err":"fetch failed (simulated network error)","msg":"notion request transport error"}
+{"level":"warn","time":"2026-11-12T05:37:42.039Z","service":"web","env":"unknown","build":"dev","component":"notion-client","method":"POST","path":"/v1/databases","status":503,"code":"service_unavailable","attempt":1,"retryable":false,"msg":"notion request failed"}
+{"level":"warn","time":"2026-11-12T05:37:42.041Z","service":"web","env":"unknown","build":"dev","component":"notion-client","method":"GET","path":"/v1/data_sources/154bf522-0bf0-4b0d-bf20-59f77e12e9bc","status":429,"code":"rate_limited","attempt":1,"retryable":true,"retry_after_ms":600000,"msg":"notion request failed"}
+ ✓ |unit| tests/unit/notion-client.test.ts > retry policy > honours Retry-After on 429 and then succeeds 9ms
+ ✓ |unit| tests/unit/notion-client.test.ts > retry policy > retries 529 and 5xx on reads with exponential backoff 5ms
+ ✓ |unit| tests/unit/notion-client.test.ts > retry policy > gives up after max attempts with the last error 6ms
+ ✓ |unit| tests/unit/notion-client.test.ts > retry policy > never retries 4xx such as 401, 404 or 400 14ms
+ ✓ |unit| tests/unit/notion-client.test.ts > retry policy > retries network errors on reads, but reports an uncertain outcome for non-idempotent creates 7ms
+ ✓ |unit| tests/unit/notion-client.test.ts > retry policy > does not retry a 5xx on a non-idempotent create (could create a second database) 4ms
+ ✓ |unit| tests/unit/notion-client.test.ts > retry policy > aborts instead of blocking when Retry-After is very long 2ms
+ ✓ |unit| tests/unit/notion-client.test.ts > retry policy > sends the pinned Notion-Version and bearer [REDACTED] 10ms
+ ✓ |unit| tests/unit/config.test.ts > config safety rules > defaults SEND_MODE to disabled and normalizes domains 15ms
+ ✓ |unit| tests/unit/config.test.ts > config safety rules > rejects SEND_MODE=live when APP_ENV=local 2ms
+ ✓ |unit| tests/unit/config.test.ts > config safety rules > rejects SEND_MODE=live when APP_ENV=test 1ms
+ ✓ |unit| tests/unit/config.test.ts > config safety rules > rejects SEND_MODE=live when APP_ENV=staging 1ms
+ ✓ |unit| tests/unit/config.test.ts > config safety rules > accepts SEND_MODE=live only in production 1ms
+ ✓ |unit| tests/unit/config.test.ts > config safety rules > rejects SEND_MODE=mock in production 1ms
+ ✓ |unit| tests/unit/config.test.ts > config safety rules > requires SEND_AUTHORIZATION_REF for SEND_MODE=simulator 1ms
+ ✓ |unit| tests/unit/config.test.ts > config safety rules > requires SEND_AUTHORIZATION_REF for SEND_MODE=allowlist 2ms
+ ✓ |unit| tests/unit/config.test.ts > config safety rules > requires a non-empty allowlist for SEND_MODE=allowlist 1ms
+ ✓ |unit| tests/unit/config.test.ts > config safety rules > refuses the dev sign-in when APP_ENV=staging 1ms
+ ✓ |unit| tests/unit/config.test.ts > config safety rules > refuses the dev sign-in when APP_ENV=production 1ms
+ ✓ |unit| tests/unit/config.test.ts > config safety rules > requires Google OAuth and https in staging/production 1ms
+ ✓ |unit| tests/unit/config.test.ts > config safety rules > rejects short secrets and missing domains 1ms
+ ✓ |unit| tests/unit/config.test.ts > config: Notion access rules > defaults to NOTION_MODE=disabled with no base URL 0ms
+ ✓ |unit| tests/unit/config.test.ts > config: Notion access rules > mock mode requires an encryption key and a loopback base URL 1ms
+ ✓ |unit| tests/unit/config.test.ts > config: Notion access rules > mock mode is refused in production 0ms
+ ✓ |unit| tests/unit/config.test.ts > config: Notion access rules > live mode requires NOTION_AUTHORIZATION_REF and the official API host 1ms
+ ✓ |unit| tests/unit/config.test.ts > config: Notion access rules > rejects a malformed encryption key and requires one in staging/production 1ms
+ ✓ |unit| tests/unit/config.test.ts > config: blank values > treats KEY= (blank) as unset, as in .env.example (regression found by the M2 dev-flow check) 1ms
+ ✓ |unit| tests/unit/config.test.ts > config: blank values > parses the committed .env.example (with a generated key) without errors 5ms
+ ✓ |unit| tests/unit/redact.test.ts > evidence redaction > masks email addresses but keeps the domain 5ms
+ ✓ |unit| tests/unit/redact.test.ts > evidence redaction > masks bearer [REDACTED], cookies, AWS keys, Notion and Google tokens 1ms
+ ✓ |unit| tests/unit/clock.test.ts > FixedClock > is controllable for time-dependent tests 5ms
+ ✓ |unit| tests/unit/templates.test.ts > structure-preserving parse/serialize > fixture A: a no-edit save is identical after normalizing only cosmetic differences 21ms
+ ✓ |unit| tests/unit/templates.test.ts > structure-preserving parse/serialize > fixture B: a no-edit save is identical after normalizing only cosmetic differences 9ms
+ ✓ |unit| tests/unit/templates.test.ts > structure-preserving parse/serialize > keeps MSO conditional comments, VML and merge fields through sanitize + edit 24ms
+ ✓ |unit| tests/unit/templates.test.ts > structure-preserving parse/serialize > an edit changes only the edited element 21ms
+ ✓ |unit| tests/unit/templates.test.ts > structure-preserving parse/serialize > finds text, image, link and button regions in the table template 10ms
+ ✓ |unit| tests/unit/templates.test.ts > structure-preserving parse/serialize > edits images, links and buttons, and validates destinations 29ms
+ ✓ |unit| tests/unit/crm-validation.test.ts > email normalization and validation > trims and lowercases only (no dot/plus folding) 7ms
+ ✓ |unit| tests/unit/crm-validation.test.ts > email normalization and validation > trang.ly@@example.com is invalid (multiple_at_signs) 1ms
+ ✓ |unit| tests/unit/crm-validation.test.ts > email normalization and validation > tuan.mai example.com is invalid (contains_whitespace) 0ms
+ ✓ |unit| tests/unit/crm-validation.test.ts > email normalization and validation > sơn***@example.com is invalid (non_ascii) 0ms
+ ✓ |unit| tests/unit/crm-validation.test.ts > email normalization and validation > l***@example.com is invalid (consecutive_dots) 0ms
+ ✓ |unit| tests/unit/crm-validation.test.ts > email normalization and validation > hung.vu@localhost is invalid (domain_without_dot) 0ms
+ ✓ |unit| tests/unit/crm-validation.test.ts > email normalization and validation > no-at-sign.example.com is invalid (no_at_sign) 0ms
+ ✓ |unit| tests/unit/crm-validation.test.ts > email normalization and validation > @example.com is invalid (empty_local_part) 1ms
+ ✓ |unit| tests/unit/crm-validation.test.ts > email normalization and validation > a@ is invalid (empty_domain) 0ms
+ ✓ |unit| tests/unit/crm-validation.test.ts > email normalization and validation > .a***@example.com is invalid (leading_or_trailing_dot) 1ms
+ ✓ |unit| tests/unit/crm-validation.test.ts > email normalization and validation > a@exa_mple.com is invalid (invalid_characters) 0ms
+ ✓ |unit| tests/unit/crm-validation.test.ts > email normalization and validation > a@example.c0m is invalid (invalid_characters) 0ms
+ ✓ |unit| tests/unit/crm-validation.test.ts > email normalization and validation > treats empty and whitespace as missing 1ms
+ ✓ |unit| tests/unit/crm-validation.test.ts > Vietnamese text normalization > converts decomposed (NFD) diacritics to NFC so names compare equal 1ms
+ ✓ |unit| tests/unit/crm-validation.test.ts > Vietnamese text normalization > collapses whitespace and turns blank into null 0ms
+ ✓ |unit| tests/unit/crm-validation.test.ts > Vietnamese text normalization > dedupes, trims and sorts tags 20ms
+ ✓ |unit| tests/unit/crm-validation.test.ts > Vietnamese text normalization > flags missing greeting name and missing full name 1ms
+ ✓ |unit| tests/unit/crm-validation.test.ts > consent rules > an automated source (notion_import) can never grant consent 1ms
+ ✓ |unit| tests/unit/crm-validation.test.ts > consent rules > an automated source (notion_unsubscribe) can never grant consent 0ms
+ ✓ |unit| tests/unit/crm-validation.test.ts > consent rules > an automated source (system) can never grant consent 0ms
+ ✓ |unit| tests/unit/crm-validation.test.ts > consent rules > a staff grant requires evidence 1ms
+ ✓ |unit| tests/unit/crm-validation.test.ts > consent rules > imports may record unknown and withdrawn 1ms
+ ✓ |unit| tests/unit/crm-validation.test.ts > eligibility > eligible only when every condition holds 1ms
+ ✓ |unit| tests/unit/crm-validation.test.ts > eligibility > unknown consent blocks when consent is required (default) 0ms
+ ✓ |unit| tests/unit/crm-validation.test.ts > eligibility > withdrawn consent and suppression always block, even if consent is not required 0ms
+ ✓ |unit| tests/unit/crm-validation.test.ts > eligibility > duplicates: unresolved and secondary block, primary does not 0ms
+ ✓ |unit| tests/unit/crm-validation.test.ts > eligibility > collects multiple reasons 1ms
+ ✓ |unit| tests/unit/sending-guard.test.ts > sending guard: customer campaigns > never allows customer campaigns from APP_ENV=local with a real transport 6ms
+ ✓ |unit| tests/unit/sending-guard.test.ts > sending guard: customer campaigns > never allows customer campaigns from APP_ENV=test with a real transport 1ms
+ ✓ |unit| tests/unit/sending-guard.test.ts > sending guard: customer campaigns > never allows customer campaigns from APP_ENV=staging with a real transport 0ms
+ ✓ |unit| tests/unit/sending-guard.test.ts > sending guard: customer campaigns > requires production + live + admin enablement 3ms
+ ✓ |unit| tests/unit/sending-guard.test.ts > sending guard: customer campaigns > refuses customer campaigns in production when SEND_MODE is not live 1ms
+ ✓ |unit| tests/unit/sending-guard.test.ts > sending guard: test and integration sends > disabled refuses everything 0ms
+ ✓ |unit| tests/unit/sending-guard.test.ts > sending guard: test and integration sends > mock is allowed outside production and never selects a real transport 0ms
+ ✓ |unit| tests/unit/sending-guard.test.ts > sending guard: test and integration sends > simulator requires authorization and simulator-only recipients 0ms
+ ✓ |unit| tests/unit/sending-guard.test.ts > sending guard: test and integration sends > allowlist requires authorization and allowlisted recipients only (case-insensitive) 1ms
+ ✓ |unit| tests/unit/sending-guard.test.ts > sending guard: test and integration sends > live is production-only, and production test sends are still allowlist-restricted 1ms
+ ✓ |unit| tests/unit/sending-guard.test.ts > sending guard: test and integration sends > refuses an empty recipient list 0ms
+ ✓ |unit| tests/unit/sending-guard.test.ts > transport factory (M1) > returns the mock transport only when the guard selects mock 2ms
+ ✓ |unit| tests/unit/sending-guard.test.ts > transport factory (M1) > refuses to build any real transport in M1, even when the guard would allow it 2ms
+ ✓ |unit| tests/unit/sending-guard.test.ts > transport factory (M1) > propagates guard refusals 0ms
+ ✓ |unit| tests/unit/notion-mapping.test.ts > mapping validation > accepts the standard CRM schema 6ms
+ ✓ |unit| tests/unit/notion-mapping.test.ts > mapping validation > requires full name and email 1ms
+ ✓ |unit| tests/unit/notion-mapping.test.ts > mapping validation > detects renamed/deleted properties and wrong types 1ms
+ ✓ |unit| tests/unit/notion-mapping.test.ts > mapping validation > rejects one property mapped to two fields 0ms
+ ✓ |unit| tests/unit/notion-mapping.test.ts > mapping validation > warns when a status-type subscription property lacks the app's options 1ms
+ ✓ |unit| tests/unit/notion-mapping.test.ts > mapping suggestion > recognizes English and Vietnamese property names 2ms
+ ✓ |unit| tests/unit/notion-mapping.test.ts > page parsing > reads every mapped field from Notion value shapes 1ms
+ ✓ |unit| tests/unit/notion-mapping.test.ts > page parsing > reports a missing property or an unexpected type instead of crashing 1ms
+ ✓ |unit| tests/unit/notion-mapping.test.ts > page parsing > builds select and status writes 1ms
+ ✓ |unit| tests/unit/notion-mapping.test.ts > page parsing > only Unsubscribed/Bounced/Complained count as suppression requests 1ms
+ ✓ |unit| tests/unit/notion-mapping.test.ts > Notion id parsing > accepts bare ids, dashed ids and URLs 1ms
+ ✓ |unit| tests/unit/access.test.ts > identity checks (domain + verified email) > accepts a verified company address, case-insensitively 3ms
+ ✓ |unit| tests/unit/access.test.ts > identity checks (domain + verified email) > rejects unverified emails before anything else 1ms
+ ✓ |unit| tests/unit/access.test.ts > identity checks (domain + verified email) > rejects a***@freemail.example as wrong_domain 0ms
+ ✓ |unit| tests/unit/access.test.ts > identity checks (domain + verified email) > rejects a***@example.com.evil.io as wrong_domain 0ms
+ ✓ |unit| tests/unit/access.test.ts > identity checks (domain + verified email) > rejects a***@sub.example.com as wrong_domain 0ms
+ ✓ |unit| tests/unit/access.test.ts > identity checks (domain + verified email) > rejects a***@notexample.com as wrong_domain 0ms
+ ✓ |unit| tests/unit/access.test.ts > identity checks (domain + verified email) > rejects e***@freemail.example as wrong_domain 0ms
+ ✓ |unit| tests/unit/access.test.ts > identity checks (domain + verified email) > rejects noat as wrong_domain 0ms
+ ✓ |unit| tests/unit/access.test.ts > identity checks (domain + verified email) > helpers 1ms
+ ✓ |unit| tests/unit/templates.test.ts > structure-preserving parse/serialize > REGRESSION: a button that is the only content of a <p> is a button region and keeps its styling when edited 15ms
+ ✓ |unit| tests/unit/templates.test.ts > structure-preserving parse/serialize > button-like links inside a text block are classified as buttons 1ms
+ ✓ |unit| tests/unit/templates.test.ts > structure-preserving parse/serialize > export never contains editor annotations 9ms
+ ✓ |unit| tests/unit/templates.test.ts > sanitization > removes scripts, forms, iframes, objects, SVG, handlers, javascript: URLs and meta refresh from fixture B 7ms
+ ✓ |unit| tests/unit/templates.test.ts > sanitization > REGRESSION: HTML between <!--[if !mso]><!--> and <!--<![endif]--> is sanitized (it is visible in non-Outlook clients) 3ms
+ ✓ |unit| tests/unit/templates.test.ts > sanitization > REGRESSION: keeps the original DOCTYPE (losing it switches rendering to quirks mode) 5ms
+ ✓ |unit| tests/unit/templates.test.ts > sanitization > drops an Outlook-only block that contains dangerous markup, keeps safe ones 2ms
+ ✓ |unit| tests/unit/templates.test.ts > sanitization > inline sanitizer for edited text keeps basic [REDACTED] and merge fields only 1ms
+ ✓ |unit| tests/unit/templates.test.ts > sanitization > URL policy 0ms
+ ✓ |unit| tests/unit/templates.test.ts > sanitization > can import only the email part of a tool page 2ms
+ ✓ |unit| tests/unit/templates.test.ts > merge fields > scans fields, fallbacks, contexts and problems 1ms
+ ✓ |unit| tests/unit/templates.test.ts > merge fields > renders a recipient preview with fallbacks for missing names and escapes values 10ms
+ ✓ |unit| tests/unit/templates.test.ts > merge fields > tolerates entity-encoded quotes inside braces (editors may encode them) 1ms
+ ✓ |unit| tests/unit/templates.test.ts > merge fields > never executes Liquid tags (no file access) and leaves bad fields visible 1ms
+ ✓ |unit| tests/unit/templates.test.ts > lint > flags relative, http, localhost and data images, missing alt, tracking pixels 5ms
+ ✓ |unit| tests/unit/templates.test.ts > lint > fixture A: root-relative images are errors (fine in the app preview, broken in real email) 4ms
+ ✓ |unit| tests/unit/templates.test.ts > lint > warns about Gmail clipping above ~102 KB and missing unsubscribe 3ms
+ ✓ |unit| tests/unit/templates.test.ts > plain-text part > REGRESSION: never upper-cases headings (would break {{ full_name }} → {{ FULL_NAME }}) 627ms
+ ✓ |unit| tests/unit/templates.test.ts > TipTap output → inline HTML > joins paragraphs with <br><br> and drops a trailing empty paragraph 0ms
+
+ Test Files  10 passed (10)
+      Tests  124 passed (124)
+   Start at  12:37:41
+   Duration  2.57s (import 74%, transform 13%, tests 12%, worker 1%)
+

@@ -16,6 +16,13 @@ Baseline: `PROJECT_BRIEF.md` rev 2. Status: approved plan. M1 was authorized and
 >   - Eligibility for audiences also requires recorded marketing consent by default (`crm.require_marketing_consent`, pending counsel). M5 must re-check suppression and consent at send time.
 >   - Notion API version `2026-03-11` (data sources). The 10,000-result query cap is handled by time-ordered chunking.
 >   - Notion access modes `disabled`, `mock` and `live`. The token is encrypted in the DB; see [NOTION_SETUP.md](NOTION_SETUP.md).
+> - **M3 (editor trial):**
+>   - §4.4 trial run on synthetic templates A and B, plus one unconfirmed real candidate.
+>   - Provisional choice: (a) structure-preserving click-to-edit, plus (c) TipTap for text blocks and paste. (b) GrapesJS is not used for imported HTML.
+>   - Merge fields use Liquid output syntax only; tags are never executed.
+>   - The preview width is 640/375 px.
+>   - Template versions are immutable.
+>   - Image re-hosting to S3 is still to do. See `reports/2026-11-12-m3/report.md`.
 
 ## Context
 

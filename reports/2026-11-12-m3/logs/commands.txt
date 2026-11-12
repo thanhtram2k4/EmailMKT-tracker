@@ -1,0 +1,7 @@
+2026-11-12T05:37:23Z | lint | npm run lint | exit=0 | 9s
+2026-11-12T05:37:33Z | typecheck | npm run typecheck | exit=0 | 7s
+2026-11-12T05:37:39Z | unit | npx vitest run --project unit --reporter=verbose | exit=0 | 4s
+2026-11-12T05:37:43Z | integration | npx vitest run --project integration --reporter=verbose | exit=0 | 48s
+2026-11-12T05:38:31Z | tooling | npx vitest run --project tooling --reporter=verbose | exit=0 | 23s
+2026-11-12T05:38:54Z | e2e | npm run e2e | exit=0 | 115s
+2026-11-12T05:40:49Z | smoke | npm run smoke:local | exit=0 | 31s

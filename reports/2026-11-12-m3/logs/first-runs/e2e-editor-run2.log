@@ -1,0 +1,80 @@
+
+> email-mkt-tracker@0.1.0 e2e
+> tsx scripts/local-stack.ts --log-dir .local/logs/e2e -- playwright test tests/e2e/editor-trial.spec.ts
+
+[core] WARNING: Executable file detection not yet supported on 'win32'.
+Your pool doesn't have all of the error handlers! See: https://err.red/wpeh?v=0.18.0&method=connect
+migrations applied (app + graphile_worker)
+[stack] postgres ready on 54332; logs in D:\AI Studio\Email MKT Tracker\.local\logs\e2e
+[stack] building web app (next build)…
+[stack] web + worker healthy at http://localhost:3100
+
+Running 16 tests using 1 worker
+
+  ok  1 [chromium] › tests\e2e\editor-trial.spec.ts:84:5 › SYNTHETIC A › import, sanitize report, regions, checks (2.3s)
+  ok  2 [chromium] › tests\e2e\editor-trial.spec.ts:111:5 › SYNTHETIC A › edit text, image, button and link; save; reopen; export (2.3s)
+  ok  3 [chromium] › tests\e2e\editor-trial.spec.ts:181:5 › SYNTHETIC A › recipient previews and missing-name fallbacks (1.6s)
+  ok  4 [chromium] › tests\e2e\editor-trial.spec.ts:200:5 › SYNTHETIC A › responsive browser renderings and import fidelity (Chromium only) (4.3s)
+  ok  5 [chromium] › tests\e2e\editor-trial.spec.ts:217:5 › SYNTHETIC A › GrapesJS (candidate b): no-edit export fidelity, then an edit + save (3.7s)
+  ok  6 [chromium] › tests\e2e\editor-trial.spec.ts:84:5 › SYNTHETIC B › import, sanitize report, regions, checks (1.4s)
+  x   7 [chromium] › tests\e2e\editor-trial.spec.ts:111:5 › SYNTHETIC B › edit text, image, button and link; save; reopen; export (3.1s)
+  -   8 [chromium] › tests\e2e\editor-trial.spec.ts:181:5 › SYNTHETIC B › recipient previews and missing-name fallbacks
+  -   9 [chromium] › tests\e2e\editor-trial.spec.ts:200:5 › SYNTHETIC B › responsive browser renderings and import fidelity (Chromium only)
+  -  10 [chromium] › tests\e2e\editor-trial.spec.ts:217:5 › SYNTHETIC B › GrapesJS (candidate b): no-edit export fidelity, then an edit + save
+  ok 11 [chromium] › tests\e2e\editor-trial.spec.ts:84:5 › REAL CANDIDATE 1 › import, sanitize report, regions, checks (1.5s)
+  ok 12 [chromium] › tests\e2e\editor-trial.spec.ts:111:5 › REAL CANDIDATE 1 › edit text, image, button and link; save; reopen; export (2.0s)
+  ok 13 [chromium] › tests\e2e\editor-trial.spec.ts:181:5 › REAL CANDIDATE 1 › recipient previews and missing-name fallbacks (1.2s)
+  ok 14 [chromium] › tests\e2e\editor-trial.spec.ts:200:5 › REAL CANDIDATE 1 › responsive browser renderings and import fidelity (Chromium only) (3.1s)
+  ok 15 [chromium] › tests\e2e\editor-trial.spec.ts:217:5 › REAL CANDIDATE 1 › GrapesJS (candidate b): no-edit export fidelity, then an edit + save (4.1s)
+  ok 16 [chromium] › tests\e2e\editor-trial.spec.ts:265:1 › TipTap paste (candidate c): formatted text from a Google-Docs-like clipboard keeps bold/italic/links, drops styles (1.3s)
+
+
+  1) [chromium] › tests\e2e\editor-trial.spec.ts:111:5 › SYNTHETIC B › edit text, image, button and link; save; reopen; export 
+
+    Error: expect(received).toContain(expected) // indexOf
+
+    Expected substring: "Xin cảm ơn"
+    Received string:    "⚡ FLASH SALE 48 GIỜ CHO {{ FULL_NAME }}! XIN CẢM ƠN {{ GREETING_NAME |
+    DEFAULT: \"QUÝ KHÁCH\" }}!·
+    Chào {{greeting_name}}, cuối tuần này mọi sản phẩm giảm đến 50%. Mã giảm giá
+    riêng của {{ ten_khach }}: FLASH50.·
+    Áp dụng cho {{ company | defaul: \"khách hàng thân thiết\" }} đến hết Chủ nhật.·
+    Bình giữ nhiệt 500ml [https://example.com/da-doi-lien-ket]·
+    Túi vải canvas·
+    Mua ngay [http://shop.example/flash-sale]·
+    www.ngan-hang-that.example/dang-nhap [https://shop.example/tai-khoan]·
+    Style với URL javascript·
+    Shop Mẫu (tổng hợp) · Hà Nội · h***@shop.example · 024 0000 0000
+    [tel:+84240000000] · Hủy đăng ký"
+
+      176 |       const txt = await (await page.request.get(`/templates/${templateId}/export?format=txt`)).text();
+      177 |       metrics.plainTextChars = txt.length;
+    > 178 |       expect(txt).toContain("Xin cảm ơn");
+          |                   ^
+      179 |     });
+      180 |
+      181 |     test("recipient previews and missing-name fallbacks", async ({ page }) => {
+        at D:\AI Studio\Email MKT Tracker\tests\e2e\editor-trial.spec.ts:178:19
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results\editor-trial-SYNTHETIC-B-e-07399-and-link-save-reopen-export-chromium\test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results\editor-trial-SYNTHETIC-B-e-07399-and-link-save-reopen-export-chromium\error-context.md
+
+    Error Context: test-results\editor-trial-SYNTHETIC-B-e-07399-and-link-save-reopen-export-chromium\error-context.md
+
+    attachment #4: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results\editor-trial-SYNTHETIC-B-e-07399-and-link-save-reopen-export-chromium\trace.zip
+    Usage:
+
+        npx playwright show-trace test-results\editor-trial-SYNTHETIC-B-e-07399-and-link-save-reopen-export-chromium\trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  1 failed
+    [chromium] › tests\e2e\editor-trial.spec.ts:111:5 › SYNTHETIC B › edit text, image, button and link; save; reopen; export 
+  3 did not run
+  12 passed (36.3s)
+[stack] cleanup ok: 5 owned process(es) stopped, none left
+[stack] stopped (exit 1)

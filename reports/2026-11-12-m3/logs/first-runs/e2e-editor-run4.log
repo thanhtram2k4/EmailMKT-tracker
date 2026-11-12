@@ -1,0 +1,33 @@
+
+> email-mkt-tracker@0.1.0 e2e
+> tsx scripts/local-stack.ts --log-dir .local/logs/e2e -- playwright test tests/e2e/editor-trial.spec.ts
+
+[core] WARNING: Executable file detection not yet supported on 'win32'.
+Your pool doesn't have all of the error handlers! See: https://err.red/wpeh?v=0.18.0&method=connect
+migrations applied (app + graphile_worker)
+[stack] postgres ready on 54332; logs in D:\AI Studio\Email MKT Tracker\.local\logs\e2e
+[stack] building web app (next build)…
+[stack] web + worker healthy at http://localhost:3100
+
+Running 16 tests using 1 worker
+
+  ok  1 [chromium] › tests\e2e\editor-trial.spec.ts:84:5 › SYNTHETIC A › import, sanitize report, regions, checks (2.7s)
+  ok  2 [chromium] › tests\e2e\editor-trial.spec.ts:111:5 › SYNTHETIC A › edit text, image, button and link; save; reopen; export (2.3s)
+  ok  3 [chromium] › tests\e2e\editor-trial.spec.ts:186:5 › SYNTHETIC A › recipient previews and missing-name fallbacks (1.6s)
+  ok  4 [chromium] › tests\e2e\editor-trial.spec.ts:205:5 › SYNTHETIC A › responsive browser renderings and import fidelity (Chromium only) (4.5s)
+  ok  5 [chromium] › tests\e2e\editor-trial.spec.ts:225:5 › SYNTHETIC A › GrapesJS (candidate b): no-edit export fidelity, then an edit + save (3.8s)
+  ok  6 [chromium] › tests\e2e\editor-trial.spec.ts:84:5 › SYNTHETIC B › import, sanitize report, regions, checks (1.8s)
+  ok  7 [chromium] › tests\e2e\editor-trial.spec.ts:111:5 › SYNTHETIC B › edit text, image, button and link; save; reopen; export (4.1s)
+  ok  8 [chromium] › tests\e2e\editor-trial.spec.ts:186:5 › SYNTHETIC B › recipient previews and missing-name fallbacks (2.5s)
+  ok  9 [chromium] › tests\e2e\editor-trial.spec.ts:205:5 › SYNTHETIC B › responsive browser renderings and import fidelity (Chromium only) (27.5s)
+  ok 10 [chromium] › tests\e2e\editor-trial.spec.ts:225:5 › SYNTHETIC B › GrapesJS (candidate b): no-edit export fidelity, then an edit + save (13.6s)
+  ok 11 [chromium] › tests\e2e\editor-trial.spec.ts:84:5 › REAL CANDIDATE 1 › import, sanitize report, regions, checks (1.6s)
+  ok 12 [chromium] › tests\e2e\editor-trial.spec.ts:111:5 › REAL CANDIDATE 1 › edit text, image, button and link; save; reopen; export (2.1s)
+  ok 13 [chromium] › tests\e2e\editor-trial.spec.ts:186:5 › REAL CANDIDATE 1 › recipient previews and missing-name fallbacks (1.7s)
+  ok 14 [chromium] › tests\e2e\editor-trial.spec.ts:205:5 › REAL CANDIDATE 1 › responsive browser renderings and import fidelity (Chromium only) (3.0s)
+  ok 15 [chromium] › tests\e2e\editor-trial.spec.ts:225:5 › REAL CANDIDATE 1 › GrapesJS (candidate b): no-edit export fidelity, then an edit + save (4.5s)
+  ok 16 [chromium] › tests\e2e\editor-trial.spec.ts:273:1 › TipTap paste (candidate c): formatted text from a Google-Docs-like clipboard keeps bold/italic/links, drops styles (1.4s)
+
+  16 passed (1.4m)
+[stack] cleanup ok: 5 owned process(es) stopped, none left
+[stack] stopped (exit 0)

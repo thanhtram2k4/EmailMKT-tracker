@@ -1,0 +1,83 @@
+{
+  "input": "real-1 (candidate; content NOT included)",
+  "kind": "real",
+  "regions": 62,
+  "editsMade": [
+    "text",
+    "link"
+  ],
+  "mergeFieldsV1Count": 0,
+  "mergeFieldsV2Count": 1,
+  "msoMarkers": [
+    0,
+    0
+  ],
+  "bytes": [
+    17298,
+    17317
+  ],
+  "inlineStyledSpans": [
+    3,
+    3
+  ],
+  "brokenImagesInBrowserPreview": "All images loaded in this browser preview",
+  "findingCountsBySeverity": {
+    "warning": 1,
+    "info": 1
+  },
+  "rendering": {
+    "v1_vs_v2_640": {
+      "ratio": 0.106,
+      "changedPixels": 192294,
+      "heightA": 2834,
+      "heightB": 2852
+    },
+    "raw_vs_v1_640": {
+      "ratio": 0,
+      "changedPixels": 0,
+      "heightA": 2834,
+      "heightB": 2834
+    },
+    "v1_vs_v2_375": {
+      "ratio": 0.1131,
+      "changedPixels": 192294,
+      "heightA": 2834,
+      "heightB": 2852
+    },
+    "raw_vs_v1_375": {
+      "ratio": 0,
+      "changedPixels": 0,
+      "heightA": 2834,
+      "heightB": 2834
+    }
+  },
+  "grapesjs": {
+    "bytes": 32119,
+    "msoMarkers": 0,
+    "mergeFieldsSame": true,
+    "idAttributesAdded": 91,
+    "classAttributes": [
+      12,
+      12
+    ],
+    "roleAttributes": [
+      10,
+      10
+    ],
+    "savedContainsEdit": true,
+    "rendering": {
+      "v1_vs_grapesjs_noedit_640": {
+        "ratio": 0.0698,
+        "changedPixels": 126511,
+        "heightA": 2834,
+        "heightB": 2856
+      },
+      "v1_vs_grapesjs_noedit_375": {
+        "ratio": 0.0744,
+        "changedPixels": 126511,
+        "heightA": 2834,
+        "heightB": 2856
+      }
+    }
+  }
+}

@@ -1,0 +1,9 @@
+
+ RUN  v5.1.0 D:/AI Studio/Email MKT Tracker
+
+
+ Test Files  1 passed (1)
+      Tests  21 passed (21)
+   Start at  12:22:43
+   Duration  1.08s (import 75%, transform 12%, tests 12%, worker 1%)
+

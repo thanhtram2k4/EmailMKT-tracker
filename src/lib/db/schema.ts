@@ -373,3 +373,44 @@ export const notionOutbox = pgTable(
     index("notion_outbox_due_idx").on(t.status, t.nextAttemptAt),
   ],
 );
+
+// ================================================================ M3: email templates (editor trial)
+
+export const templateSource = pgEnum("template_source", ["upload", "paste", "fixture"]);
+export const templateEditor = pgEnum("template_editor", ["import", "structured", "grapesjs"]);
+
+export const templates = pgTable("templates", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  name: text("name").notNull(),
+  sourceKind: templateSource("source_kind").notNull(),
+  sourceFilename: text("source_filename"),
+  /** SHA-256 of the original uploaded bytes (identifies the exact input file). */
+  sourceSha256: text("source_sha256"),
+  extractSelector: text("extract_selector"),
+  createdBy: text("created_by").notNull(),
+  createdAt: ts("created_at").notNull().defaultNow(),
+  updatedAt: ts("updated_at").notNull().defaultNow(),
+});
+
+/** Immutable versions (DB trigger blocks UPDATE/DELETE). Saving always creates a new version. */
+export const templateVersions = pgTable(
+  "template_versions",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    templateId: uuid("template_id")
+      .notNull()
+      .references(() => templates.id),
+    versionNo: integer("version_no").notNull(),
+    baseVersionId: uuid("base_version_id"),
+    editor: templateEditor("editor").notNull(),
+    /** Canonical sanitized HTML (no editor annotations). */
+    html: text("html").notNull(),
+    plainText: text("plain_text").notNull(),
+    ops: jsonb("ops"),
+    sanitizeReport: jsonb("sanitize_report"),
+    note: text("note"),
+    createdBy: text("created_by").notNull(),
+    createdAt: ts("created_at").notNull().defaultNow(),
+  },
+  (t) => [uniqueIndex("template_versions_no_idx").on(t.templateId, t.versionNo)],
+);

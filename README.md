@@ -76,6 +76,21 @@ npm run dev:crm              # web at http://localhost:3000, the worker, and the
    npm run notion:mock:ctl -- reset                                  # reseed the synthetic data
    ```
 
+### Walkthrough: template editor trial (M3)
+1. Open **Templates**. Click **Import TỔNG HỢP A…** (table newsletter with Outlook conditional comments and merge fields) or **Import TỔNG HỢP B…** (unsafe markup, to see sanitization).
+2. To try your own file, use **HTML file**:
+   - If the email sits inside a tool page, set **Only import part of the page** to its selector, e.g. `#email`.
+   - The file stays in your local database. Nothing is sent anywhere.
+3. In the editor:
+   - **Edit regions.** Click a text block, image, link or button in the preview, or pick one from **Editable regions**.
+     - Text uses a rich-text field with a **merge-field picker**.
+     - Images take a URL and alt text; links and buttons take a destination, and buttons also take their text.
+     - A warning appears if a block has formatting the rich-text field cannot keep.
+   - **Save as new version.** Earlier versions stay listed and can be reopened.
+   - **Preview as a recipient**, e.g. "Mẫu: thiếu tên gọi", to see the fallbacks (`Quý khách`) and any "missing values without fallback".
+   - **Desktop 640px / Mobile 375px.** These are **your browser's** rendering only, not Gmail, Outlook or a phone mail app.
+   - **Side panels:** checks (images, links, size, merge fields), the sanitization report, **Export HTML / plain text**, and **Open in GrapesJS (trial)** for comparison.
+
 **Stopping:** press Ctrl+C in both terminals. On Windows, check that no `node`/`postgres` processes from this folder remain if a terminal was closed abruptly (see `CLAUDE.md` → "Windows process hygiene").
 
 ## Checks

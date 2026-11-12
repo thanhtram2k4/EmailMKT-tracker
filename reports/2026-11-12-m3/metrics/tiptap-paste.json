@@ -1,0 +1,8 @@
+{
+  "resultHtml": "<p><strong>Đậm từ Docs</strong><em> và nghiêng</em> chữ đỏ <a target=\"_blank\" rel=\"noopener noreferrer nofollow\" href=\"https://docs.example/x\"><u>liên kết</u></a></p>",
+  "keptBold": true,
+  "keptItalic": true,
+  "keptLink": true,
+  "droppedColour": true,
+  "droppedFontStyles": true
+}

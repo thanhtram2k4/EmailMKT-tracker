@@ -1,0 +1,37 @@
+
+ RUN  v5.1.0 D:/AI Studio/Email MKT Tracker
+
+ ❯ |tooling| tests/tooling/process-cleanup.test.ts (3 tests | 1 failed) 2578ms
+   ❯ owned-process cleanup (3)
+     × stops an owned process and its grandchild, and leaves an unrelated process running 1175ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  |tooling| tests/tooling/process-cleanup.test.ts > owned-process cleanup > stops an owned process and its grandchild, and leaves an unrelated process running
+AssertionError: expected [ 9940 ] to deeply equal ArrayContaining [9940, 25648]
+
+- Expected
++ Received
+
+- ArrayContaining [
++ [
+    9940,
+-   25648,
+  ]
+
+ ❯ tests/tooling/process-cleanup.test.ts:45:24
+     43|
+     44|     const r = await cleanupOwned();
+     45|     expect(r.targeted).toEqual(expect.arrayContaining([parent.pid, gra…
+       |                        ^
+     46|     expect(r.targeted).not.toContain(bystander.pid);
+     47|     expect(r.targeted).not.toContain(process.pid); // never the test r…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 2 passed (3)
+   Start at  12:01:40
+   Duration  3.49s (tests 93%, transform 4%, import 2%, worker 1%)
+

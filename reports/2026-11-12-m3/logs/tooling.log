@@ -1,0 +1,16 @@
+
+ RUN  v5.1.0 D:/AI Studio/Email MKT Tracker
+
+ ✓ |tooling| tests/tooling/exit-code.test.ts > test-runner exit codes (with the project's embedded-postgres helper) > a deliberately failing test exits non-zero 747ms
+ ✓ |tooling| tests/tooling/exit-code.test.ts > test-runner exit codes (with the project's embedded-postgres helper) > a passing test exits 0 645ms
+ ✓ |tooling| tests/tooling/exit-code.test.ts > test-runner exit codes (with the project's embedded-postgres helper) > with a real Postgres started and stopped: failing → non-zero, passing → 0 (no 'done is not a function') 15148ms
+ ✓ |tooling| tests/tooling/exit-code.test.ts > characterization of the upstream defect (documents why the workaround exists) > importing embedded-postgres directly makes a FAILING run exit 0 723ms
+ ✓ |tooling| tests/tooling/process-cleanup.test.ts > owned-process cleanup > stops an owned process and its grandchild, and leaves an unrelated process running 1368ms
+ ✓ |tooling| tests/tooling/process-cleanup.test.ts > owned-process cleanup > does nothing when the run owns no processes 5ms
+ ✓ |tooling| tests/tooling/process-cleanup.test.ts > owned-process cleanup > only targets the roots it is given (another owned tree is left alone) 2192ms
+
+ Test Files  2 passed (2)
+      Tests  7 passed (7)
+   Start at  12:38:33
+   Duration  21.28s (tests 100%)
+

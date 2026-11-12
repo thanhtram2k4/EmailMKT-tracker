@@ -140,8 +140,27 @@ rows.push({
   notes: "No Notion test database or connection token yet (see docs/NOTION_SETUP.md); live Notion access not authorized under M2.",
 });
 
+// S4 (partial, M3) — template import + preview as a recipient with a missing greeting name.
+if (process.env.DATABASE_URL && process.env.NOTION_MODE === "mock") {
+  await check("S4-m3", "Import SYNTHETIC template A; preview for a recipient without greeting name uses the fallback; no unresolved fields", "MOCK", async () => {
+    const fsMod = await import("node:fs");
+    const { getDb, closeDb } = await import("../src/lib/db/client.ts");
+    const { importTemplate } = await import("../src/lib/templates/service.ts");
+    const { renderForRecipient, SAMPLE_RECIPIENTS } = await import("../src/lib/templates/merge.ts");
+    try {
+      const html = fsMod.readFileSync("fixtures/email-templates/synthetic-a-newsletter.html", "utf8");
+      const r = await importTemplate(getDb(), { name: "smoke A", html, sourceKind: "fixture", actor: "smoke" });
+      const out = renderForRecipient(r.version.html, SAMPLE_RECIPIENTS.find((s) => s.id === "sample-no-greeting")!.data);
+      const ok = out.errors.length === 0 && out.missingWithoutFallback.length === 0 && out.html.includes("Kính gửi Quý khách") && !/\{\{/.test(out.html);
+      return { result: ok ? "PASS" : "FAIL", notes: `errors=${out.errors.length}; missing without fallback=${out.missingWithoutFallback.join(",") || "none"}; fallback used=${out.html.includes("Kính gửi Quý khách")}` };
+    } finally {
+      await closeDb();
+    }
+  });
+}
+
 for (const [id, s, ms] of [
-  ["S4", "Preview as recipient with no unresolved fields", "M4"],
+  ["S4", "Preview as recipient with no unresolved fields (full M4 flow with real CRM recipients)", "M4"],
   ["S5", "Test send → simulator Delivery event; campaign metrics unchanged", "M4"],
   ["S6", "Send now to 3 simulator addresses → Sent 3 / Delivered 2 / Bounced 1", "M5"],
   ["S7", "Scheduled send (+3 min, Asia/Ho_Chi_Minh) executes with browser closed", "M6"],

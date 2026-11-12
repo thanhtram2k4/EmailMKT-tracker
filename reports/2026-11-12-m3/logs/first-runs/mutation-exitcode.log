@@ -1,0 +1,27 @@
+
+ RUN  v5.1.0 D:/AI Studio/Email MKT Tracker
+
+ ❯ |tooling| tests/tooling/exit-code.test.ts (4 tests | 1 failed | 3 skipped) 3600ms
+   ❯ test-runner exit codes (with the project's embedded-postgres helper) (3)
+     × a deliberately failing test exits non-zero 3594ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  |tooling| tests/tooling/exit-code.test.ts > test-runner exit codes (with the project's embedded-postgres helper) > a deliberately failing test exits non-zero
+AssertionError: expected +0 not to be +0 // Object.is equality
+ ❯ tests/tooling/exit-code.test.ts:26:24
+     24|     const r = runFixture({ FIXTURE_MODE: "fail", FIXTURE_SETUP: "fixed…
+     25|     expect(r.out).toMatch(/1 failed/);
+     26|     expect(r.code).not.toBe(0);
+       |                        ^
+     27|   });
+     28|
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 3 skipped (4)
+   Start at  12:01:13
+   Duration  4.89s (tests 94%, worker 3%, import 2%, transform 1%)
+

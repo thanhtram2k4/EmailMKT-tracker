@@ -1,0 +1,130 @@
+{
+  "input": "synthetic-a",
+  "kind": "fixture",
+  "regions": 14,
+  "sanitize": [
+    "Removed elements: none",
+    "Removed event-handler attributes: 0",
+    "Blocked URLs: none",
+    "Meta refresh removed: 0",
+    "Unsafe CSS removed: 0 style attribute(s), 0 style block(s)",
+    "Outlook conditional comments kept: 6 (dropped as unsafe: 0)",
+    "Ordinary HTML comments removed: 1"
+  ],
+  "findings": [
+    "error image: relative URL — will not load in an email; must be re-hosted at an absolute https URL",
+    "error image: relative URL — will not load in an email; must be re-hosted at an absolute https URL",
+    "error image: relative URL — will not load in an email; must be re-hosted at an absolute https URL",
+    "error image: relative URL — will not load in an email; must be re-hosted at an absolute https URL",
+    "info link: contains a merge field",
+    "info link: merge-field link (resolved at send time)",
+    "info structure: 6 Outlook conditional comment marker(s) preserved (not rendered by browsers)",
+    "info structure: Responsive @media rules present in <style> (some clients ignore <style>)"
+  ],
+  "mergeFieldsV1": [
+    "{{ company | default: \"quý công ty\" }}",
+    "{{ company | default: \"quý khách hàng\" }}",
+    "{{ email | url_encode }}",
+    "{{ email | url_encode }}",
+    "{{ greeting_name | default: \"Quý khách\" }}",
+    "{{ unsubscribe_url }}"
+  ],
+  "msoMarkersV1": 6,
+  "bytesV1": 6114,
+  "unsupportedInlineWarning": "Editing this block will drop formatting the rich-text editor cannot keep: inline style on <span>: color:#1f5f8b;font-weight:bold",
+  "editsMade": [
+    "text",
+    "image",
+    "button",
+    "link"
+  ],
+  "mergeFieldsV2": [
+    "{{ company | default: \"quý công ty\" }}",
+    "{{ company | default: \"quý khách hàng\" }}",
+    "{{ email | url_encode }}",
+    "{{ email | url_encode }}",
+    "{{ greeting_name | default: \"Quý khách\" }}",
+    "{{ greeting_name | default: \"Quý khách\" }}",
+    "{{ unsubscribe_url }}"
+  ],
+  "inlineStyledSpansV1": 1,
+  "inlineStyledSpansV2": 0,
+  "msoMarkersV2": 6,
+  "bytesV2": 6125,
+  "plainTextChars": 797,
+  "missingWithoutFallback_noGreeting": "✓ No missing values without fallback for this recipient",
+  "missingWithoutFallback_noCompany": "✓ No missing values without fallback for this recipient",
+  "brokenImagesInBrowserPreview": "All images loaded in this browser preview",
+  "rendering": {
+    "v1_vs_v2_640": {
+      "changedPixels": 6890,
+      "ratio": 0.0118,
+      "heightA": 911,
+      "heightB": 911
+    },
+    "raw_vs_v1_640": {
+      "changedPixels": 0,
+      "ratio": 0,
+      "heightA": 943,
+      "heightB": 943
+    },
+    "v1_vs_v2_375": {
+      "changedPixels": 32639,
+      "ratio": 0.0774,
+      "heightA": 1124,
+      "heightB": 1148
+    },
+    "raw_vs_v1_375": {
+      "changedPixels": 0,
+      "ratio": 0,
+      "heightA": 1180,
+      "heightB": 1180
+    }
+  },
+  "grapesjs": {
+    "bytes": 10826,
+    "msoMarkers": 6,
+    "msoMarkersExpected": 6,
+    "vmlPresent": true,
+    "vmlExpected": true,
+    "mergeFieldsSame": true,
+    "mergeFieldsExported": [
+      "{{ company | default: \"quý công ty\" }}",
+      "{{ company | default: \"quý khách hàng\" }}",
+      "{{ email | url_encode }}",
+      "{{ email | url_encode }}",
+      "{{ greeting_name | default: \"Quý khách\" }}",
+      "{{ unsubscribe_url }}"
+    ],
+    "bodyStyleTagsInBody": 0,
+    "idAttributesAdded": 24,
+    "classAttributes": 9,
+    "classAttributesV1": 9,
+    "roleAttributes": 4,
+    "roleAttributesV1": 4,
+    "rendering": {
+      "v1_vs_grapesjs_noedit_640": {
+        "changedPixels": 0,
+        "ratio": 0,
+        "heightA": 943,
+        "heightB": 943
+      },
+      "v1_vs_grapesjs_noedit_375": {
+        "changedPixels": 12789,
+        "ratio": 0.0291,
+        "heightA": 1180,
+        "heightB": 1170
+      }
+    },
+    "savedContainsEdit": true,
+    "savedMergeFields": [
+      "{{ company | default: \"quý công ty\" }}",
+      "{{ company | default: \"quý khách hàng\" }}",
+      "{{ email | url_encode }}",
+      "{{ email | url_encode }}",
+      "{{ greeting_name | default: \"Quý khách\" }}",
+      "{{ unsubscribe_url }}"
+    ],
+    "savedMsoMarkers": 6
+  }
+}

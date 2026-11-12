@@ -1,0 +1,59 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:v="urn:schemas-microsoft-com:vml" xmlns:o="urn:schemas-microsoft-com:office:office" lang="vi">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="x-apple-disable-message-reformatting">
+<title>Bản tin tháng 11 – Công ty An Phát (mẫu tổng hợp)</title>
+<!--[if mso]>
+<xml><o:OfficeDocumentSettings><o:AllowPNG/><o:PixelsPerInch>96</o:PixelsPerInch></o:OfficeDocumentSettings></xml>
+<style type="text/css">table, td { border-collapse: collapse; mso-table-lspace: 0pt; mso-table-rspace: 0pt; }</style>
+<![endif]-->
+<style type="text/css">
+  body { margin: 0; padding: 0; background-color: #f2f4f7; }
+  .container { width: 600px; }
+  .btn a { text-decoration: none; }
+  @media only screen and (max-width: 620px) {
+    .container { width: 100% !important; }
+    .stack { display: block !important; width: 100% !important; }
+    .hero img { width: 100% !important; height: auto !important; }
+    .pad { padding-left: 16px !important; padding-right: 16px !important; }
+  }
+</style>
+</head>
+<body style="margin:0;padding:0;background-color:#f2f4f7">
+<body style="box-sizing: border-box; margin: 0; margin-top: 0px; margin-right: 0px; margin-bottom: 0px; margin-left: 0px; padding-top: 0px; padding-right: 0px; padding-bottom: 0px; padding-left: 0px; background-color: rgb(242, 244, 247);"><div id="ieep" style="box-sizing: border-box; display: none; max-height: 0px; overflow-x: hidden; overflow-y: hidden;">Ưu đãi tháng 11 dành riêng cho {{ company | default: "quý khách hàng" }} – xem ngay.</div><table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" id="i0ik" style="box-sizing: border-box; background-color: rgb(242, 244, 247);" bgcolor="rgb(242, 244, 247)"><tbody style="box-sizing: border-box;"><tr style="box-sizing: border-box;"><td align="center" id="i6o9" style="box-sizing: border-box; padding-top: 24px; padding-right: 0px; padding-bottom: 24px; padding-left: 0px;"><!--[if mso]><table role="presentation" width="600" cellpadding="0" cellspacing="0" border="0"><tr><td><![endif]--><table role="presentation" width="600" cellpadding="0" cellspacing="0" border="0" class="container" id="itjir" style="box-sizing: border-box; width: 600px; max-width: 600px; background-color: rgb(255, 255, 255); border-top-left-radius: 8px; border-top-right-radius: 8px; border-bottom-right-radius: 8px; border-bottom-left-radius: 8px;" bgcolor="rgb(255, 255, 255)"><tbody style="box-sizing: border-box;"><tr style="box-sizing: border-box;"><td class="pad" id="i56kc" style="box-sizing: border-box; padding-top: 24px; padding-right: 32px; padding-bottom: 8px; padding-left: 32px; font-family: Arial, Helvetica, sans-serif;"><img src="/fixtures/email/logo.png" width="140" height="40" alt="An Phát" id="ixutt" style="box-sizing: border-box; display: block; border-top-width: 0px; border-right-width: 0px; border-bottom-width: 0px; border-left-width: 0px; border-top-style: none; border-right-style: none; border-bottom-style: none; border-left-style: none; border-top-color: currentcolor; border-right-color: currentcolor; border-bottom-color: currentcolor; border-left-color: currentcolor; border-image-source: none; border-image-slice: 100%; border-image-width: 1; border-image-outset: 0; border-image-repeat: stretch;"></td></tr><tr style="box-sizing: border-box;"><td class="hero" id="iczhj" style="box-sizing: border-box; padding-top: 0px; padding-right: 0px; padding-bottom: 0px; padding-left: 0px;"><img src="/fixtures/email/hero.png" width="600" height="240" alt="Ưu đãi tháng 11" id="icsek" style="box-sizing: border-box; display: block; border-top-width: 0px; border-right-width: 0px; border-bottom-width: 0px; border-left-width: 0px; border-top-style: none; border-right-style: none; border-bottom-style: none; border-left-style: none; border-top-color: currentcolor; border-right-color: currentcolor; border-bottom-color: currentcolor; border-left-color: currentcolor; border-image-source: none; border-image-slice: 100%; border-image-width: 1; border-image-outset: 0; border-image-repeat: stretch; width: 600px; height: auto;"></td></tr><tr style="box-sizing: border-box;"><td class="pad" id="i65et" style="box-sizing: border-box; padding-top: 24px; padding-right: 32px; padding-bottom: 0px; padding-left: 32px; font-family: Arial, Helvetica, sans-serif; font-size: 24px; line-height: 32px; color: rgb(28, 28, 26); font-weight: bold;">
+            Ưu đãi cuối năm dành cho {{ company | default: "quý công ty" }}
+          </td></tr><tr style="box-sizing: border-box;"><td class="pad" id="isdag" style="box-sizing: border-box; padding-top: 12px; padding-right: 32px; padding-bottom: 0px; padding-left: 32px; font-family: Arial, Helvetica, sans-serif; font-size: 16px; line-height: 24px; color: rgb(58, 58, 55);">
+            Kính gửi {{ greeting_name | default: "Quý khách" }},<br style="box-sizing: border-box;">
+            Cảm ơn quý khách đã đồng hành cùng <strong style="box-sizing: border-box;">An Phát</strong> trong năm 2026. Từ nay đến <em style="box-sizing: border-box;">30/11</em>, đơn hàng từ 2 triệu đồng được <span id="i0y4i" style="box-sizing: border-box; color: rgb(31, 95, 139); font-weight: bold;">giảm 15%</span>.
+          </td></tr><tr style="box-sizing: border-box;"><td align="left" class="pad btn" id="igur8" style="box-sizing: border-box; padding-top: 24px; padding-right: 32px; padding-bottom: 24px; padding-left: 32px;"><!--[if mso]>
+            <v:roundrect xmlns:v="urn:schemas-microsoft-com:vml" href="https://anphat.example/uu-dai?ma={{ email | url_encode }}" style="height:44px;v-text-anchor:middle;width:220px;" arcsize="12%" stroke="f" fillcolor="#1f5f8b">
+              <center style="color:#ffffff;font-family:Arial,sans-serif;font-size:16px;font-weight:bold;">Xem ưu đãi</center>
+            </v:roundrect>
+            <![endif]--><!--[if !mso]><!-- --><a href="https://anphat.example/uu-dai?ma={{ email | url_encode }}" id="ih665" style="box-sizing: border-box; display: inline-block; background-color: rgb(31, 95, 139); color: rgb(255, 255, 255); font-family: Arial, sans-serif; font-size: 16px; font-weight: bold; line-height: 44px; padding-top: 0px; padding-right: 28px; padding-bottom: 0px; padding-left: 28px; border-top-left-radius: 6px; border-top-right-radius: 6px; border-bottom-right-radius: 6px; border-bottom-left-radius: 6px; text-decoration-line: none; text-decoration-thickness: initial; text-decoration-style: initial; text-decoration-color: initial;">Xem ưu đãi</a><!--<![endif]--></td></tr><tr style="box-sizing: border-box;"><td id="ijyi6" style="box-sizing: border-box; padding-top: 0px; padding-right: 32px; padding-bottom: 0px; padding-left: 32px;"><table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="box-sizing: border-box;"><tbody style="box-sizing: border-box;"><tr style="box-sizing: border-box;"><td width="50%" valign="top" class="stack" id="in4p6" style="box-sizing: border-box; padding-top: 0px; padding-right: 8px; padding-bottom: 16px; padding-left: 0px; font-family: Arial, sans-serif; font-size: 14px; line-height: 20px; color: rgb(58, 58, 55);"><img src="/fixtures/email/product-1.png" width="260" height="160" alt="Máy lọc nước AP-200" id="iq51p" style="box-sizing: border-box; display: block; border-top-width: 0px; border-right-width: 0px; border-bottom-width: 0px; border-left-width: 0px; border-top-style: none; border-right-style: none; border-bottom-style: none; border-left-style: none; border-top-color: currentcolor; border-right-color: currentcolor; border-bottom-color: currentcolor; border-left-color: currentcolor; border-image-source: none; border-image-slice: 100%; border-image-width: 1; border-image-outset: 0; border-image-repeat: stretch; width: 100%; height: auto;"><p id="iez04" style="box-sizing: border-box; margin-top: 8px; margin-right: 0px; margin-bottom: 0px; margin-left: 0px;"><a href="https://anphat.example/san-pham/ap-200" id="ib3ik" style="box-sizing: border-box; color: rgb(31, 95, 139);">Máy lọc nước AP-200</a> – nay chỉ còn 3.990.000 ₫.</p></td><td width="50%" valign="top" class="stack" id="i7kxf" style="box-sizing: border-box; padding-top: 0px; padding-right: 0px; padding-bottom: 16px; padding-left: 8px; font-family: Arial, sans-serif; font-size: 14px; line-height: 20px; color: rgb(58, 58, 55);"><img src="/fixtures/email/product-2.png" width="260" height="160" alt="Bộ lõi lọc thay thế" id="ihb6x" style="box-sizing: border-box; display: block; border-top-width: 0px; border-right-width: 0px; border-bottom-width: 0px; border-left-width: 0px; border-top-style: none; border-right-style: none; border-bottom-style: none; border-left-style: none; border-top-color: currentcolor; border-right-color: currentcolor; border-bottom-color: currentcolor; border-left-color: currentcolor; border-image-source: none; border-image-slice: 100%; border-image-width: 1; border-image-outset: 0; border-image-repeat: stretch; width: 100%; height: auto;"><p id="ib7iy" style="box-sizing: border-box; margin-top: 8px; margin-right: 0px; margin-bottom: 0px; margin-left: 0px;"><a href="https://anphat.example/san-pham/loi-loc" id="iksql" style="box-sizing: border-box; color: rgb(31, 95, 139);">Bộ lõi lọc thay thế</a> – mua 2 tặng 1.</p></td></tr></tbody></table></td></tr><tr style="box-sizing: border-box;"><td class="pad" id="i2ueh" style="box-sizing: border-box; padding-top: 16px; padding-right: 32px; padding-bottom: 24px; padding-left: 32px; font-family: Arial, sans-serif; font-size: 12px; line-height: 18px; color: rgb(107, 107, 102); border-top-width: 1px; border-top-style: solid; border-top-color: rgb(228, 227, 222);">
+            Công ty An Phát (mẫu tổng hợp) · 123 Đường Mẫu, Quận 1, TP. Hồ Chí Minh · 028 0000 0000 · l***@anphat.example<br style="box-sizing: border-box;">
+            Bạn nhận email này vì đã đăng ký nhận tin. <a href="{{ unsubscribe_url }}" id="iz3n9" style="box-sizing: border-box; color: rgb(107, 107, 102);">Hủy đăng ký</a></td></tr></tbody></table><!--[if mso]></td></tr></table><![endif]--></td></tr></tbody></table></body><style>
+@media only screen and (max-width: 620px) {
+  .container {
+    width: 100% !important;
+  }
+
+  .stack {
+    display: block !important;
+    width: 100% !important;
+  }
+
+  .hero img {
+    width: 100% !important;
+    height: auto !important;
+  }
+
+  .pad {
+    padding-left: 16px !important;
+    padding-right: 16px !important;
+  }
+}
+</style>
+</body>
+</html>

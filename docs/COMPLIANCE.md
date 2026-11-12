@@ -20,6 +20,8 @@ As a result, most of the Decree 91 article text below is **SECONDARY** (hethongp
 These go beyond the technical `SEND_MODE`, admin and approval controls in CLAUDE.md.
 - [ ] Counsel has confirmed the applicable rules (questions in §5) and the answers are recorded in this file.
 - [ ] A lawful consent basis exists for every contact who will be emailed (§1.2, §3.2), and consent evidence is stored per contact.
+  - **Policy confirmed by the user on 2026-11-12:** contacts with *unknown* consent are ineligible for marketing sends by default (`crm.require_marketing_consent=true`), and remain manageable in the CRM.
+  - This is an internal safety default. It is not a legal conclusion; counsel's answers (§5) still decide which evidence counts as consent.
 - [ ] Every advertising email carries the subject label, sender identity block and opt-out block (§1.3–§1.5), and they are verified on a test send.
 - [ ] Opt-outs are honoured immediately, and the refusal confirmation email is in place (§1.5).
 - [ ] The frequency cap is enforced: at most 3 advertising emails per address per 24 hours (§1.4).

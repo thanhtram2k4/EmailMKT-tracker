@@ -29,6 +29,20 @@
       "when": 1794420412189,
       "tag": "0003_crm_append_only_guards",
       "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1794460577820,
+      "tag": "0004_templates",
+      "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1794460580342,
+      "tag": "0005_template_versions_immutable",
+      "breakpoints": true
     }
   ]
 }

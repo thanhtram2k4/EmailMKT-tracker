@@ -1,0 +1,5 @@
+{"level":"info","time":"2026-11-12T05:41:13.039Z","service":"worker","env":"test","build":"src-071125b4e5f2","env":"test","send_mode":"disabled","msg":"starting worker"}
+{"level":"warn","time":"2026-11-12T05:41:13.219Z","service":"worker","env":"test","build":"src-071125b4e5f2","worker_id":"worker-Thanh-Tram-4724-5a506923","gw":{},"msg":"Executable file detection not yet supported on 'win32'."}
+{"level":"info","time":"2026-11-12T05:41:13.267Z","service":"worker","env":"test","build":"src-071125b4e5f2","worker_id":"worker-Thanh-Tram-4724-5a506923","concurrency":2,"msg":"worker started"}
+{"level":"info","time":"2026-11-12T05:41:13.267Z","service":"worker","env":"test","build":"src-071125b4e5f2","notion_mode":"mock","crm_schedules":true,"msg":"worker schedules configured"}
+{"level":"info","time":"2026-11-12T05:41:13.306Z","service":"worker","env":"test","build":"src-071125b4e5f2","worker_id":"worker-Thanh-Tram-4724-5a506923","gw":{},"msg":"Worker connected and looking for jobs... (task names: 'system_probe', 'crm_sync', 'notion_outbox_flush')"}

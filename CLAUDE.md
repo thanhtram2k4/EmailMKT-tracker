@@ -12,8 +12,10 @@ This is an internal email-marketing app for a single company. Campaigns go out t
 
 ## Status
 - **M1 (foundation) is implemented** and checkpointed as Git tag `m1-checkpoint`. See `reports/2026-11-12-m1/report.md`.
-- **M2 (Notion CRM) is implemented with mocks and synthetic data only.** See `reports/2026-11-12-m2/report.md`.
-- **M3 and later are not authorized yet.**
+- **M2 (Notion CRM) is implemented with mocks and synthetic data only.** Tag `m2-checkpoint`. See `reports/2026-11-12-m2/report.md`.
+- **M3 (editor trial) is done.** Tag `m3-checkpoint`, branch `m3-editor-trial`. See `reports/2026-11-12-m3/report.md` (Vietnamese).
+  - The editor recommendation is **provisional**: only one unconfirmed real template was available, and no real email client was tested.
+- **M4 and later are not authorized yet.**
 - **Verified only locally:** Google OAuth, staging, CI and live Notion are unverified.
 
 Ask the user explicitly before any of these:
@@ -27,7 +29,9 @@ Ask the user explicitly before any of these:
 Approving a plan or a document does not count as permission for any of them.
 
 ## Language
-Reply to the user in **English**, because they asked for it; this overrides the brief's request for Vietnamese. The app's UI and email content may be in Vietnamese.
+- **Replies:** in **Vietnamese**. That is the user's latest instruction (M3, 2026-11-12); M1–M2 replies were in English at their request. Follow the most recent explicit instruction.
+- **Repository docs:** stay in English. Test reports follow the reply language.
+- **App:** UI and email content may be in Vietnamese.
 
 ## Stack
 TypeScript on Node 22.18+ (developed on Node 24).
@@ -49,7 +53,8 @@ TypeScript on Node 22.18+ (developed on Node 24).
 | Migrate / staff | `npm run db:migrate` · `npm run staff:add -- admin@example.com admin` |
 | Run | `npm run dev:all` (web on :3000 and worker) · `npm run dev:crm` (plus the mock Notion server on :4010) |
 | Mock Notion control | `npm run notion:mock:ctl -- list` · `set <key> subscription=Subscribed` · `trash <key>` · `fault 503 3` |
-| Checks | `npm run lint` · `npm run typecheck` · `npm run test:unit` · `npm run test:integration` |
+| Checks | `npm run lint` · `npm run typecheck` · `npm run test:unit` · `npm run test:integration` · `npm run test:tooling` |
+| Editor trial | `npm run e2e -- tests/e2e/editor-trial.spec.ts` (results in `test-results/editor-trial/`) · `npx tsx scripts/editor-trial/probe.ts` (counts only) |
 | E2E / smoke | `npm run e2e` · `npm run smoke:local` (each starts an isolated stack, runs, then tears it down) |
 | New migration | edit `src/lib/db/schema.ts`, then `npm run db:generate` |
 
@@ -92,6 +97,21 @@ TypeScript on Node 22.18+ (developed on Node 24).
   - Other 5xx are retried only for reads and idempotent property writes.
   - Creates are never retried.
 - **Tests use `scripts/notion-mock/` only.** All synthetic addresses are on reserved domains (`example.com/org/net`, `*.example`).
+
+## Template rules (M3; do not break)
+- **Structure-preserving editing.** Parse and serialize with cheerio in htmlparser2 mode (`src/lib/templates/html-doc.ts`); never use an HTML5 tree builder (it inserts `<tbody>`). An edit changes only the targeted node.
+- **Sanitize on every import and save** (`src/lib/templates/sanitize.ts`).
+  - Keep DOCTYPE, tables, inline styles, `<style>`/`@media` and MSO conditional comments.
+  - HTML between `<!--[if !mso]><!-->` and `<!--<![endif]-->` **must still be sanitized**: it is visible in non-Outlook clients.
+- **Merge fields:** Liquid **output only** (`{{ field | filter }}`), with allowlisted fields and filters, and HTML-escaped values. Liquid tags (`{% %}`) are never executed (file access).
+- **Plain-text part:** never change letter case.
+- **Preview** runs in a sandboxed iframe with CSP `script-src 'none'`. Editor annotations (`data-emt-id`) never reach stored or exported HTML.
+- **Template versions are immutable** (DB trigger). Saving always creates a new version.
+- **Real customer templates:** keep inputs under `.local/` (git-ignored). Never commit their content or screenshots.
+
+## Test tooling rules
+- Spawn long-running test processes with `spawnOwned` (`scripts/lib/owned-processes.ts`). Clean up with `cleanupOwned`, which targets only this run's PIDs and their descendants. Never kill by name or port.
+- Exit codes are regression-tested (`npm run test:tooling`). A deliberately failing test must exit non-zero.
 
 ## Windows process hygiene
 - Stopping a background task here does **not** stop its child processes (next, worker, postgres, mock server).

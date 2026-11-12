@@ -7,7 +7,8 @@
 import { getSessionCookie } from "better-auth/cookies";
 import { NextResponse, type NextRequest } from "next/server";
 
-const PUBLIC_PREFIXES = ["/sign-in", "/access-denied", "/healthz", "/api/auth", "/api/dev", "/_next", "/favicon.ico"];
+// /fixtures: SYNTHETIC demo images used by the M3 template fixtures (public, no data).
+const PUBLIC_PREFIXES = ["/sign-in", "/access-denied", "/healthz", "/api/auth", "/api/dev", "/_next", "/favicon.ico", "/fixtures"];
 
 export function proxy(request: NextRequest) {
   const requestId = request.headers.get("x-request-id") || crypto.randomUUID();

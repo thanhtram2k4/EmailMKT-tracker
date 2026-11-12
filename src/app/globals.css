@@ -79,3 +79,22 @@ input[type="text"], input:not([type]), input[type="password"], input[type="date"
 .group { border-top: 1px solid var(--border); padding-top: 12px; margin-top: 12px; }
 ul.plain { margin: 0; padding-left: 18px; }
 h3 { font-size: 15px; margin: 16px 0 4px; }
+
+/* M3: template editor trial */
+.grid2 { display: grid; grid-template-columns: repeat(auto-fit, minmax(420px, 1fr)); gap: 16px; }
+.editor-toolbar { justify-content: space-between; margin-bottom: 12px; }
+.editor-body { display: flex; gap: 16px; align-items: flex-start; flex-wrap: wrap; }
+.frame-wrap { flex: 0 0 auto; max-width: 100%; }
+.frame-wrap iframe { display: block; max-width: 100%; }
+.regions { flex: 1 1 320px; min-width: 280px; }
+.region-list { max-height: 420px; overflow: auto; }
+.region-list li { margin: 2px 0; }
+.linkish { background: none; border: 0; padding: 4px 6px; text-align: left; cursor: pointer; color: var(--text); font: inherit; border-radius: 6px; width: 100%; }
+.linkish:hover, .linkish.active { background: var(--bg); }
+.region-form { display: flex; flex-direction: column; gap: 8px; }
+.region-form input { width: 100%; }
+.rte .ProseMirror { min-height: 90px; border: 1px solid var(--border); border-radius: 8px; padding: 8px 10px; background: var(--bg); outline: none; }
+.rte-toolbar { margin-bottom: 6px; }
+.small-btn { padding: 2px 10px; }
+.small { font-size: 13px; }
+.findings li { margin: 6px 0; }

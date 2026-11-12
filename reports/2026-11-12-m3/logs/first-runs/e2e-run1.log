@@ -1,0 +1,159 @@
+
+> email-mkt-tracker@0.1.0 e2e
+> tsx scripts/local-stack.ts --log-dir .local/logs/e2e -- playwright test
+
+[core] WARNING: Executable file detection not yet supported on 'win32'.
+Your pool doesn't have all of the error handlers! See: https://err.red/wpeh?v=0.18.0&method=connect
+migrations applied (app + graphile_worker)
+[stack] postgres ready on 54332; logs in D:\AI Studio\Email MKT Tracker\.local\logs\e2e
+[stack] building web app (next build)…
+[stack] web + worker healthy at http://localhost:3100
+
+Running 31 tests using 1 worker
+
+  ok  1 [chromium] › tests\e2e\auth.spec.ts:20:1 › unauthenticated visitors are redirected to sign-in (989ms)
+  ok  2 [chromium] › tests\e2e\auth.spec.ts:26:1 › allowlisted admin signs in, sees role and admin page, signs out (1.9s)
+  ok  3 [chromium] › tests\e2e\auth.spec.ts:46:1 › allowlisted member signs in but cannot open the admin page (759ms)
+  ok  4 [chromium] › tests\e2e\auth.spec.ts:60:3 › s***@example.com is rejected (ACCESS_DENIED_NOT_ALLOWLISTED) (776ms)
+  ok  5 [chromium] › tests\e2e\auth.spec.ts:60:3 › o***@example.net is rejected (ACCESS_DENIED_WRONG_DOMAIN) (610ms)
+  ok  6 [chromium] › tests\e2e\auth.spec.ts:60:3 › r***@example.com is rejected (ACCESS_DENIED_DISABLED) (589ms)
+  ok  7 [chromium] › tests\e2e\auth.spec.ts:70:1 › revoking a signed-in member ends the session and blocks the next sign-in (2.0s)
+  ok  8 [chromium] › tests\e2e\auth.spec.ts:90:1 › healthz reports database and worker (47ms)
+  ok  9 [chromium] › tests\e2e\crm.spec.ts:44:3 › CRM with mock Notion (synthetic data) › admin connects the mock Notion database and reviews the mapping (3.2s)
+  ok 10 [chromium] › tests\e2e\crm.spec.ts:63:3 › CRM with mock Notion (synthetic data) › first sync imports the synthetic contacts with issues flagged (3.5s)
+  ok 11 [chromium] › tests\e2e\crm.spec.ts:85:3 › CRM with mock Notion (synthetic data) › data issues: duplicates can be resolved by choosing a primary (1.2s)
+  ok 12 [chromium] › tests\e2e\crm.spec.ts:99:3 › CRM with mock Notion (synthetic data) › consent: imported contacts are unknown; a grant needs evidence and is recorded by staff (1.3s)
+  ok 13 [chromium] › tests\e2e\crm.spec.ts:121:3 › CRM with mock Notion (synthetic data) › a 'resubscribe' in Notion never removes the suppression and is corrected in Notion (1.8s)
+  ok 14 [chromium] › tests\e2e\crm.spec.ts:138:3 › CRM with mock Notion (synthetic data) › a repeated full sync creates nothing new (1.7s)
+  ok 15 [chromium] › tests\e2e\crm.spec.ts:149:3 › CRM with mock Notion (synthetic data) › members can read contacts but cannot change settings or consent (1.1s)
+  x  16 [chromium] › tests\e2e\editor-trial.spec.ts:84:5 › SYNTHETIC A › import, sanitize report, regions, checks (1.3s)
+  -  17 [chromium] › tests\e2e\editor-trial.spec.ts:111:5 › SYNTHETIC A › edit text, image, button and link; save; reopen; export
+  -  18 [chromium] › tests\e2e\editor-trial.spec.ts:181:5 › SYNTHETIC A › recipient previews and missing-name fallbacks
+  -  19 [chromium] › tests\e2e\editor-trial.spec.ts:200:5 › SYNTHETIC A › responsive browser renderings and import fidelity (Chromium only)
+  -  20 [chromium] › tests\e2e\editor-trial.spec.ts:217:5 › SYNTHETIC A › GrapesJS (candidate b): no-edit export fidelity, then an edit + save
+  x  21 [chromium] › tests\e2e\editor-trial.spec.ts:84:5 › SYNTHETIC B › import, sanitize report, regions, checks (1.4s)
+  -  22 [chromium] › tests\e2e\editor-trial.spec.ts:111:5 › SYNTHETIC B › edit text, image, button and link; save; reopen; export
+  -  23 [chromium] › tests\e2e\editor-trial.spec.ts:181:5 › SYNTHETIC B › recipient previews and missing-name fallbacks
+  -  24 [chromium] › tests\e2e\editor-trial.spec.ts:200:5 › SYNTHETIC B › responsive browser renderings and import fidelity (Chromium only)
+  -  25 [chromium] › tests\e2e\editor-trial.spec.ts:217:5 › SYNTHETIC B › GrapesJS (candidate b): no-edit export fidelity, then an edit + save
+  x  26 [chromium] › tests\e2e\editor-trial.spec.ts:84:5 › REAL CANDIDATE 1 › import, sanitize report, regions, checks (1.6s)
+  -  27 [chromium] › tests\e2e\editor-trial.spec.ts:111:5 › REAL CANDIDATE 1 › edit text, image, button and link; save; reopen; export
+  -  28 [chromium] › tests\e2e\editor-trial.spec.ts:181:5 › REAL CANDIDATE 1 › recipient previews and missing-name fallbacks
+  -  29 [chromium] › tests\e2e\editor-trial.spec.ts:200:5 › REAL CANDIDATE 1 › responsive browser renderings and import fidelity (Chromium only)
+  -  30 [chromium] › tests\e2e\editor-trial.spec.ts:217:5 › REAL CANDIDATE 1 › GrapesJS (candidate b): no-edit export fidelity, then an edit + save
+  ok 31 [chromium] › tests\e2e\editor-trial.spec.ts:265:1 › TipTap paste (candidate c): formatted text from a Google-Docs-like clipboard keeps bold/italic/links, drops styles (1.5s)
+
+
+  1) [chromium] › tests\e2e\editor-trial.spec.ts:84:5 › SYNTHETIC A › import, sanitize report, regions, checks 
+
+    Error: locator.getAttribute: Error: strict mode violation: getByTestId('versions-panel').getByRole('link', { name: 'v1' }) resolved to 2 elements:
+        1) <a href="/templates/19dda299-93ec-4afd-977f-7d94d0ccce14?v=1db2a01a-d562-47a1-ac4b-b70d2dfc0c89">v1</a> aka getByRole('link', { name: 'v1', exact: true })
+        2) <a class="btn" data-testid="export-html" href="/templates/19dda299-93ec-4afd-977f-7d94d0ccce14/export?v=1db2a01a-d562-47a1-ac4b-b70d2dfc0c89">Export HTML (v1)</a> aka getByTestId('export-html')
+
+    Call log:
+      - waiting for getByTestId('versions-panel').getByRole('link', { name: 'v1' })
+
+
+       97 |       const resp = await page.request.get(`/templates/${templateId}/export`);
+       98 |       v1Html = await resp.text();
+    >  99 |       v1 = (await page.getByTestId("versions-panel").getByRole("link", { name: "v1" }).getAttribute("href"))!.split("v=")[1];
+          |                                                                                        ^
+      100 |       metrics.regions = await page.locator('[data-testid^="region-"]').count();
+      101 |       metrics.sanitize = (await page.getByTestId("sanitize-panel").innerText()).split("\n").slice(1);
+      102 |       metrics.findings = (await page.getByTestId("lint-panel").locator("li").allInnerTexts()).map((t) => t.split("\n")[0]);
+        at D:\AI Studio\Email MKT Tracker\tests\e2e\editor-trial.spec.ts:99:88
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results\editor-trial-SYNTHETIC-A-i-2a319-itize-report-regions-checks-chromium\test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results\editor-trial-SYNTHETIC-A-i-2a319-itize-report-regions-checks-chromium\error-context.md
+
+    Error Context: test-results\editor-trial-SYNTHETIC-A-i-2a319-itize-report-regions-checks-chromium\error-context.md
+
+    attachment #4: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results\editor-trial-SYNTHETIC-A-i-2a319-itize-report-regions-checks-chromium\trace.zip
+    Usage:
+
+        npx playwright show-trace test-results\editor-trial-SYNTHETIC-A-i-2a319-itize-report-regions-checks-chromium\trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  2) [chromium] › tests\e2e\editor-trial.spec.ts:84:5 › SYNTHETIC B › import, sanitize report, regions, checks 
+
+    Error: locator.getAttribute: Error: strict mode violation: getByTestId('versions-panel').getByRole('link', { name: 'v1' }) resolved to 2 elements:
+        1) <a href="/templates/4f627703-8521-4568-9771-169f9ed577c1?v=c134ddac-3ba0-440e-b772-277013b21d48">v1</a> aka getByRole('link', { name: 'v1', exact: true })
+        2) <a class="btn" data-testid="export-html" href="/templates/4f627703-8521-4568-9771-169f9ed577c1/export?v=c134ddac-3ba0-440e-b772-277013b21d48">Export HTML (v1)</a> aka getByTestId('export-html')
+
+    Call log:
+      - waiting for getByTestId('versions-panel').getByRole('link', { name: 'v1' })
+
+
+       97 |       const resp = await page.request.get(`/templates/${templateId}/export`);
+       98 |       v1Html = await resp.text();
+    >  99 |       v1 = (await page.getByTestId("versions-panel").getByRole("link", { name: "v1" }).getAttribute("href"))!.split("v=")[1];
+          |                                                                                        ^
+      100 |       metrics.regions = await page.locator('[data-testid^="region-"]').count();
+      101 |       metrics.sanitize = (await page.getByTestId("sanitize-panel").innerText()).split("\n").slice(1);
+      102 |       metrics.findings = (await page.getByTestId("lint-panel").locator("li").allInnerTexts()).map((t) => t.split("\n")[0]);
+        at D:\AI Studio\Email MKT Tracker\tests\e2e\editor-trial.spec.ts:99:88
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results\editor-trial-SYNTHETIC-B-i-895e8-itize-report-regions-checks-chromium\test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results\editor-trial-SYNTHETIC-B-i-895e8-itize-report-regions-checks-chromium\error-context.md
+
+    Error Context: test-results\editor-trial-SYNTHETIC-B-i-895e8-itize-report-regions-checks-chromium\error-context.md
+
+    attachment #4: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results\editor-trial-SYNTHETIC-B-i-895e8-itize-report-regions-checks-chromium\trace.zip
+    Usage:
+
+        npx playwright show-trace test-results\editor-trial-SYNTHETIC-B-i-895e8-itize-report-regions-checks-chromium\trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  3) [chromium] › tests\e2e\editor-trial.spec.ts:84:5 › REAL CANDIDATE 1 › import, sanitize report, regions, checks 
+
+    Error: locator.getAttribute: Error: strict mode violation: getByTestId('versions-panel').getByRole('link', { name: 'v1' }) resolved to 2 elements:
+        1) <a href="/templates/6107bcd0-3775-4672-a363-e10d5c2ba714?v=d6d959b5-df4f-4339-87ba-7bfec1f6d48a">v1</a> aka getByRole('link', { name: 'v1', exact: true })
+        2) <a class="btn" data-testid="export-html" href="/templates/6107bcd0-3775-4672-a363-e10d5c2ba714/export?v=d6d959b5-df4f-4339-87ba-7bfec1f6d48a">Export HTML (v1)</a> aka getByTestId('export-html')
+
+    Call log:
+      - waiting for getByTestId('versions-panel').getByRole('link', { name: 'v1' })
+
+
+       97 |       const resp = await page.request.get(`/templates/${templateId}/export`);
+       98 |       v1Html = await resp.text();
+    >  99 |       v1 = (await page.getByTestId("versions-panel").getByRole("link", { name: "v1" }).getAttribute("href"))!.split("v=")[1];
+          |                                                                                        ^
+      100 |       metrics.regions = await page.locator('[data-testid^="region-"]').count();
+      101 |       metrics.sanitize = (await page.getByTestId("sanitize-panel").innerText()).split("\n").slice(1);
+      102 |       metrics.findings = (await page.getByTestId("lint-panel").locator("li").allInnerTexts()).map((t) => t.split("\n")[0]);
+        at D:\AI Studio\Email MKT Tracker\tests\e2e\editor-trial.spec.ts:99:88
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results\editor-trial-REAL-CANDIDAT-ffd05-itize-report-regions-checks-chromium\test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results\editor-trial-REAL-CANDIDAT-ffd05-itize-report-regions-checks-chromium\error-context.md
+
+    Error Context: test-results\editor-trial-REAL-CANDIDAT-ffd05-itize-report-regions-checks-chromium\error-context.md
+
+    attachment #4: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results\editor-trial-REAL-CANDIDAT-ffd05-itize-report-regions-checks-chromium\trace.zip
+    Usage:
+
+        npx playwright show-trace test-results\editor-trial-REAL-CANDIDAT-ffd05-itize-report-regions-checks-chromium\trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  3 failed
+    [chromium] › tests\e2e\editor-trial.spec.ts:84:5 › SYNTHETIC A › import, sanitize report, regions, checks 
+    [chromium] › tests\e2e\editor-trial.spec.ts:84:5 › SYNTHETIC B › import, sanitize report, regions, checks 
+    [chromium] › tests\e2e\editor-trial.spec.ts:84:5 › REAL CANDIDATE 1 › import, sanitize report, regions, checks 
+  12 did not run
+  16 passed (35.9s)
+[stack] cleanup ok: 5 owned process(es) stopped, none left
+[stack] stopped (exit 1)

@@ -8,7 +8,8 @@
  * The command receives E2E_BASE_URL and DATABASE_URL in its environment.
  * Used by `npm run e2e` and `npm run smoke:local`.
  */
-import { spawn, type ChildProcess } from "node:child_process";
+import type { ChildProcess } from "node:child_process";
+import { cleanupOwned, spawnOwned } from "./lib/owned-processes.ts";
 import { randomBytes } from "node:crypto";
 import fs from "node:fs";
 import path from "node:path";
@@ -61,17 +62,16 @@ const appEnv: NodeJS.ProcessEnv = {
   APP_ENCRYPTION_KEY_ID: "k1",
 };
 
-const children: ChildProcess[] = [];
 const bin = (p: string) => path.resolve("node_modules", p);
 
+/** Every process is spawned as "owned" so cleanup can target exactly this run's process trees. */
 function run(name: string, args: string[], env: NodeJS.ProcessEnv, opts: { capture: boolean }) {
-  const child = spawn(process.execPath, args, { env, stdio: opts.capture ? ["ignore", "pipe", "pipe"] : "inherit" });
+  const child = spawnOwned(name, process.execPath, args, { env, stdio: opts.capture ? ["ignore", "pipe", "pipe"] : "inherit" });
   if (opts.capture) {
     const out = fs.createWriteStream(path.join(logDir, `${name}.log`));
     child.stdout!.pipe(out);
     child.stderr!.pipe(out);
   }
-  children.push(child);
   return child;
 }
 
@@ -96,6 +96,14 @@ async function waitHealthy(timeoutMs = 120_000) {
 }
 
 const pg = await startLocalPostgres({ dir: `.local/pg-stack-${pgPort}`, port: pgPort, ephemeral: true, quiet: true });
+// Ctrl+C / termination: clean up this run's processes too (not only on normal completion).
+for (const sig of ["SIGINT", "SIGTERM"] as const) {
+  process.on(sig, () => {
+    void cleanupOwned()
+      .then(() => pg.stop())
+      .finally(() => process.exit(130));
+  });
+}
 let exitCode = 1;
 try {
   await pg.ensureDatabase(dbName);
@@ -133,7 +141,7 @@ try {
 
   const [exe, ...rest] = cmd;
   const target = exe === "playwright" ? [bin("@playwright/test/cli.js"), ...rest] : exe === "tsx" ? [bin("tsx/dist/cli.mjs"), ...rest] : [exe, ...rest];
-  const c = spawn(process.execPath, target, {
+  const c = spawnOwned("command", process.execPath, target, {
     env: { ...appEnv, E2E_BASE_URL: baseUrl, STACK_LOG_DIR: logDir, PLAYWRIGHT_BROWSERS_PATH: process.env.PLAYWRIGHT_BROWSERS_PATH ?? "0" },
     stdio: "inherit",
   });
@@ -142,9 +150,15 @@ try {
   console.error("[stack]", e instanceof Error ? e.message : e);
   exitCode = 1;
 } finally {
-  for (const c of children) if (c.exitCode === null) c.kill();
-  await new Promise((r) => setTimeout(r, 1000));
+  // Only this run's process trees (owned roots + their descendants) are targeted.
+  const r = await cleanupOwned();
   await pg.stop().catch(() => {});
+  if (r.survivors.length) {
+    console.error(`[stack] cleanup FAILED: ${r.survivors.length} owned process(es) still alive: ${r.survivors.join(", ")}`);
+    if (exitCode === 0) exitCode = 3;
+  } else {
+    console.log(`[stack] cleanup ok: ${r.targeted.length} owned process(es) stopped, none left`);
+  }
   console.log(`[stack] stopped (exit ${exitCode})`);
   process.exit(exitCode);
 }

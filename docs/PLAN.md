@@ -27,11 +27,18 @@ Legend: `[ ]` todo · `[x]` done (with a link to evidence) · results are PASS /
 | 2026-11-12 | `NOTION_MODE=disabled\|mock\|live`. `live` requires `NOTION_AUTHORIZATION_REF` and the official API host. `mock` is loopback only and refused in production. The Notion token is entered in the admin UI and stored AES-256-GCM-encrypted (`APP_ENCRYPTION_KEY`); it is never an env var | Implementation |
 | 2026-11-12 | Notion API version pinned to 2026-03-11 after re-verifying the official docs (query is `POST /v1/data_sources/{id}/query`; 10,000-result cap per query handled) | Implementation |
 | 2026-11-12 | Client pacing set to 2.5 req/s with burst 1, so there are at most about 3 requests in any second. Found by an M2 test; the earlier burst of 3 could exceed a strict 3/s | Implementation |
+| 2026-11-12 | M2 checkpointed: commit `63cad42`, tag `m2-checkpoint`, branch `m2-notion-crm` | Implementation |
+| 2026-11-12 | **M3 authorized** (editor trial), on branch `m3-editor-trial` from `m2-checkpoint`. `SEND_MODE=disabled`; no email, no deployment, no real Notion | User |
+| 2026-11-12 | **Confirmed by the user:** contacts with *unknown* consent stay **ineligible for marketing sends by default**, but remain fully manageable in the CRM (`crm.require_marketing_consent=true`) | User |
+| 2026-11-12 | Reply language switched to **Vietnamese** at the user's request (M3 onwards); repository docs stay English | User |
+| 2026-11-12 | **Editor recommendation (PROVISIONAL):** (a) structure-preserving editor for imported builder HTML, with (c) TipTap for text blocks and paste. (b) GrapesJS is **not** used for imported templates: its no-edit export changed Chromium rendering by 2.9–13.8% and collapsed fixture B's columns. Provisional because only one unconfirmed real template was available and no real email client was tested | Trial result, pending user |
+| 2026-11-12 | Test tooling: processes are spawned as "owned" and cleanup targets only those PIDs and their descendants (`scripts/lib/owned-processes.ts`); a stack run fails if any survive | Implementation |
 
 ## Open items (need user input)
 - [ ] Confirm assumptions A1–A7 ([DESIGN.md](DESIGN.md) "Assumptions")
 - [ ] Wix reference screenshots or a recording (audience, editor, test send, review, schedule picker, scheduled list, stats)
-- [ ] Two real builder-exported HTML templates
+- [ ] Two real builder-exported HTML templates. Candidate #1 found in Downloads (`wildcats-email-gmail.html`) **needs confirmation**; #2 not found
+- [ ] Authorization for test sends to designated inboxes, or a rendering service (Litmus / Email on Acid), to validate Gmail/Outlook/mobile rendering
 - [ ] Legal: research recorded in [COMPLIANCE.md](COMPLIANCE.md). Counsel review is still needed (8 questions). Correction: the Decree 91 subject label is `[QC]` or `[AD]`, not "[ADV]" (secondary source)
 - [ ] Choice of sending subdomain (e.g. `news.company.com`) and tracking subdomain
 
@@ -108,17 +115,29 @@ Proposed in [COMPLIANCE.md](COMPLIANCE.md) §6, to be adopted only after counsel
 - [x] R-SYNC-06: simulated 429 (`Retry-After`) and 5xx are backed off and the sync succeeds; exhausted retries end partial, with the cursor kept and nothing archived. **PASS (MOCK)**
 - [ ] S3-live: a live sync against the separate Notion test database matches the counts. **BLOCKED** (no test database or token; live access not authorized)
 
-## M3: Editor spike → templates
-- [ ] Spike: both real templates × (click-to-edit, GrapesJS). Edit headline, paragraph, image, link and button; export; DOM diff; test sends to Gmail web and Android, Outlook desktop and web, iOS Mail → `reports/<date>-editor-spike/`
-- [ ] Editor decision recorded in the decisions log
-- [ ] Import pipeline: sanitize (keep tables, inline styles and MSO comments; strip scripts, forms, handlers and `javascript:` URLs), re-host images to S3, extract links, lint (102 KB clipping, missing alt text, image-heavy content)
-- [ ] Editor, paste of formatted text, plain-text part, desktop (600 px) and mobile (375 px) preview in a sandboxed iframe
-- [ ] Reusable templates and saved drafts
+## M3: Editor trial — run 2026-11-12 (evidence: [reports/2026-11-12-m3/report.md](../reports/2026-11-12-m3/report.md), in Vietnamese)
+- [~] Trial on templates × (a) structure-preserving, (b) GrapesJS, (c) TipTap paste:
+  - edited headline/paragraph, image, link and button; saved; reopened; exported;
+  - DOM and pixel comparison in **Chromium**;
+  - inputs: SYNTHETIC A, SYNTHETIC B, and **real candidate #1** (`wildcats-email-gmail.html`, sha256 `3c781d16…`, not yet confirmed by the user);
+  - **real template #2 BLOCKED** (not found);
+  - **test sends to Gmail/Outlook/iOS: NOT RUN** (sending not authorized).
+- [x] Editor recommendation recorded (decisions log). **PROVISIONAL**
+- [~] Import pipeline:
+  - sanitize: keeps tables, inline styles, `<style>`, DOCTYPE and MSO comments; strips scripts, forms, handlers, `javascript:`, meta refresh and CSS expressions;
+  - link and image extraction; lint (102 KB clipping, missing alt, image-heavy, relative/http/localhost images, phishing-like link text, missing unsubscribe);
+  - optional "import only `#selector`";
+  - **image re-hosting to S3: NOT DONE** (relative images are flagged only).
+- [x] Editor: click-to-edit regions in a sandboxed preview (no scripts; CSP; SAMEORIGIN), TipTap text blocks with merge-field picker, plain-text part, desktop 640 px and mobile 375 px preview, preview as recipient with fallbacks
+- [x] Templates with immutable versions (each save is a new version, DB trigger); reopen any version; export HTML or TXT
 
-**Acceptance:**
-- [ ] Both templates show no layout regression after edits in the tested clients (screenshots attached)
-- [ ] An XSS payload corpus is stripped (R-TPL-02)
-- [ ] An image-only template triggers a warning (R-TPL-03)
+**Acceptance (observed 2026-11-12):**
+- [~] No layout regression after import and edits: **Chromium only**.
+  - Import is pixel-identical (0.00%) for A and the real candidate. Edits change only edited nodes.
+  - In real email clients: **NOT RUN**.
+- [x] R-TPL-02: an XSS payload corpus is stripped (fixture B + unit tests). **PASS**
+- [x] R-TPL-03: an image-heavy template triggers a warning (unit). **PASS**
+- [x] Regression coverage for the M1/M2 tooling defects: exit code (a failing test exits non-zero) and owned-process cleanup. **PASS**, each proven by a mutation check
 
 ## M4: Personalization and test sends
 - [ ] LiquidJS with strict variables and allowlisted fields, in subject and body; `default:` fallbacks; HTML escaping

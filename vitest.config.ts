@@ -22,6 +22,16 @@ export default defineConfig({
           hookTimeout: 120_000,
         },
       },
+      {
+        test: {
+          // Regression tests for the test tooling itself (exit codes, process cleanup).
+          name: "tooling",
+          include: ["tests/tooling/**/*.test.ts"],
+          environment: "node",
+          fileParallelism: false,
+          testTimeout: 240_000,
+        },
+      },
     ],
   },
 });

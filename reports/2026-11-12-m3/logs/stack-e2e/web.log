@@ -1,0 +1,37 @@
+▲ Next.js 16.4.6
+- Local:         http://localhost:3100
+- Network:       http://172.16.0.2:3100
+✓ Ready in 318ms
+✓ Running next.config.ts took 57ms
+{"level":"info","time":"2026-11-12T05:39:16.869Z","service":"web","env":"test","build":"src-071125b4e5f2","env":"test","send_mode":"disabled","google":false,"msg":"web server configuration validated"}
+{"level":"info","time":"2026-11-12T05:39:20.660Z","service":"web","env":"test","build":"src-071125b4e5f2","request_id":"c5aa0735-59bd-4e0b-bbcb-a123b5b27366","role":"admin","msg":"sign-in succeeded"}
+{"level":"info","time":"2026-11-12T05:39:22.328Z","service":"web","env":"test","build":"src-071125b4e5f2","request_id":"453808e2-87f6-4aac-97d0-5cc2cd76cf42","role":"member","msg":"sign-in succeeded"}
+{"level":"warn","time":"2026-11-12T05:39:23.203Z","service":"web","env":"test","build":"src-071125b4e5f2","request_id":"9c7bce34-93d6-48ca-abb6-ec729f50db5e","reason":"not_allowlisted","stage":"user.create","msg":"sign-in denied"}
+{"level":"warn","time":"2026-11-12T05:39:23.879Z","service":"web","env":"test","build":"src-071125b4e5f2","request_id":"9c075400-0f85-40a1-8781-fcf0e6af4104","reason":"wrong_domain","stage":"user.create","msg":"sign-in denied"}
+{"level":"warn","time":"2026-11-12T05:39:24.609Z","service":"web","env":"test","build":"src-071125b4e5f2","request_id":"7d90bd86-bd8c-4909-9504-23881b9f1d81","reason":"disabled","stage":"user.create","msg":"sign-in denied"}
+{"level":"info","time":"2026-11-12T05:39:25.271Z","service":"web","env":"test","build":"src-071125b4e5f2","request_id":"39c9ef63-f104-47b5-b8c0-3ccaa6ad6548","role":"member","msg":"sign-in succeeded"}
+{"level":"warn","time":"2026-11-12T05:39:26.654Z","service":"web","env":"test","build":"src-071125b4e5f2","request_id":"d5e77f14-fc43-434b-96ef-2aea22342e30","reason":"disabled","stage":"session.create","msg":"sign-in denied"}
+{"level":"info","time":"2026-11-12T05:39:27.506Z","service":"web","env":"test","build":"src-071125b4e5f2","request_id":"c89a0ce1-baf2-42d8-a378-359a37935dfb","role":"admin","msg":"sign-in succeeded"}
+{"level":"info","time":"2026-11-12T05:39:30.768Z","service":"web","env":"test","build":"src-071125b4e5f2","request_id":"178521bd-c13b-4d97-9079-72aaedd745df","role":"admin","msg":"sign-in succeeded"}
+[core] WARNING: Executable file detection not yet supported on 'win32'.
+{"level":"info","time":"2026-11-12T05:39:33.355Z","service":"web","env":"test","build":"src-071125b4e5f2","request_id":"d6eae56d-eae0-4a93-9cf6-9b6e280b681b","role":"admin","msg":"sign-in succeeded"}
+{"level":"info","time":"2026-11-12T05:39:34.538Z","service":"web","env":"test","build":"src-071125b4e5f2","request_id":"68935df6-5235-45c4-b032-16fb8c633892","role":"admin","msg":"sign-in succeeded"}
+{"level":"info","time":"2026-11-12T05:39:35.903Z","service":"web","env":"test","build":"src-071125b4e5f2","request_id":"445111db-f87f-406e-9900-bc2e880a95c1","role":"admin","msg":"sign-in succeeded"}
+{"level":"info","time":"2026-11-12T05:39:37.767Z","service":"web","env":"test","build":"src-071125b4e5f2","request_id":"b512cc66-5b0d-4cea-a0e5-5cd883bb2b58","role":"admin","msg":"sign-in succeeded"}
+{"level":"info","time":"2026-11-12T05:39:39.590Z","service":"web","env":"test","build":"src-071125b4e5f2","request_id":"3a3fd68b-a3ef-4e4a-a16b-89171bd6b2ae","role":"member","msg":"sign-in succeeded"}
+{"level":"info","time":"2026-11-12T05:39:41.214Z","service":"web","env":"test","build":"src-071125b4e5f2","request_id":"2006751e-0014-4f86-967b-c9a8e12576fb","role":"admin","msg":"sign-in succeeded"}
+{"level":"info","time":"2026-11-12T05:39:42.635Z","service":"web","env":"test","build":"src-071125b4e5f2","request_id":"3ff9e4dc-3e14-4259-8b7e-5683f1f902a6","role":"admin","msg":"sign-in succeeded"}
+{"level":"info","time":"2026-11-12T05:39:44.983Z","service":"web","env":"test","build":"src-071125b4e5f2","request_id":"1a97f119-41c8-421b-b69b-1b99e50d158f","role":"admin","msg":"sign-in succeeded"}
+{"level":"info","time":"2026-11-12T05:39:46.499Z","service":"web","env":"test","build":"src-071125b4e5f2","request_id":"09a0457c-5bb1-460c-9566-15b2ba4bf64d","role":"admin","msg":"sign-in succeeded"}
+{"level":"info","time":"2026-11-12T05:39:50.813Z","service":"web","env":"test","build":"src-071125b4e5f2","request_id":"bdaae9cc-ce01-4bda-a0ed-8f5807492add","role":"admin","msg":"sign-in succeeded"}
+{"level":"info","time":"2026-11-12T05:39:54.515Z","service":"web","env":"test","build":"src-071125b4e5f2","request_id":"90f8f302-8ab2-49c3-ae63-96ef37538952","role":"admin","msg":"sign-in succeeded"}
+{"level":"info","time":"2026-11-12T05:39:56.080Z","service":"web","env":"test","build":"src-071125b4e5f2","request_id":"328115fb-8fd3-4047-a666-e4df62ba0f65","role":"admin","msg":"sign-in succeeded"}
+{"level":"info","time":"2026-11-12T05:39:59.733Z","service":"web","env":"test","build":"src-071125b4e5f2","request_id":"e19d4ae2-62d7-4ff0-8293-bfafec370459","role":"admin","msg":"sign-in succeeded"}
+{"level":"info","time":"2026-11-12T05:40:02.131Z","service":"web","env":"test","build":"src-071125b4e5f2","request_id":"aee3e26e-1709-4067-831b-9d0cc5c55c7a","role":"admin","msg":"sign-in succeeded"}
+{"level":"info","time":"2026-11-12T05:40:20.421Z","service":"web","env":"test","build":"src-071125b4e5f2","request_id":"858efb7e-177f-416a-99bf-f5171cf166e8","role":"admin","msg":"sign-in succeeded"}
+{"level":"info","time":"2026-11-12T05:40:31.288Z","service":"web","env":"test","build":"src-071125b4e5f2","request_id":"5f261aa3-2159-49ba-9e3f-8547c55d93b2","role":"admin","msg":"sign-in succeeded"}
+{"level":"info","time":"2026-11-12T05:40:32.818Z","service":"web","env":"test","build":"src-071125b4e5f2","request_id":"94a1d361-aefc-4059-8828-a0a7f52ed962","role":"admin","msg":"sign-in succeeded"}
+{"level":"info","time":"2026-11-12T05:40:34.897Z","service":"web","env":"test","build":"src-071125b4e5f2","request_id":"00d6db8a-1587-4cc1-934e-8578544c6a8a","role":"admin","msg":"sign-in succeeded"}
+{"level":"info","time":"2026-11-12T05:40:36.418Z","service":"web","env":"test","build":"src-071125b4e5f2","request_id":"213557cc-4bca-4f04-bf74-40f8860f01e9","role":"admin","msg":"sign-in succeeded"}
+{"level":"info","time":"2026-11-12T05:40:41.526Z","service":"web","env":"test","build":"src-071125b4e5f2","request_id":"fb3e90c0-1a63-4c09-acbf-c08c9d406608","role":"admin","msg":"sign-in succeeded"}
+{"level":"info","time":"2026-11-12T05:40:45.931Z","service":"web","env":"test","build":"src-071125b4e5f2","request_id":"4a5fc71d-61f6-42ec-b77a-875b1f1e72d4","role":"admin","msg":"sign-in succeeded"}

@@ -1,0 +1,48 @@
+
+> email-mkt-tracker@0.1.0 e2e
+> tsx scripts/local-stack.ts --log-dir .local/logs/e2e -- playwright test
+
+[core] WARNING: Executable file detection not yet supported on 'win32'.
+Your pool doesn't have all of the error handlers! See: https://err.red/wpeh?v=0.18.0&method=connect
+migrations applied (app + graphile_worker)
+[stack] postgres ready on 54332; logs in D:\AI Studio\Email MKT Tracker\.local\logs\e2e
+[stack] building web app (next build)…
+[stack] web + worker healthy at http://localhost:3100
+
+Running 31 tests using 1 worker
+
+  ok  1 [chromium] › tests\e2e\auth.spec.ts:20:1 › unauthenticated visitors are redirected to sign-in (634ms)
+  ok  2 [chromium] › tests\e2e\auth.spec.ts:26:1 › allowlisted admin signs in, sees role and admin page, signs out (1.7s)
+  ok  3 [chromium] › tests\e2e\auth.spec.ts:46:1 › allowlisted member signs in but cannot open the admin page (816ms)
+  ok  4 [chromium] › tests\e2e\auth.spec.ts:60:3 › s***@example.com is rejected (ACCESS_DENIED_NOT_ALLOWLISTED) (673ms)
+  ok  5 [chromium] › tests\e2e\auth.spec.ts:60:3 › o***@example.net is rejected (ACCESS_DENIED_WRONG_DOMAIN) (640ms)
+  ok  6 [chromium] › tests\e2e\auth.spec.ts:60:3 › r***@example.com is rejected (ACCESS_DENIED_DISABLED) (671ms)
+  ok  7 [chromium] › tests\e2e\auth.spec.ts:70:1 › revoking a signed-in member ends the session and blocks the next sign-in (2.0s)
+  ok  8 [chromium] › tests\e2e\auth.spec.ts:90:1 › healthz reports database and worker (105ms)
+  ok  9 [chromium] › tests\e2e\crm.spec.ts:44:3 › CRM with mock Notion (synthetic data) › admin connects the mock Notion database and reviews the mapping (3.2s)
+  ok 10 [chromium] › tests\e2e\crm.spec.ts:63:3 › CRM with mock Notion (synthetic data) › first sync imports the synthetic contacts with issues flagged (2.5s)
+  ok 11 [chromium] › tests\e2e\crm.spec.ts:85:3 › CRM with mock Notion (synthetic data) › data issues: duplicates can be resolved by choosing a primary (1.1s)
+  ok 12 [chromium] › tests\e2e\crm.spec.ts:99:3 › CRM with mock Notion (synthetic data) › consent: imported contacts are unknown; a grant needs evidence and is recorded by staff (1.3s)
+  ok 13 [chromium] › tests\e2e\crm.spec.ts:121:3 › CRM with mock Notion (synthetic data) › a 'resubscribe' in Notion never removes the suppression and is corrected in Notion (1.8s)
+  ok 14 [chromium] › tests\e2e\crm.spec.ts:138:3 › CRM with mock Notion (synthetic data) › a repeated full sync creates nothing new (1.8s)
+  ok 15 [chromium] › tests\e2e\crm.spec.ts:149:3 › CRM with mock Notion (synthetic data) › members can read contacts but cannot change settings or consent (1.0s)
+  ok 16 [chromium] › tests\e2e\editor-trial.spec.ts:85:5 › SYNTHETIC A › import, sanitize report, regions, checks (1.3s)
+  ok 17 [chromium] › tests\e2e\editor-trial.spec.ts:112:5 › SYNTHETIC A › edit text, image, button and link; save; reopen; export (2.2s)
+  ok 18 [chromium] › tests\e2e\editor-trial.spec.ts:187:5 › SYNTHETIC A › recipient previews and missing-name fallbacks (1.4s)
+  ok 19 [chromium] › tests\e2e\editor-trial.spec.ts:206:5 › SYNTHETIC A › responsive browser renderings and import fidelity (Chromium only) (4.1s)
+  ok 20 [chromium] › tests\e2e\editor-trial.spec.ts:230:5 › SYNTHETIC A › GrapesJS (candidate b): no-edit export fidelity, then an edit + save (3.5s)
+  ok 21 [chromium] › tests\e2e\editor-trial.spec.ts:85:5 › SYNTHETIC B › import, sanitize report, regions, checks (1.5s)
+  ok 22 [chromium] › tests\e2e\editor-trial.spec.ts:112:5 › SYNTHETIC B › edit text, image, button and link; save; reopen; export (3.4s)
+  ok 23 [chromium] › tests\e2e\editor-trial.spec.ts:187:5 › SYNTHETIC B › recipient previews and missing-name fallbacks (2.3s)
+  ok 24 [chromium] › tests\e2e\editor-trial.spec.ts:206:5 › SYNTHETIC B › responsive browser renderings and import fidelity (Chromium only) (17.9s)
+  ok 25 [chromium] › tests\e2e\editor-trial.spec.ts:230:5 › SYNTHETIC B › GrapesJS (candidate b): no-edit export fidelity, then an edit + save (10.6s)
+  ok 26 [chromium] › tests\e2e\editor-trial.spec.ts:85:5 › REAL CANDIDATE 1 › import, sanitize report, regions, checks (1.4s)
+  ok 27 [chromium] › tests\e2e\editor-trial.spec.ts:112:5 › REAL CANDIDATE 1 › edit text, image, button and link; save; reopen; export (2.0s)
+  ok 28 [chromium] › tests\e2e\editor-trial.spec.ts:187:5 › REAL CANDIDATE 1 › recipient previews and missing-name fallbacks (1.4s)
+  ok 29 [chromium] › tests\e2e\editor-trial.spec.ts:206:5 › REAL CANDIDATE 1 › responsive browser renderings and import fidelity (Chromium only) (4.9s)
+  ok 30 [chromium] › tests\e2e\editor-trial.spec.ts:230:5 › REAL CANDIDATE 1 › GrapesJS (candidate b): no-edit export fidelity, then an edit + save (4.2s)
+  ok 31 [chromium] › tests\e2e\editor-trial.spec.ts:278:1 › TipTap paste (candidate c): formatted text from a Google-Docs-like clipboard keeps bold/italic/links, drops styles (1.3s)
+
+  31 passed (1.5m)
+[stack] cleanup ok: 5 owned process(es) stopped, none left
+[stack] stopped (exit 0)

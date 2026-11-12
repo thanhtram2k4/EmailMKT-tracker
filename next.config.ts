@@ -11,7 +11,8 @@ const nextConfig: NextConfig = {
         headers: [
           { key: "X-Content-Type-Options", value: "nosniff" },
           { key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },
-          { key: "X-Frame-Options", value: "DENY" },
+          // SAMEORIGIN (not DENY): the template preview is shown in a same-origin sandboxed iframe.
+          { key: "X-Frame-Options", value: "SAMEORIGIN" },
         ],
       },
     ];

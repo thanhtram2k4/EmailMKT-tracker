@@ -1,0 +1,153 @@
+
+ RUN  v5.1.0 D:/AI Studio/Email MKT Tracker
+
+stderr | tests/integration/crm-sync.test.ts > synthetic CRM import > imports the 40 synthetic contacts with validation, duplicates, suppressions and unknown consent
+[core] WARNING: Executable file detection not yet supported on 'win32'.
+Your pool doesn't have all of the error handlers! See: https://err.red/wpeh?v=0.18.0&method=connect
+
+ ✓ |integration| tests/integration/crm-sync.test.ts > synthetic CRM import > imports the 40 synthetic contacts with validation, duplicates, suppressions and unknown consent 1251ms
+stderr | tests/integration/crm-sync.test.ts > synthetic CRM import > R-SYNC-01: repeated syncs create no duplicate contacts, consent or suppression rows
+[core] WARNING: Executable file detection not yet supported on 'win32'.
+Your pool doesn't have all of the error handlers! See: https://err.red/wpeh?v=0.18.0&method=connect
+
+ ✓ |integration| tests/integration/crm-sync.test.ts > synthetic CRM import > R-SYNC-01: repeated syncs create no duplicate contacts, consent or suppression rows 1348ms
+stderr | tests/integration/crm-sync.test.ts > pagination, query cap and incremental cursor > paginates 250 pages at page_size 100
+[core] WARNING: Executable file detection not yet supported on 'win32'.
+Your pool doesn't have all of the error handlers! See: https://err.red/wpeh?v=0.18.0&method=connect
+
+ ✓ |integration| tests/integration/crm-sync.test.ts > pagination, query cap and incremental cursor > paginates 250 pages at page_size 100 1773ms
+stderr | tests/integration/crm-sync.test.ts > pagination, query cap and incremental cursor > continues past the per-query result cap in time-ordered chunks
+[core] WARNING: Executable file detection not yet supported on 'win32'.
+Your pool doesn't have all of the error handlers! See: https://err.red/wpeh?v=0.18.0&method=connect
+
+ ✓ |integration| tests/integration/crm-sync.test.ts > pagination, query cap and incremental cursor > continues past the per-query result cap in time-ordered chunks 1630ms
+stderr | tests/integration/crm-sync.test.ts > pagination, query cap and incremental cursor > treats a capped listing without timestamp progress as incomplete and does not archive
+[core] WARNING: Executable file detection not yet supported on 'win32'.
+Your pool doesn't have all of the error handlers! See: https://err.red/wpeh?v=0.18.0&method=connect
+
+ ✓ |integration| tests/integration/crm-sync.test.ts > pagination, query cap and incremental cursor > treats a capped listing without timestamp progress as incomplete and does not archive 1203ms
+stderr | tests/integration/crm-sync.test.ts > pagination, query cap and incremental cursor > incremental sync filters on last_edited_time with a 5-minute overlap and catches same-minute edits
+[core] WARNING: Executable file detection not yet supported on 'win32'.
+Your pool doesn't have all of the error handlers! See: https://err.red/wpeh?v=0.18.0&method=connect
+
+ ✓ |integration| tests/integration/crm-sync.test.ts > pagination, query cap and incremental cursor > incremental sync filters on last_edited_time with a 5-minute overlap and catches same-minute edits 1088ms
+stderr | tests/integration/crm-sync.test.ts > identity, archiving and email changes > R-SYNC-03: an email change keeps the same contact; the old suppressed address stays suppressed and is flagged
+[core] WARNING: Executable file detection not yet supported on 'win32'.
+Your pool doesn't have all of the error handlers! See: https://err.red/wpeh?v=0.18.0&method=connect
+
+ ✓ |integration| tests/integration/crm-sync.test.ts > identity, archiving and email changes > R-SYNC-03: an email change keeps the same contact; the old suppressed address stays suppressed and is flagged 1271ms
+stderr | tests/integration/crm-sync.test.ts > identity, archiving and email changes > R-SYNC-04: trashed pages are archived (when returned), removed pages are archived by a full sync only, restored pages reactivate
+[core] WARNING: Executable file detection not yet supported on 'win32'.
+Your pool doesn't have all of the error handlers! See: https://err.red/wpeh?v=0.18.0&method=connect
+
+ ✓ |integration| tests/integration/crm-sync.test.ts > identity, archiving and email changes > R-SYNC-04: trashed pages are archived (when returned), removed pages are archived by a full sync only, restored pages reactivate 1585ms
+stderr | tests/integration/crm-sync.test.ts > identity, archiving and email changes > archived duplicates no longer count as duplicates
+[core] WARNING: Executable file detection not yet supported on 'win32'.
+Your pool doesn't have all of the error handlers! See: https://err.red/wpeh?v=0.18.0&method=connect
+
+ ✓ |integration| tests/integration/crm-sync.test.ts > identity, archiving and email changes > archived duplicates no longer count as duplicates 1082ms
+stderr | tests/integration/crm-sync.test.ts > R-SYNC-05: suppression and consent are never weakened by sync > Notion 'Subscribed' after an unsubscribe keeps the suppression, queues a Notion correction and is echo-free
+[core] WARNING: Executable file detection not yet supported on 'win32'.
+Your pool doesn't have all of the error handlers! See: https://err.red/wpeh?v=0.18.0&method=connect
+
+ ✓ |integration| tests/integration/crm-sync.test.ts > R-SYNC-05: suppression and consent are never weakened by sync > Notion 'Subscribed' after an unsubscribe keeps the suppression, queues a Notion correction and is echo-free 1369ms
+stderr | tests/integration/crm-sync.test.ts > R-SYNC-05: suppression and consent are never weakened by sync > blank subscription in Notion never removes a suppression either
+[core] WARNING: Executable file detection not yet supported on 'win32'.
+Your pool doesn't have all of the error handlers! See: https://err.red/wpeh?v=0.18.0&method=connect
+
+ ✓ |integration| tests/integration/crm-sync.test.ts > R-SYNC-05: suppression and consent are never weakened by sync > blank subscription in Notion never removes a suppression either 1368ms
+stderr | tests/integration/crm-sync.test.ts > R-SYNC-05: suppression and consent are never weakened by sync > the database refuses to delete/alter suppressions or consent, and refuses imported grants
+[core] WARNING: Executable file detection not yet supported on 'win32'.
+Your pool doesn't have all of the error handlers! See: https://err.red/wpeh?v=0.18.0&method=connect
+
+ ✓ |integration| tests/integration/crm-sync.test.ts > R-SYNC-05: suppression and consent are never weakened by sync > the database refuses to delete/alter suppressions or consent, and refuses imported grants 1442ms
+stderr | tests/integration/crm-sync.test.ts > R-SYNC-06 and partial failures > recovers from 429 (Retry-After) and 503 during listing
+[core] WARNING: Executable file detection not yet supported on 'win32'.
+Your pool doesn't have all of the error handlers! See: https://err.red/wpeh?v=0.18.0&method=connect
+
+ ✓ |integration| tests/integration/crm-sync.test.ts > R-SYNC-06 and partial failures > recovers from 429 (Retry-After) and 503 during listing 1424ms
+stderr | tests/integration/crm-sync.test.ts > R-SYNC-06 and partial failures > when retries are exhausted mid-listing: partial, cursor unchanged, nothing archived; the next run completes without duplicates
+[core] WARNING: Executable file detection not yet supported on 'win32'.
+Your pool doesn't have all of the error handlers! See: https://err.red/wpeh?v=0.18.0&method=connect
+
+ ✓ |integration| tests/integration/crm-sync.test.ts > R-SYNC-06 and partial failures > when retries are exhausted mid-listing: partial, cursor unchanged, nothing archived; the next run completes without duplicates 2590ms
+stderr | tests/integration/crm-sync.test.ts > R-SYNC-06 and partial failures > isolates a failing page: others are imported, the run is partial and the page is retried next time
+[core] WARNING: Executable file detection not yet supported on 'win32'.
+Your pool doesn't have all of the error handlers! See: https://err.red/wpeh?v=0.18.0&method=connect
+
+ ✓ |integration| tests/integration/crm-sync.test.ts > R-SYNC-06 and partial failures > isolates a failing page: others are imported, the run is partial and the page is retried next time 916ms
+stderr | tests/integration/crm-sync.test.ts > R-SYNC-06 and partial failures > records data problems (unexpected property type) without failing the run
+[core] WARNING: Executable file detection not yet supported on 'win32'.
+Your pool doesn't have all of the error handlers! See: https://err.red/wpeh?v=0.18.0&method=connect
+
+ ✓ |integration| tests/integration/crm-sync.test.ts > R-SYNC-06 and partial failures > records data problems (unexpected property type) without failing the run 955ms
+stderr | tests/integration/crm-sync.test.ts > R-SYNC-06 and partial failures > fails safely on schema drift (mapped property renamed) without touching contacts
+[core] WARNING: Executable file detection not yet supported on 'win32'.
+Your pool doesn't have all of the error handlers! See: https://err.red/wpeh?v=0.18.0&method=connect
+
+ ✓ |integration| tests/integration/crm-sync.test.ts > R-SYNC-06 and partial failures > fails safely on schema drift (mapped property renamed) without touching contacts 1146ms
+stderr | tests/integration/crm-sync.test.ts > R-SYNC-06 and partial failures > allows only one sync at a time and marks interrupted runs
+[core] WARNING: Executable file detection not yet supported on 'win32'.
+Your pool doesn't have all of the error handlers! See: https://err.red/wpeh?v=0.18.0&method=connect
+
+ ✓ |integration| tests/integration/crm-sync.test.ts > R-SYNC-06 and partial failures > allows only one sync at a time and marks interrupted runs 952ms
+stderr | tests/integration/crm-sync.test.ts > connection and token handling > stores the token encrypted only, and a wrong token is rejected without storing anything
+[core] WARNING: Executable file detection not yet supported on 'win32'.
+Your pool doesn't have all of the error handlers! See: https://err.red/wpeh?v=0.18.0&method=connect
+
+ ✓ |integration| tests/integration/crm-sync.test.ts > connection and token handling > stores the token encrypted only, and a wrong token is rejected without storing anything 824ms
+stderr | tests/integration/crm-sync.test.ts > connection and token handling > creates the CRM database under a parent page and syncs from it
+[core] WARNING: Executable file detection not yet supported on 'win32'.
+Your pool doesn't have all of the error handlers! See: https://err.red/wpeh?v=0.18.0&method=connect
+
+ ✓ |integration| tests/integration/crm-sync.test.ts > connection and token handling > creates the CRM database under a parent page and syncs from it 864ms
+stderr | tests/integration/crm-sync.test.ts > Notion outbox > retries a 503 later with backoff and marks 404 as permanently failed
+[core] WARNING: Executable file detection not yet supported on 'win32'.
+Your pool doesn't have all of the error handlers! See: https://err.red/wpeh?v=0.18.0&method=connect
+
+ ✓ |integration| tests/integration/crm-sync.test.ts > Notion outbox > retries a 503 later with backoff and marks 404 as permanently failed 1204ms
+stderr | tests/integration/crm-sync.test.ts > Notion outbox > coalesces writes and never marks a newer value done by mistake
+[core] WARNING: Executable file detection not yet supported on 'win32'.
+Your pool doesn't have all of the error handlers! See: https://err.red/wpeh?v=0.18.0&method=connect
+
+ ✓ |integration| tests/integration/crm-sync.test.ts > Notion outbox > coalesces writes and never marks a newer value done by mistake 1070ms
+stderr | tests/integration/worker.test.ts
+[core] WARNING: Executable file detection not yet supported on 'win32'.
+Your pool doesn't have all of the error handlers! See: https://err.red/wpeh?v=0.18.0&method=connect
+
+stderr | tests/integration/worker.test.ts > background worker > runs a job that was queued while no worker was running
+[core] WARNING: Executable file detection not yet supported on 'win32'.
+
+ ✓ |integration| tests/integration/worker.test.ts > background worker > reports degraded health when no worker has ever run 63ms
+ ✓ |integration| tests/integration/worker.test.ts > background worker > runs a job that was queued while no worker was running 964ms
+ ✓ |integration| tests/integration/worker.test.ts > background worker > runs a job queued during downtime after a worker restart 666ms
+ ✓ |integration| tests/integration/worker.test.ts > background worker > executes each queued job once even with two workers running 333ms
+ ✓ |integration| tests/integration/worker.test.ts > background worker > flags a stale heartbeat as degraded (controlled clock) 4ms
+stderr | tests/integration/auth-gate.test.ts
+[core] WARNING: Executable file detection not yet supported on 'win32'.
+Your pool doesn't have all of the error handlers! See: https://err.red/wpeh?v=0.18.0&method=connect
+
+ ✓ |integration| tests/integration/auth-gate.test.ts > staff sign-in gate > lets an allowlisted admin sign in and creates a session cookie 133ms
+ ✓ |integration| tests/integration/auth-gate.test.ts > staff sign-in gate > lets an allowlisted member sign in (address normalized) 17ms
+ ✓ |integration| tests/integration/auth-gate.test.ts > staff sign-in gate > rejects a company-domain account that is not on the allowlist 14ms
+ ✓ |integration| tests/integration/auth-gate.test.ts > staff sign-in gate > rejects an outside-domain account and correlates the audit row with the request id 12ms
+ ✓ |integration| tests/integration/auth-gate.test.ts > staff sign-in gate > rejects a revoked staff member 11ms
+ ✓ |integration| tests/integration/auth-gate.test.ts > staff sign-in gate > revoking an existing user ends their sessions and blocks the next sign-in 17ms
+ ✓ |integration| tests/integration/auth-gate.test.ts > staff sign-in gate > records audit entries for successful sign-ins and staff changes 1ms
+stderr | tests/integration/database.test.ts
+[core] WARNING: Executable file detection not yet supported on 'win32'.
+Your pool doesn't have all of the error handlers! See: https://err.red/wpeh?v=0.18.0&method=connect
+
+stderr | tests/integration/database.test.ts > database migrations > is idempotent when re-run
+[core] WARNING: Executable file detection not yet supported on 'win32'.
+Your pool doesn't have all of the error handlers! See: https://err.red/wpeh?v=0.18.0&method=connect
+
+ ✓ |integration| tests/integration/database.test.ts > database migrations > creates application, auth and worker schemas 151ms
+ ✓ |integration| tests/integration/database.test.ts > database migrations > is idempotent when re-run 43ms
+ ✓ |integration| tests/integration/database.test.ts > database migrations > enforces an append-only audit log at the database level 102ms
+
+ Test Files  4 passed (4)
+      Tests  37 passed (37)
+   Start at  12:37:45
+   Duration  44.99s (tests 91%, import 8%, transform 1%)
+

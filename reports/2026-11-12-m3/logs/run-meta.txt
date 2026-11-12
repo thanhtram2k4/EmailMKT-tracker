@@ -1,0 +1,4 @@
+BUILD_ID=src-071125b4e5f2
+git_branch=m3-editor-trial base=63cad42 (m2-checkpoint; M3 changes uncommitted at test time; checkpoint commit follows)
+node=v24.18.1 npm=11.16.0 os=Windows 11 Pro 10.0.26300 (Git Bash) start_utc=2026-11-12T05:37:23Z
+end_utc=2026-11-12T05:41:20Z
