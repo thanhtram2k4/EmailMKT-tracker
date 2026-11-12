@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { ShieldX } from "lucide-react";
 import { DENIAL_MESSAGES, type AccessDenialReason } from "../../lib/auth/access";
 
 export const dynamic = "force-dynamic";
@@ -22,10 +23,16 @@ export default async function AccessDenied({ searchParams }: { searchParams: Pro
   return (
     <main className="center">
       <div className="card auth-card" data-testid="access-denied">
-        <h1 style={{ marginTop: 0, fontSize: 22 }}>Access denied</h1>
+        <div className="auth-brand">
+          <span className="logo" aria-hidden>
+            <ShieldX className="icon" />
+          </span>
+          Email MKT Tracker
+        </div>
+        <h1 className="page-title">Access denied</h1>
         <p>{messageFor(error)}</p>
         {error && (
-          <p className="muted" style={{ fontSize: 13 }}>
+          <p className="muted small">
             Reference: <code data-testid="denial-code">{error}</code>
           </p>
         )}

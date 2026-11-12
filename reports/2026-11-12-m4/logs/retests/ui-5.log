@@ -1,0 +1,51 @@
+[core] WARNING: Executable file detection not yet supported on 'win32'.
+Your pool doesn't have all of the error handlers! See: https://err.red/wpeh?v=0.18.0&method=connect
+migrations applied (app + graphile_worker)
+[stack] postgres ready on 54332; logs in D:\AI Studio\Email MKT Tracker\.local\logs\retest5
+[stack] building web app (next build)…
+[stack] web + worker healthy at http://localhost:3100
+
+Running 1 test using 1 worker
+
+  x  1 [chromium] › tests\e2e\ui-shell.spec.ts:150:1 › R-UI-03/04 (detail pages): email editor and contact detail — axe light/dark and no page scroll at 375px (5.4s)
+
+
+  1) [chromium] › tests\e2e\ui-shell.spec.ts:150:1 › R-UI-03/04 (detail pages): email editor and contact detail — axe light/dark and no page scroll at 375px 
+
+    Error: expect(received).toEqual(expected) // deep equality
+
+    - Expected  - 1
+    + Received  + 3
+
+    - Array []
+    + Array [
+    +   "375px /templates/abd85b05-3a20-4a9f-a81a-4364d87b069b: +163px (label[], select[preview-mode])",
+    + ]
+
+      189 |   await page.goto(editorUrl);
+      190 |   await page.screenshot({ path: path.join(SHOTS, "editor-1440.png"), fullPage: true });
+    > 191 |   expect(problems).toEqual([]);
+          |                    ^
+      192 | });
+      193 |
+      194 | test("R-UI-04b: the signed-out sign-in page passes axe", async ({ page }) => {
+        at D:\AI Studio\Email MKT Tracker\tests\e2e\ui-shell.spec.ts:191:20
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results\ui-shell-R-UI-03-04-detail-7065b-and-no-page-scroll-at-375px-chromium\test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results\ui-shell-R-UI-03-04-detail-7065b-and-no-page-scroll-at-375px-chromium\error-context.md
+
+    attachment #3: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results\ui-shell-R-UI-03-04-detail-7065b-and-no-page-scroll-at-375px-chromium\trace.zip
+    Usage:
+
+        npx playwright show-trace test-results\ui-shell-R-UI-03-04-detail-7065b-and-no-page-scroll-at-375px-chromium\trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  1 failed
+    [chromium] › tests\e2e\ui-shell.spec.ts:150:1 › R-UI-03/04 (detail pages): email editor and contact detail — axe light/dark and no page scroll at 375px 
+[stack] cleanup ok: 5 owned process(es) stopped, none left
+[stack] stopped (exit 1)

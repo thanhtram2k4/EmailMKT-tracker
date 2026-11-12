@@ -5,7 +5,7 @@ import { syncOverview } from "../../lib/crm/queries";
 import type { SyncCounts } from "../../lib/crm/sync";
 import { getDb } from "../../lib/db/client";
 import { syncNowAction } from "../crm-actions";
-import { AppHeader } from "../app-header";
+import { AppShell } from "../app-shell";
 import { Flash, Pill, fmtTime } from "../ui";
 
 export const dynamic = "force-dynamic";
@@ -20,11 +20,11 @@ export default async function SyncPage({ searchParams }: { searchParams: Promise
   const [o, conn] = await Promise.all([syncOverview(db), loadConnection(db)]);
 
   return (
-    <main className="shell wide">
-      <AppHeader staff={staff} />
+    <AppShell staff={staff} wide>
       <h1 className="page-title">Notion synchronization</h1>
       <Flash ok={sp.ok} error={sp.error} />
       <section className="card" data-testid="sync-status">
+        <div className="table-wrap" tabIndex={0}>
         <table>
           <tbody>
             <tr>
@@ -64,8 +64,9 @@ export default async function SyncPage({ searchParams }: { searchParams: Promise
             </tr>
           </tbody>
         </table>
+        </div>
         {staff.role === "admin" && (
-          <div className="row" style={{ marginTop: 12 }}>
+          <div className="row mt3">
             <form action={syncNowAction}>
               <input type="hidden" name="mode" value="incremental" />
               <button className="btn primary" type="submit" data-testid="sync-now">
@@ -84,7 +85,7 @@ export default async function SyncPage({ searchParams }: { searchParams: Promise
 
       <section className="card">
         <h2>Recent runs</h2>
-        <div className="table-wrap">
+        <div className="table-wrap" tabIndex={0}>
           <table data-testid="sync-runs">
             <thead>
               <tr>
@@ -139,6 +140,7 @@ export default async function SyncPage({ searchParams }: { searchParams: Promise
       {o.failedOutbox.length > 0 && (
         <section className="card" data-testid="outbox-failed">
           <h2>Failed Notion write-backs</h2>
+          <div className="table-wrap" tabIndex={0}>
           <table>
             <tbody>
               {o.failedOutbox.map((f) => (
@@ -153,8 +155,9 @@ export default async function SyncPage({ searchParams }: { searchParams: Promise
               ))}
             </tbody>
           </table>
+          </div>
         </section>
       )}
-    </main>
+    </AppShell>
   );
 }

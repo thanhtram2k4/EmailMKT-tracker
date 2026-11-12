@@ -6,7 +6,7 @@ import { NotionDisabledError, loadConnection, notionEnvFromConfig } from "../../
 import { getDb } from "../../../lib/db/client";
 import { NOTION_API_VERSION } from "../../../lib/notion/types";
 import { connectNotionAction, createDatabaseAction, disconnectNotionAction, saveMappingAction } from "../../crm-actions";
-import { AppHeader } from "../../app-header";
+import { AppShell } from "../../app-shell";
 import { Flash, Pill, fmtTime } from "../../ui";
 
 export const dynamic = "force-dynamic";
@@ -27,13 +27,12 @@ export default async function NotionSettings({ searchParams }: { searchParams: P
   const conn = info?.conn ?? (await loadConnection(db));
 
   return (
-    <main className="shell">
-      <AppHeader staff={staff} />
+    <AppShell staff={staff}>
       <h1 className="page-title">Notion settings</h1>
       <Flash ok={sp.ok} error={sp.error} />
 
       <section className="card" data-testid="notion-mode">
-        <p style={{ margin: 0 }}>
+        <p className="m0">
           <code>NOTION_MODE={cfg.NOTION_MODE}</code> · API version <code>{NOTION_API_VERSION}</code>
           {cfg.notionBaseUrl && (
             <>
@@ -44,7 +43,7 @@ export default async function NotionSettings({ searchParams }: { searchParams: P
         </p>
         {disabled && <p className="muted">Notion access is disabled. Set NOTION_MODE=mock (local synthetic data) or, with a recorded authorization, NOTION_MODE=live.</p>}
         {cfg.NOTION_MODE === "mock" && (
-          <p className="muted" style={{ fontSize: 13 }} data-testid="mock-hint">
+          <p className="muted small" data-testid="mock-hint">
             Local mock server with <strong>synthetic</strong> contacts. Token: <code>mock-notion-token-not-a-secret</code> · database ID{" "}
             <code>11111111-2222-4333-8444-555555555555</code> · parent page for “Create CRM database”: <code>99999999-8888-4777-8666-555555555555</code>
           </p>
@@ -88,6 +87,7 @@ export default async function NotionSettings({ searchParams }: { searchParams: P
             </div>
           ))}
           <form action={saveMappingAction}>
+            <div className="table-wrap" tabIndex={0}>
             <table>
               <thead>
                 <tr>
@@ -107,7 +107,7 @@ export default async function NotionSettings({ searchParams }: { searchParams: P
                       </td>
                       <td className="muted">{def.owner === "notion" ? "Notion → app" : "app → Notion"}</td>
                       <td>
-                        <select name={`map_${f}`} defaultValue={info!.mapping.fields[f] ?? ""} data-testid={`map-${f}`}>
+                        <select name={`map_${f}`} aria-label={`Notion property for ${def.label}`} defaultValue={info!.mapping.fields[f] ?? ""} data-testid={`map-${f}`}>
                           <option value="">(not mapped)</option>
                           {options.map((p) => (
                             <option key={p.name} value={p.name}>
@@ -121,7 +121,8 @@ export default async function NotionSettings({ searchParams }: { searchParams: P
                 })}
               </tbody>
             </table>
-            <p className="muted" style={{ fontSize: 13 }}>
+            </div>
+            <p className="muted small">
               App-owned columns are mirrors: the app writes Subscription status (and, later, Last emailed / Last engagement). A person setting Unsubscribed,
               Bounced or Complained in Notion adds a suppression; setting Subscribed never removes one and never counts as consent.
             </p>
@@ -150,7 +151,7 @@ export default async function NotionSettings({ searchParams }: { searchParams: P
                   Connect
                 </button>
               </div>
-              <p className="muted" style={{ fontSize: 13, margin: 0 }}>
+              <p className="muted small m0">
                 The token is encrypted (AES-256-GCM) before it is stored and is never shown again. Do not paste it into chat, tickets or Git.
               </p>
             </form>
@@ -179,6 +180,6 @@ export default async function NotionSettings({ searchParams }: { searchParams: P
           </section>
         </>
       )}
-    </main>
+    </AppShell>
   );
 }

@@ -42,7 +42,7 @@ describe("config safety rules", () => {
   });
 
   it("accepts SEND_MODE=live only in production", () => {
-    expect(issues({ ...prod, SEND_MODE: "live" })).toEqual([]);
+    expect(issues({ ...prod, SEND_MODE: "live", SES_FROM_ADDRESS: "news@example.com" })).toEqual([]);
   });
 
   it("rejects SEND_MODE=mock in production", () => {
@@ -54,8 +54,21 @@ describe("config safety rules", () => {
       /requires SEND_AUTHORIZATION_REF/,
     );
     expect(
-      issues({ ...base, SEND_MODE: mode, TEST_RECIPIENT_ALLOWLIST: "qa@example.com", SEND_AUTHORIZATION_REF: "approved 2026-11-12" }),
+      issues({ ...base, SEND_MODE: mode, TEST_RECIPIENT_ALLOWLIST: "qa@example.com", SEND_AUTHORIZATION_REF: "approved 2026-11-12", SES_FROM_ADDRESS: "QA <qa@example.com>" }),
     ).toEqual([]);
+  });
+
+  // M4: a real transport needs a verified From identity; header injection in From is refused.
+  it.each(["simulator", "allowlist"])("requires SES_FROM_ADDRESS for SEND_MODE=%s (M4)", (mode) => {
+    const env = { ...base, SEND_MODE: mode, TEST_RECIPIENT_ALLOWLIST: "qa@example.com", SEND_AUTHORIZATION_REF: "approved" };
+    expect(issues(env).join()).toMatch(/requires SES_FROM_ADDRESS/);
+    expect(issues({ ...env, SES_FROM_ADDRESS: "qa@example.com\r\nBcc: x@example.org" }).join()).toMatch(/SES_FROM_ADDRESS: must be an address/);
+    expect(issues({ ...env, SES_FROM_ADDRESS: "Công ty <qa@example.com>" })).toEqual([]);
+  });
+
+  it("validates SES_REGION and defaults to ap-southeast-1 (M4)", () => {
+    expect(parseConfig(base).SES_REGION).toBe("ap-southeast-1");
+    expect(issues({ ...base, SES_REGION: "nowhere" }).join()).toMatch(/AWS region/);
   });
 
   it("requires a non-empty allowlist for SEND_MODE=allowlist", () => {

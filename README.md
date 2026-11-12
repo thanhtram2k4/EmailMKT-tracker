@@ -88,6 +88,16 @@ npm run dev:crm              # web at http://localhost:3000, the worker, and the
 6. **Preview as a recipient** (e.g. "Mẫu: thiếu tên gọi") to see fallbacks; **Desktop 640px / Mobile 375px** are your browser's rendering only, not Gmail, Outlook or a phone mail app.
 7. **Export HTML / plain text** from the Versions panel.
 
+### Walkthrough: subject, personalization check and test send (M4)
+1. On an email's page, enter a **Subject** (merge fields allowed, e.g. `{{ greeting_name | default: "bạn" }}`) and click **Save subject (new version)**. The rendered subject is shown for each sample recipient.
+2. **Find a contact to preview as** searches the synced CRM contacts for the preview list.
+3. **Personalization check** lists contacts that would get an unresolved field (a field used without `default:`) and any problem that blocks sending.
+4. **Gửi thử (test send):** type 1–3 addresses and choose whose data fills the merge fields. Only addresses on `TEST_RECIPIENT_ALLOWLIST` (or SES simulator addresses) are accepted; the subject gets `[TEST]`.
+   - With `SEND_MODE=disabled` (default) the button is off.
+   - With `SEND_MODE=mock`, the message stays in-process (nothing leaves the machine).
+   - Real SES test sends need `SEND_MODE=allowlist` or `simulator`, `SEND_AUTHORIZATION_REF`, `SES_FROM_ADDRESS` and an AWS profile, plus the user's explicit approval. "Accepted" means SES accepted the message, not that it reached the inbox; an uncertain result is shown as such and never retried automatically.
+5. **Sending** (admin) shows the read-only sending configuration.
+
 Internal test tooling (labelled fixtures, GrapesJS comparison) is at `/internal/editor-lab` for admins when APP_ENV is local or test; it is not part of the user workflow.
 
 **Stopping:** press Ctrl+C in both terminals. On Windows, check that no `node`/`postgres` processes from this folder remain if a terminal was closed abruptly (see `CLAUDE.md` → "Windows process hygiene").
@@ -99,12 +109,16 @@ npm run test:unit
 npm run test:integration     # starts a throwaway PostgreSQL automatically
 npm run e2e                  # throwaway DB + production build + worker + mock Notion + Playwright, then tears down
 npm run smoke:local          # same isolated stack, runs the smoke suite (results in .local/logs/smoke/)
+npm run e2e:mock-send        # stack with SEND_MODE=mock: test-send UI flow (nothing leaves the machine)
+npm run smoke:mock-send      # smoke suite with SEND_MODE=mock (S5-mock)
 ```
+The local stack only accepts `--send-mode disabled|mock`; it never starts a real send mode.
 
 ## Configuration
 See `.env.example`. Safety rules are enforced at startup, and the web and worker processes refuse to start when they are broken:
 - `SEND_MODE=live` is rejected unless `APP_ENV=production`.
 - `SEND_MODE=simulator` and `SEND_MODE=allowlist` require `SEND_AUTHORIZATION_REF`.
+- `SEND_MODE=simulator`, `allowlist` and `live` require `SES_FROM_ADDRESS` (a verified SES identity, no line breaks). AWS credentials come from an AWS profile, never from this repository.
 - `DEV_LOGIN_ENABLED` is rejected in staging and production.
 - Staging and production require a Google OAuth client, an `https` base URL and `APP_ENCRYPTION_KEY`.
 - `NOTION_MODE=mock` only accepts a loopback base URL and is rejected in production.

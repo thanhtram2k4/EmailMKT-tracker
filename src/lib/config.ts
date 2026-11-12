@@ -36,6 +36,9 @@ function isLoopbackUrl(u: string): boolean {
   }
 }
 
+/** "address@domain" or "Display Name <address@domain>" (no line breaks: header injection). */
+export const SES_FROM_RE = /^(?:[^<>\r\n]*<)?[^\s@<>]+@[^\s@<>]+\.[^\s@<>]+>?$/;
+
 const csv = z
   .string()
   .optional()
@@ -67,6 +70,16 @@ const schema = z
     TEST_RECIPIENT_ALLOWLIST: csv,
     /** Reference to the explicit approval for real test sends (ticket, date + approver). */
     SEND_AUTHORIZATION_REF: z.string().optional(),
+    /** M4: Amazon SES v2 (used only when the guard selects a real transport). */
+    SES_REGION: z.string().regex(/^[a-z]{2}(-[a-z]+)+-\d$/,"must be an AWS region such as ap-southeast-1").default("ap-southeast-1"),
+    /** Verified SES identity used as From for test sends, e.g. "Company <news@mail.company.com>". */
+    SES_FROM_ADDRESS: z.string().optional(),
+    SES_CONFIGURATION_SET: z.string().optional(),
+    /** Provider call timeout. A timeout is recorded as an UNKNOWN outcome and never retried automatically. */
+    SES_TIMEOUT_MS: z.coerce.number().int().min(1000).max(60000).default(10000),
+    /** Test-send rate limits (per staff member per hour, and for the whole app per day). */
+    TEST_SEND_MAX_PER_HOUR: z.coerce.number().int().min(1).max(100).default(10),
+    TEST_SEND_MAX_PER_DAY: z.coerce.number().int().min(1).max(1000).default(50),
     LOG_LEVEL: z.enum(["trace", "debug", "info", "warn", "error", "fatal", "silent"]).default("info"),
     BUILD_ID: z.string().default("dev"),
     WORKER_CONCURRENCY: z.coerce.number().int().min(1).max(20).default(2),
@@ -109,6 +122,16 @@ const schema = z
         path: ["TEST_RECIPIENT_ALLOWLIST"],
         message: "SEND_MODE=allowlist requires a non-empty TEST_RECIPIENT_ALLOWLIST",
       });
+    }
+    if ((c.SEND_MODE === "simulator" || c.SEND_MODE === "allowlist" || c.SEND_MODE === "live") && !c.SES_FROM_ADDRESS) {
+      ctx.addIssue({
+        code: "custom",
+        path: ["SES_FROM_ADDRESS"],
+        message: `SEND_MODE=${c.SEND_MODE} requires SES_FROM_ADDRESS (a verified SES identity)`,
+      });
+    }
+    if (c.SES_FROM_ADDRESS && !SES_FROM_RE.test(c.SES_FROM_ADDRESS.trim())) {
+      ctx.addIssue({ code: "custom", path: ["SES_FROM_ADDRESS"], message: "must be an address or \"Name <address>\"" });
     }
     if (c.DEV_LOGIN_ENABLED && (c.APP_ENV === "staging" || c.APP_ENV === "production")) {
       ctx.addIssue({

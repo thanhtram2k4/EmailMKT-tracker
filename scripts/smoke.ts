@@ -159,9 +159,92 @@ if (process.env.DATABASE_URL && process.env.NOTION_MODE === "mock") {
   });
 }
 
+// S4 (M4) — subject + body personalization for a synced CRM contact without a greeting name.
+if (process.env.DATABASE_URL && process.env.NOTION_MODE === "mock") {
+  await check("S4", "Subject + body with fallbacks; preview as a synced CRM contact without a greeting name has no unresolved fields", "MOCK", async () => {
+    const fsMod = await import("node:fs");
+    const { getDb, closeDb } = await import("../src/lib/db/client.ts");
+    const { importTemplate, saveSubject } = await import("../src/lib/templates/service.ts");
+    const { renderForRecipient, renderSubject } = await import("../src/lib/templates/merge.ts");
+    const { previewRecipients, personalizationCheck } = await import("../src/lib/templates/recipients.ts");
+    try {
+      const db = getDb();
+      const html = fsMod.readFileSync("fixtures/email-templates/synthetic-a-newsletter.html", "utf8");
+      const r = await importTemplate(db, { name: "smoke S4", html, sourceKind: "fixture", actor: "smoke" });
+      const v = await saveSubject(db, { templateId: r.template.id, baseVersionId: r.version.id, subject: 'Chào {{ greeting_name | default: "bạn" }} — bản tin', actor: "smoke" });
+      const crm = (await previewRecipients(db)).find((p) => p.id.startsWith("contact:") && !p.data.greeting_name);
+      if (!crm) return { result: "FAIL", notes: "no synced CRM contact without a greeting name (S3-mock must run first)" };
+      const s = renderSubject(v.subject!, crm.data);
+      const b = renderForRecipient(v.html, crm.data);
+      const check = await personalizationCheck(db, { subject: v.subject, html: v.html });
+      const ok = s.errors.length === 0 && s.missingWithoutFallback.length === 0 && s.subject === "Chào bạn — bản tin" && b.errors.length === 0 && b.missingWithoutFallback.length === 0 && !/\{\{/.test(b.html) && check.blocking.length === 0;
+      return { result: ok ? "PASS" : "FAIL", notes: `subject="${s.subject}"; body errors=${b.errors.length}; missing=${[...s.missingWithoutFallback, ...b.missingWithoutFallback].join(",") || "none"}; check: ${check.checked} contacts, ${check.affected.length} affected, ${check.blocking.length} blocking` };
+    } finally {
+      await closeDb();
+    }
+  });
+}
+
+// S5 — test send. MOCK variants only (the local stack refuses real send modes).
+if (process.env.DATABASE_URL && process.env.NOTION_MODE === "mock") {
+  const mode = process.env.SEND_MODE ?? "disabled";
+  await check(
+    mode === "mock" ? "S5-mock" : "S5-disabled",
+    mode === "mock"
+      ? "Test send in SEND_MODE=mock to the allowlisted reserved-domain inbox: accepted by the in-process transport, [TEST] prefix, no network, no campaign link"
+      : "Test send in SEND_MODE=disabled is refused by the server and nothing reaches a transport",
+    "MOCK",
+    async () => {
+      const { randomUUID } = await import("node:crypto");
+      const { getConfig } = await import("../src/lib/config.ts");
+      const { getDb, closeDb } = await import("../src/lib/db/client.ts");
+      const { importTemplate, saveSubject } = await import("../src/lib/templates/service.ts");
+      const { sendTestEmail, sharedMockTransport } = await import("../src/lib/sending/test-send.ts");
+      try {
+        const db = getDb();
+        const r = await importTemplate(db, { name: "smoke S5", html: '<p>Chào {{ greeting_name | default: "bạn" }}</p>', sourceKind: "paste", actor: "smoke" });
+        const v = await saveSubject(db, { templateId: r.template.id, baseVersionId: r.version.id, subject: 'Smoke {{ company | default: "-" }}', actor: "smoke" });
+        const before = sharedMockTransport.sent.length;
+        const out = await sendTestEmail(db, { cfg: getConfig() }, { templateId: r.template.id, versionId: v.id, recipients: "qa-inbox@example.com", mergeSource: "sample-full", idempotencyKey: randomUUID(), actor: "system:smoke", correlationId: "smoke-s5" });
+        const sent = sharedMockTransport.sent.slice(before);
+        if (mode === "mock") {
+          const ok = out[0]?.status === "accepted" && sent.length === 1 && sent[0].subject === "[TEST] Smoke Công ty An Phát";
+          return { result: ok ? "PASS" : "FAIL", notes: `status=${out[0]?.status}; transport calls=${sent.length}; subject="${sent[0]?.subject ?? ""}"; to=${out[0]?.recipient}` };
+        }
+        const ok = out[0]?.status === "refused" && /sending is disabled/.test(out[0].message) && sent.length === 0;
+        return { result: ok ? "PASS" : "FAIL", notes: `status=${out[0]?.status}; message="${out[0]?.message}"; transport calls=${sent.length}` };
+      } finally {
+        await closeDb();
+      }
+    },
+  );
+}
+rows.push({
+  id: "S5-live",
+  scenario: "Real test send through SES to an allowlisted inbox / the SES simulator; Delivery event; campaign metrics unchanged",
+  type: "LIVE",
+  result: "BLOCKED",
+  notes: "Not authorized: needs the user's separate approval, SES setup (verified identity, credentials) and SEND_AUTHORIZATION_REF. Delivery events also need a public HTTPS SNS endpoint (no deployment).",
+});
+
+// S10 (M4) — every page in the sidebar opens for a signed-in admin and renders the main landmark.
+if (devAvailable) {
+  await check("S10", "UI shell: each sidebar page returns 200 with the <main id=\"main\"> landmark for a signed-in admin (dev sign-in)", "MOCK", async () => {
+    const r = await devLogin("admin@example.com");
+    if (!r.available) return { result: "BLOCKED", notes: "dev sign-in unavailable" };
+    const cookie = r.cookies.map((c) => c.split(";")[0]).join("; ");
+    const pages = ["/", "/contacts", "/contacts/issues", "/sync", "/templates", "/settings/notion", "/settings/sending", "/staff"];
+    const bad: string[] = [];
+    for (const p of pages) {
+      const res = await fetch(`${baseUrl}${p}`, { headers: { cookie }, redirect: "manual" });
+      const body = res.status === 200 ? await res.text() : "";
+      if (res.status !== 200 || !body.includes('id="main"') || !body.includes('data-testid="sidebar-nav"')) bad.push(`${p} → ${res.status}`);
+    }
+    return { result: bad.length ? "FAIL" : "PASS", notes: bad.length ? `failed: ${bad.join(", ")}` : `${pages.length} pages ok` };
+  });
+}
+
 for (const [id, s, ms] of [
-  ["S4", "Preview as recipient with no unresolved fields (full M4 flow with real CRM recipients)", "M4"],
-  ["S5", "Test send → simulator Delivery event; campaign metrics unchanged", "M4"],
   ["S6", "Send now to 3 simulator addresses → Sent 3 / Delivered 2 / Bounced 1", "M5"],
   ["S7", "Scheduled send (+3 min, Asia/Ho_Chi_Minh) executes with browser closed", "M6"],
   ["S8", "Open, click, unsubscribe recorded; redirect to snapshot URL", "M7"],

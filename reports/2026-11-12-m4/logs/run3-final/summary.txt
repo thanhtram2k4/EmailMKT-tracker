@@ -1,0 +1,11 @@
+commit e4ab97e (+ uncommitted M4 changes) start 2026-11-12T15:54:21+07:00
+smoke-precheck exit=0 dur=30s cmd=npm run smoke:local
+lint exit=0 dur=7s cmd=npm run lint
+typecheck exit=0 dur=5s cmd=npm run typecheck
+unit exit=0 dur=4s cmd=npm run test:unit
+integration exit=0 dur=44s cmd=npm run test:integration
+tooling exit=0 dur=20s cmd=npm run test:tooling
+e2e exit=0 dur=140s cmd=npm run e2e
+e2e-mock-send exit=0 dur=35s cmd=npm run e2e:mock-send
+smoke-mock-send exit=0 dur=31s cmd=npm run smoke:mock-send
+end 2026-11-12T15:59:37+07:00

@@ -1,0 +1,68 @@
+
+> email-mkt-tracker@0.1.0 e2e
+> tsx scripts/local-stack.ts --log-dir .local/logs/e2e -- playwright test
+
+[core] WARNING: Executable file detection not yet supported on 'win32'.
+Your pool doesn't have all of the error handlers! See: https://err.red/wpeh?v=0.18.0&method=connect
+migrations applied (app + graphile_worker)
+[stack] postgres ready on 54332; logs in D:\AI Studio\Email MKT Tracker\.local\logs\e2e
+[stack] building web app (next build)…
+[stack] web + worker healthy at http://localhost:3100
+
+Running 50 tests using 1 worker
+
+  ok  1 [chromium] › tests\e2e\auth.spec.ts:20:1 › unauthenticated visitors are redirected to sign-in (595ms)
+  ok  2 [chromium] › tests\e2e\auth.spec.ts:26:1 › allowlisted admin signs in, sees role and admin page, signs out (1.7s)
+  ok  3 [chromium] › tests\e2e\auth.spec.ts:46:1 › allowlisted member signs in but cannot open the admin page (807ms)
+  ok  4 [chromium] › tests\e2e\auth.spec.ts:60:3 › stranger@example.com is rejected (ACCESS_DENIED_NOT_ALLOWLISTED) (631ms)
+  ok  5 [chromium] › tests\e2e\auth.spec.ts:60:3 › outsider@example.net is rejected (ACCESS_DENIED_WRONG_DOMAIN) (585ms)
+  ok  6 [chromium] › tests\e2e\auth.spec.ts:60:3 › revoked@example.com is rejected (ACCESS_DENIED_DISABLED) (598ms)
+  ok  7 [chromium] › tests\e2e\auth.spec.ts:70:1 › revoking a signed-in member ends the session and blocks the next sign-in (1.8s)
+  ok  8 [chromium] › tests\e2e\auth.spec.ts:90:1 › healthz reports database and worker (44ms)
+  ok  9 [chromium] › tests\e2e\crm.spec.ts:44:3 › CRM with mock Notion (synthetic data) › admin connects the mock Notion database and reviews the mapping (3.3s)
+  ok 10 [chromium] › tests\e2e\crm.spec.ts:63:3 › CRM with mock Notion (synthetic data) › first sync imports the synthetic contacts with issues flagged (3.5s)
+  ok 11 [chromium] › tests\e2e\crm.spec.ts:85:3 › CRM with mock Notion (synthetic data) › data issues: duplicates can be resolved by choosing a primary (1.3s)
+  ok 12 [chromium] › tests\e2e\crm.spec.ts:99:3 › CRM with mock Notion (synthetic data) › consent: imported contacts are unknown; a grant needs evidence and is recorded by staff (1.5s)
+  ok 13 [chromium] › tests\e2e\crm.spec.ts:121:3 › CRM with mock Notion (synthetic data) › a 'resubscribe' in Notion never removes the suppression and is corrected in Notion (2.2s)
+  ok 14 [chromium] › tests\e2e\crm.spec.ts:138:3 › CRM with mock Notion (synthetic data) › a repeated full sync creates nothing new (2.0s)
+  ok 15 [chromium] › tests\e2e\crm.spec.ts:149:3 › CRM with mock Notion (synthetic data) › members can read contacts but cannot change settings or consent (1.2s)
+  ok 16 [chromium] › tests\e2e\editor-trial.spec.ts:86:5 › SYNTHETIC A › import, sanitize report, regions, checks (1.5s)
+  ok 17 [chromium] › tests\e2e\editor-trial.spec.ts:115:5 › SYNTHETIC A › edit text, image, button and link; save; reopen; export (2.2s)
+  ok 18 [chromium] › tests\e2e\editor-trial.spec.ts:199:5 › SYNTHETIC A › recipient previews and missing-name fallbacks (1.5s)
+  ok 19 [chromium] › tests\e2e\editor-trial.spec.ts:218:5 › SYNTHETIC A › responsive browser renderings and import fidelity (Chromium only) (3.8s)
+  ok 20 [chromium] › tests\e2e\editor-trial.spec.ts:242:5 › SYNTHETIC A › GrapesJS (candidate b): no-edit export fidelity, then an edit + save (3.3s)
+  ok 21 [chromium] › tests\e2e\editor-trial.spec.ts:86:5 › SYNTHETIC B › import, sanitize report, regions, checks (1.5s)
+  ok 22 [chromium] › tests\e2e\editor-trial.spec.ts:115:5 › SYNTHETIC B › edit text, image, button and link; save; reopen; export (2.5s)
+  ok 23 [chromium] › tests\e2e\editor-trial.spec.ts:199:5 › SYNTHETIC B › recipient previews and missing-name fallbacks (1.4s)
+  ok 24 [chromium] › tests\e2e\editor-trial.spec.ts:218:5 › SYNTHETIC B › responsive browser renderings and import fidelity (Chromium only) (8.6s)
+  ok 25 [chromium] › tests\e2e\editor-trial.spec.ts:242:5 › SYNTHETIC B › GrapesJS (candidate b): no-edit export fidelity, then an edit + save (5.5s)
+  ok 26 [chromium] › tests\e2e\editor-trial.spec.ts:290:1 › TipTap paste (candidate c): formatted text from a Google-Docs-like clipboard keeps bold/italic/links, drops styles (1.4s)
+  ok 27 [chromium] › tests\e2e\paste-workflow.spec.ts:55:1 › main UI: Paste HTML is the entry point; no fixture gallery or GrapesJS controls (870ms)
+  ok 28 [chromium] › tests\e2e\paste-workflow.spec.ts:68:1 › paste → import → preview → edit text, image and link → save → reopen → export (3.6s)
+  ok 29 [chromium] › tests\e2e\paste-workflow.spec.ts:161:1 › formatting loss needs a choice: undo, keep, or HTML source (sanitized on save) (2.9s)
+  ok 30 [chromium] › tests\e2e\paste-workflow.spec.ts:214:1 › formatting toolbar is an explicit conversion with a preview of what it removes, and undo (2.2s)
+  ok 31 [chromium] › tests\e2e\paste-workflow.spec.ts:242:1 › a pasted fragment (no <html>/<body>) and a typed-markup attempt (1.6s)
+  ok 32 [chromium] › tests\e2e\paste-workflow.spec.ts:258:1 › internal tools are separate: members cannot open the lab (738ms)
+  ok 33 [chromium] › tests\e2e\paste-workflow.spec.ts:264:1 › internal tools are separate: admin-only lab, not linked from the product UI (768ms)
+  ok 34 [chromium] › tests\e2e\test-send.spec.ts:44:1 › subject preview: fallbacks for each sample; unknown field reported (2.1s)
+  ok 35 [chromium] › tests\e2e\test-send.spec.ts:74:3 › SEND_MODE=disabled › R-TS-12: the button is disabled and the panel explains why (1.7s)
+  -  36 [chromium] › tests\e2e\test-send.spec.ts:86:3 › SEND_MODE=mock › OR-TS-01: subject with fallback → preview → send test to the allowlisted inbox → history
+  -  37 [chromium] › tests\e2e\test-send.spec.ts:105:3 › SEND_MODE=mock › R-TS-02 (UI): a typed address that is not allowlisted is refused and not sent
+  -  38 [chromium] › tests\e2e\test-send.spec.ts:117:3 › SEND_MODE=mock › a missing value without fallback blocks the send and lists the problem
+  ok 39 [chromium] › tests\e2e\ui-shell.spec.ts:45:3 › R-UI-01 / R-UI-06: every page renders; navigation by role › admin: all pages render without console errors; nav marks the current page (2.1s)
+  ok 40 [chromium] › tests\e2e\ui-shell.spec.ts:61:3 › R-UI-01 / R-UI-06: every page renders; navigation by role › member: admin items are hidden and admin pages are refused (714ms)
+  ok 41 [chromium] › tests\e2e\ui-shell.spec.ts:71:1 › R-UI-02: keyboard — skip link first, visible focus, nav reachable (1.0s)
+  ok 42 [chromium] › tests\e2e\ui-shell.spec.ts:93:3 › R-UI-03: no horizontal page scroll at 375px (2.4s)
+  ok 43 [chromium] › tests\e2e\ui-shell.spec.ts:93:3 › R-UI-03: no horizontal page scroll at 768px (1.6s)
+  ok 44 [chromium] › tests\e2e\ui-shell.spec.ts:93:3 › R-UI-03: no horizontal page scroll at 1024px (1.7s)
+  ok 45 [chromium] › tests\e2e\ui-shell.spec.ts:93:3 › R-UI-03: no horizontal page scroll at 1440px (1.7s)
+  ok 46 [chromium] › tests\e2e\ui-shell.spec.ts:128:1 › R-UI-04: axe finds no serious or critical violations, light and dark (13.7s)
+  ok 47 [chromium] › tests\e2e\ui-shell.spec.ts:150:1 › R-UI-03/04 (detail pages): email editor and contact detail — axe light/dark and no page scroll at 375px (5.7s)
+  ok 48 [chromium] › tests\e2e\ui-shell.spec.ts:199:1 › R-UI-04b: the signed-out sign-in page passes axe (861ms)
+  ok 49 [chromium] › tests\e2e\ui-shell.spec.ts:206:1 › R-UI-05: prefers-reduced-motion disables transitions (807ms)
+  ok 50 [chromium] › tests\e2e\ui-shell.spec.ts:217:1 › theme toggle persists across reloads (cookie, server-rendered) (972ms)
+
+  3 skipped
+  47 passed (1.9m)
+[stack] cleanup ok: 5 owned process(es) stopped, none left
+[stack] stopped (exit 0)

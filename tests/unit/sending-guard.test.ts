@@ -79,7 +79,7 @@ describe("sending guard: test and integration sends", () => {
   });
 });
 
-describe("transport factory (M1)", () => {
+describe("transport factory (M1, updated in M4)", () => {
   it("returns the mock transport only when the guard selects mock", async () => {
     const mock = new MockTransport();
     const t = createTransport(g({ sendMode: "mock" }), mock);
@@ -89,13 +89,32 @@ describe("transport factory (M1)", () => {
     expect(mock.sent).toHaveLength(1);
   });
 
-  it("refuses to build any real transport in M1, even when the guard would allow it", () => {
+  it("refuses a real transport when SES is not configured, even when the guard would allow it", () => {
     expect(() => createTransport(g({ sendMode: "simulator", recipients: ["success@simulator.amazonses.com"], authorizationRef: "ok" }))).toThrow(
       TransportUnavailableError,
     );
-    expect(() => createTransport(g({ appEnv: "production", sendMode: "live", purpose: "customer_campaign", liveCampaignsEnabled: true }))).toThrow(
-      /No real email transport/,
+    expect(() => createTransport(g({ sendMode: "simulator", recipients: ["success@simulator.amazonses.com"], authorizationRef: "ok" }))).toThrow(
+      /No real email transport is configured/,
     );
+  });
+
+  // R-TS-01 (factory part)
+  const ses = { region: "ap-southeast-1", from: "qa@example.com", timeoutMs: 1000, client: { send: async () => ({ MessageId: "x" }) } };
+
+  it("still refuses customer campaigns in M4 (no send engine until M5), even with SES configured", () => {
+    expect(() => createTransport(g({ appEnv: "production", sendMode: "live", purpose: "customer_campaign", liveCampaignsEnabled: true }), { ses })).toThrow(
+      /not implemented yet \(M5\)/,
+    );
+  });
+
+  it("builds the SES transport only after the guard approves a test send", () => {
+    const ok = createTransport(g({ sendMode: "simulator", purpose: "test_send", recipients: ["success@simulator.amazonses.com"], authorizationRef: "ok" }), { ses });
+    expect(ok.name).toBe("ses");
+    expect(() => createTransport(g({ sendMode: "simulator", purpose: "test_send", recipients: ["qa@example.com"], authorizationRef: "ok" }), { ses })).toThrow(/Send refused/);
+    expect(() =>
+      createTransport(g({ sendMode: "allowlist", purpose: "test_send", recipients: ["qa@example.com"], testRecipientAllowlist: ["qa@example.com"] }), { ses }),
+    ).toThrow(/SEND_AUTHORIZATION_REF/);
+    expect(() => createTransport(g({ sendMode: "disabled", purpose: "test_send", recipients: ["qa@example.com"] }), { ses })).toThrow(/sending is disabled/);
   });
 
   it("propagates guard refusals", () => {

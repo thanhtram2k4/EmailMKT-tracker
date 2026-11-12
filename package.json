@@ -26,6 +26,8 @@
     "e2e": "tsx scripts/local-stack.ts --log-dir .local/logs/e2e -- playwright test",
     "smoke": "tsx scripts/smoke.ts",
     "e2e:existing": "playwright test",
+    "e2e:mock-send": "tsx scripts/local-stack.ts --send-mode mock --log-dir .local/logs/e2e-mock-send -- playwright test tests/e2e/test-send.spec.ts",
+    "smoke:mock-send": "tsx scripts/local-stack.ts --send-mode mock --log-dir .local/logs/smoke-mock-send -- tsx scripts/smoke.ts --env local-stack",
     "smoke:local": "tsx scripts/local-stack.ts --log-dir .local/logs/smoke -- tsx scripts/smoke.ts --env local-stack",
     "dev:all": "concurrently -n web,worker -c blue,magenta \"npm:dev\" \"npm:worker\"",
     "seed:fixtures": "tsx scripts/seed-fixtures.ts",
@@ -36,6 +38,8 @@
     "test:tooling": "vitest run --project tooling"
   },
   "dependencies": {
+    "@aws-sdk/client-sesv2": "3.1167.0",
+    "@fontsource/be-vietnam-pro": "5.3.0",
     "@tiptap/core": "3.33.1",
     "@tiptap/extension-link": "3.33.1",
     "@tiptap/pm": "3.33.1",
@@ -51,6 +55,7 @@
     "html-to-text": "10.0.1",
     "htmlparser2": "10.1.0",
     "liquidjs": "10.30.1",
+    "lucide-react": "1.72.0",
     "next": "16.4.6",
     "pg": "8.23.1",
     "pino": "10.4.0",
@@ -61,6 +66,7 @@
     "zod": "4.6.7"
   },
   "devDependencies": {
+    "@axe-core/playwright": "4.14.0",
     "@playwright/test": "1.65.0",
     "@types/html-to-text": "9.0.4",
     "@types/node": "24.19.2",

@@ -6,6 +6,7 @@ import type { Db } from "../db/client";
 import { templates, templateVersions } from "../db/schema";
 import { applyEdits, type EditOp, type FormatChange } from "./editable";
 import { parseHtml } from "./html-doc";
+import { MAX_SUBJECT_LENGTH } from "./merge";
 import { describeFormat } from "./text-runs";
 import { extractFragment, sanitizeEmailHtml, type SanitizeReport } from "./sanitize";
 
@@ -112,10 +113,38 @@ export async function saveStructuredEdits(db: Db, i: { templateId: string; baseV
     const versionNo = await nextVersionNo(tx, i.templateId);
     const [v] = await tx
       .insert(templateVersions)
-      .values({ templateId: i.templateId, versionNo, baseVersionId: base.id, editor: "structured", html, plainText: plainTextOf(html), ops: i.ops, sanitizeReport: report, note, createdBy: i.actor })
+      .values({ templateId: i.templateId, versionNo, baseVersionId: base.id, editor: "structured", html, plainText: plainTextOf(html), ops: i.ops, sanitizeReport: report, note, subject: base.subject, preheader: base.preheader, createdBy: i.actor })
       .returning();
     await tx.update(templates).set({ updatedAt: new Date() }).where(eq(templates.id, i.templateId));
     await writeAudit(tx as unknown as Db, { actor: i.actor, action: "template.version_saved", entityType: "template", entityId: i.templateId, after: { versionNo, editor: "structured", ops: i.ops.map((o) => `${o.kind}:${o.id}`), formatChanges: edited.formatChanges.map((c) => ({ id: c.id, mode: c.mode, removed: c.removed.length, added: c.added.length })) }, correlationId: i.correlationId });
+    return v;
+  });
+}
+
+/**
+ * M4: change the subject (and preheader). Versions are immutable, so this stores a new version with
+ * the same HTML. Line breaks are refused (header injection); merge-field problems are reported by
+ * scanSubject and block test sends, but a draft subject may still be saved and fixed later.
+ */
+export async function saveSubject(db: Db, i: { templateId: string; baseVersionId: string; subject: string; preheader?: string | null; actor: string; correlationId?: string }) {
+  const subject = i.subject.trim();
+  const preheader = (i.preheader ?? "").trim() || null;
+  if (/[\r\n]/.test(i.subject) || /[\r\n]/.test(i.preheader ?? "")) throw new Error("The subject and preheader must be a single line.");
+  if (!subject) throw new Error("Enter a subject.");
+  if (subject.length > MAX_SUBJECT_LENGTH) throw new Error(`The subject is longer than ${MAX_SUBJECT_LENGTH} characters.`);
+  if (preheader && preheader.length > 250) throw new Error("The preheader is longer than 250 characters.");
+  const base = await getVersion(db, i.templateId, i.baseVersionId);
+  if (!base) throw new Error("Base version not found");
+  if (base.subject === subject && (base.preheader ?? null) === preheader) throw new Error("Nothing changed.");
+  return db.transaction(async (tx) => {
+    await tx.execute(sql`select pg_advisory_xact_lock(hashtext(${"template:" + i.templateId}))`);
+    const versionNo = await nextVersionNo(tx, i.templateId);
+    const [v] = await tx
+      .insert(templateVersions)
+      .values({ templateId: i.templateId, versionNo, baseVersionId: base.id, editor: base.editor === "grapesjs" ? "grapesjs" : "structured", html: base.html, plainText: base.plainText, ops: [{ kind: "subject" }], sanitizeReport: base.sanitizeReport, note: base.subject ? "Subject changed" : "Subject added", subject, preheader, createdBy: i.actor })
+      .returning();
+    await tx.update(templates).set({ updatedAt: new Date() }).where(eq(templates.id, i.templateId));
+    await writeAudit(tx as unknown as Db, { actor: i.actor, action: "template.subject_saved", entityType: "template", entityId: i.templateId, before: { subject: base.subject, preheader: base.preheader }, after: { versionNo, subject, preheader }, correlationId: i.correlationId });
     return v;
   });
 }

@@ -17,7 +17,8 @@ import { sanitizeEmailHtml } from "../../src/lib/templates/sanitize";
 const FIXTURE = fs.readFileSync("fixtures/email-templates/internal-paste-workflow.html", "utf8");
 // What Export returns for v1: the stored (sanitized) HTML, serialized by the export route.
 const V1 = stripAnnotations(sanitizeEmailHtml(FIXTURE).html);
-const SHOTS = "reports/2026-11-12-m3-rev2/screenshots";
+// M4: screenshots no longer overwrite the committed M3 rev 2 evidence; a test cycle chooses its folder.
+const SHOTS = process.env.PASTE_WORKFLOW_SHOTS ?? "test-results/paste-workflow/screenshots";
 const OUT = "test-results/paste-workflow";
 fs.mkdirSync(SHOTS, { recursive: true });
 fs.mkdirSync(OUT, { recursive: true });

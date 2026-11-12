@@ -2,11 +2,14 @@
  * Provider-neutral mail transport interface.
  *
  * Decision on record (docs/PLAN.md decisions log, 2026-11-12): customer campaigns use
- * Amazon SES; Gmail API sending is a Phase 2 optional transport. Both will implement
- * this interface. M1 ships ONLY the mock transport — no network-capable transport exists
- * yet, and `createTransport` refuses to build one.
+ * Amazon SES; Gmail API sending is a Phase 2 optional transport. Both implement this interface.
+ *
+ * M4: an SES transport exists for TEST SENDS only. `createTransport` builds it only when the guard
+ * approves a real send AND SES is configured. Customer campaigns are still refused (no send engine
+ * until M5). Building a transport never bypasses the guard.
  */
 import { decideSend, type GuardInput } from "./guard";
+import { SesTransport, type SesTransportOptions } from "./ses-transport";
 
 export type OutboundMessage = {
   /** Our message id (UUID); becomes the SES `msg_id` tag / Message-ID local part from M5. */
@@ -65,13 +68,21 @@ export class TransportUnavailableError extends Error {
 
 /**
  * Build the transport for a send, after the guard has approved it.
- * Throws if the guard denies, or if a real transport is required (none exists in M1).
+ * Throws if the guard denies, if SES is not configured, or for customer campaigns (no engine until M5).
  */
-export function createTransport(input: GuardInput, mock: MockTransport = new MockTransport()): MailTransport {
+export function createTransport(
+  input: GuardInput,
+  opts: MockTransport | { mock?: MockTransport; ses?: SesTransportOptions | null } = {},
+): MailTransport {
+  const o = opts instanceof MockTransport ? { mock: opts } : opts;
   const d = decideSend(input);
   if (!d.allowed) throw new TransportUnavailableError(`Send refused: ${d.reason}`);
-  if (d.transport === "mock") return mock;
-  throw new TransportUnavailableError(
-    "No real email transport is implemented (M1). SES integration is scheduled for M4/M5 and requires separate authorization.",
-  );
+  if (d.transport === "mock") return o.mock ?? new MockTransport();
+  if (input.purpose === "customer_campaign") {
+    throw new TransportUnavailableError("Customer campaign sending is not implemented yet (M5) and requires separate authorization.");
+  }
+  if (!o.ses?.from) {
+    throw new TransportUnavailableError("No real email transport is configured: set SES_FROM_ADDRESS (and AWS credentials) for SES test sends.");
+  }
+  return new SesTransport(o.ses);
 }

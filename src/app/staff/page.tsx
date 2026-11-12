@@ -3,7 +3,7 @@ import { requireRole } from "../../lib/auth/session";
 import { getDb } from "../../lib/db/client";
 import { auditLog } from "../../lib/db/schema";
 import { listStaff } from "../../lib/staff";
-import { AppHeader } from "../app-header";
+import { AppShell } from "../app-shell";
 
 export const dynamic = "force-dynamic";
 
@@ -18,15 +18,14 @@ export default async function StaffPage() {
   ]);
 
   return (
-    <main className="shell">
-      <AppHeader staff={staff} />
+    <AppShell staff={staff}>
       <section className="card" data-testid="staff-list">
         <h2>Staff access list</h2>
-        <p className="muted" style={{ marginTop: 0, fontSize: 13 }}>
+        <p className="muted small mt0">
           Manage with <code>npm run staff:add -- email role</code> / <code>npm run staff:disable -- email</code>. An admin
           screen for this comes later.
         </p>
-        <div className="table-wrap">
+        <div className="table-wrap" tabIndex={0}>
           <table>
             <thead>
               <tr>
@@ -54,7 +53,7 @@ export default async function StaffPage() {
 
       <section className="card" data-testid="audit-list">
         <h2>Recent audit events</h2>
-        <div className="table-wrap">
+        <div className="table-wrap" tabIndex={0}>
           <table>
             <thead>
               <tr>
@@ -83,6 +82,6 @@ export default async function StaffPage() {
           </table>
         </div>
       </section>
-    </main>
+    </AppShell>
   );
 }

@@ -3,7 +3,7 @@ import { requireStaff } from "../../lib/auth/session";
 import { getDb } from "../../lib/db/client";
 import { listTemplates } from "../../lib/templates/service";
 import { importTemplateAction } from "../templates-actions";
-import { AppHeader } from "../app-header";
+import { AppShell } from "../app-shell";
 import { Flash, fmtTime } from "../ui";
 
 export const dynamic = "force-dynamic";
@@ -13,13 +13,12 @@ export default async function EmailsPage({ searchParams }: { searchParams: Promi
   const sp = await searchParams;
   const rows = await listTemplates(getDb());
   return (
-    <main className="shell wide">
-      <AppHeader staff={staff} />
+    <AppShell staff={staff} wide>
       <h1 className="page-title">Emails</h1>
       <Flash ok={sp.ok} error={sp.error} />
 
       <section className="card paste-card">
-        <h2 style={{ marginTop: 0 }}>Paste HTML</h2>
+        <h2>Paste HTML</h2>
         <form action={importTemplateAction} className="stack">
           <label htmlFor="paste-html" className="muted small">
             Paste the complete HTML of your email (for example the export or “view source” of your builder), then click Import.
@@ -36,7 +35,7 @@ export default async function EmailsPage({ searchParams }: { searchParams: Promi
           </div>
           <details className="small" data-testid="import-more">
             <summary>More import options</summary>
-            <div className="stack" style={{ marginTop: 8 }}>
+            <div className="stack mt2">
               <label>
                 Upload an .html file instead (max 2 MB; used only when the box above is empty)
                 <input type="file" name="file" accept=".html,.htm,text/html" data-testid="import-file" />
@@ -47,15 +46,15 @@ export default async function EmailsPage({ searchParams }: { searchParams: Promi
               </label>
             </div>
           </details>
-          <p className="muted small" style={{ margin: 0 }}>
+          <p className="muted small m0">
             On import the HTML is checked for safety: scripts, forms, iframes, event handlers and javascript: links are removed. Layout, styles, Outlook conditional comments and merge fields such as{" "}
             <code>{'{{ greeting_name | default: "Quý khách" }}'}</code> are kept. Nothing is sent.
           </p>
         </form>
       </section>
 
-      <section className="card table-wrap">
-        <h2 style={{ marginTop: 0 }}>Your emails</h2>
+      <section className="card table-wrap" tabIndex={0}>
+        <h2>Your emails</h2>
         <table data-testid="templates-table">
           <thead>
             <tr>
@@ -91,6 +90,6 @@ export default async function EmailsPage({ searchParams }: { searchParams: Promi
           </tbody>
         </table>
       </section>
-    </main>
+    </AppShell>
   );
 }

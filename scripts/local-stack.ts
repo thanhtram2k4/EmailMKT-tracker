@@ -3,7 +3,10 @@
  * and the background worker — run a command against it, then tear everything down.
  * Nothing here talks to Google, AWS, Notion or any email provider.
  *
- *   tsx scripts/local-stack.ts [--port 3100] [--log-dir DIR] [--no-build] -- <command> [args...]
+ *   tsx scripts/local-stack.ts [--port 3100] [--log-dir DIR] [--no-build] [--send-mode disabled|mock] -- <command> [args...]
+ *
+ * --send-mode: only "disabled" (default) or "mock" (in-process fake transport, nothing leaves the
+ * machine). Real modes are refused here: this stack never has SES credentials or authorization.
  *
  * The command receives E2E_BASE_URL and DATABASE_URL in its environment.
  * Used by `npm run e2e` and `npm run smoke:local`.
@@ -28,6 +31,11 @@ const appPort = Number(opt("--port", "3100"));
 const pgPort = Number(opt("--pg-port", "54332"));
 const logDir = path.resolve(opt("--log-dir", path.join(".local", "logs", new Date().toISOString().replace(/[:.]/g, "-")))!);
 const build = !own.includes("--no-build");
+const sendMode = opt("--send-mode", "disabled")!;
+if (sendMode !== "disabled" && sendMode !== "mock") {
+  console.error(`--send-mode must be disabled or mock (got ${sendMode}); real sending is never started from the local stack`);
+  process.exit(2);
+}
 if (!cmd.length) {
   console.error("usage: tsx scripts/local-stack.ts [options] -- <command>");
   process.exit(2);
@@ -48,7 +56,11 @@ const appEnv: NodeJS.ProcessEnv = {
   GOOGLE_CLIENT_SECRET: "",
   ALLOWED_EMAIL_DOMAINS: "example.com",
   DEV_LOGIN_ENABLED: "true",
-  SEND_MODE: "disabled",
+  SEND_MODE: sendMode,
+  // Reserved-domain test inbox only (M4 test sends in mock mode; nothing is sent anywhere).
+  TEST_RECIPIENT_ALLOWLIST: "qa-inbox@example.com",
+  SEND_AUTHORIZATION_REF: "",
+  SES_FROM_ADDRESS: "",
   LOG_LEVEL: "info",
   BUILD_ID: process.env.BUILD_ID ?? "local-stack",
   HEARTBEAT_INTERVAL_MS: "5000",

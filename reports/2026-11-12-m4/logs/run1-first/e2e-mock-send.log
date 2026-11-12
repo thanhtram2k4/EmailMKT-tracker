@@ -1,0 +1,63 @@
+
+> email-mkt-tracker@0.1.0 e2e:mock-send
+> tsx scripts/local-stack.ts --send-mode mock --log-dir .local/logs/e2e-mock-send -- playwright test tests/e2e/test-send.spec.ts
+
+[core] WARNING: Executable file detection not yet supported on 'win32'.
+Your pool doesn't have all of the error handlers! See: https://err.red/wpeh?v=0.18.0&method=connect
+migrations applied (app + graphile_worker)
+[stack] postgres ready on 54332; logs in D:\AI Studio\Email MKT Tracker\.local\logs\e2e-mock-send
+[stack] building web app (next build)…
+[stack] web + worker healthy at http://localhost:3100
+
+Running 5 tests using 1 worker
+
+  x  1 [chromium] › tests\e2e\test-send.spec.ts:44:1 › subject preview: fallbacks for each sample; unknown field reported (7.6s)
+  -  2 [chromium] › tests\e2e\test-send.spec.ts:65:3 › SEND_MODE=disabled › R-TS-12: the button is disabled and the panel explains why
+  ok 3 [chromium] › tests\e2e\test-send.spec.ts:77:3 › SEND_MODE=mock › OR-TS-01: subject with fallback → preview → send test to the allowlisted inbox → history (1.7s)
+  ok 4 [chromium] › tests\e2e\test-send.spec.ts:96:3 › SEND_MODE=mock › R-TS-02 (UI): a typed address that is not allowlisted is refused and not sent (1.6s)
+  ok 5 [chromium] › tests\e2e\test-send.spec.ts:108:3 › SEND_MODE=mock › a missing value without fallback blocks the send and lists the problem (1.6s)
+
+
+  1) [chromium] › tests\e2e\test-send.spec.ts:44:1 › subject preview: fallbacks for each sample; unknown field reported 
+
+    Error: expect(locator).toBeVisible() failed
+
+    Locator: getByTestId('personalization-affected-count')
+    Expected: visible
+    Timeout: 5000ms
+    Error: element(s) not found
+
+    Call log:
+      - Expect "toBeVisible" getByTestId('personalization-affected-count') with timeout 5000ms
+      - waiting for getByTestId('personalization-affected-count')
+
+
+      57 |   await page.getByTestId("subject-input").fill("Chào {{ greeting_name }}");
+      58 |   await page.getByTestId("subject-save").click();
+    > 59 |   await expect(page.getByTestId("personalization-affected-count")).toBeVisible();
+         |                                                                    ^
+      60 |   await page.screenshot({ path: path.join(SHOTS, "personalization-check.png"), fullPage: true });
+      61 | });
+      62 |
+        at D:\AI Studio\Email MKT Tracker\tests\e2e\test-send.spec.ts:59:68
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results\test-send-subject-preview--a3070-mple-unknown-field-reported-chromium\test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results\test-send-subject-preview--a3070-mple-unknown-field-reported-chromium\error-context.md
+
+    attachment #3: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results\test-send-subject-preview--a3070-mple-unknown-field-reported-chromium\trace.zip
+    Usage:
+
+        npx playwright show-trace test-results\test-send-subject-preview--a3070-mple-unknown-field-reported-chromium\trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  1 failed
+    [chromium] › tests\e2e\test-send.spec.ts:44:1 › subject preview: fallbacks for each sample; unknown field reported 
+  1 skipped
+  3 passed (14.3s)
+[stack] cleanup ok: 5 owned process(es) stopped, none left
+[stack] stopped (exit 1)

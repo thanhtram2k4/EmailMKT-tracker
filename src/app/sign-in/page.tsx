@@ -1,4 +1,5 @@
 import { redirect } from "next/navigation";
+import { Mail } from "lucide-react";
 import { getCurrentStaff } from "../../lib/auth/session";
 import { getConfig } from "../../lib/config";
 import { SignInPanel } from "./sign-in-panel";
@@ -12,7 +13,13 @@ export default async function SignInPage() {
   return (
     <main className="center">
       <div className="card auth-card">
-        <h1 style={{ marginTop: 0, fontSize: 22 }}>Email MKT Tracker</h1>
+        <div className="auth-brand">
+          <span className="logo" aria-hidden>
+            <Mail className="icon" />
+          </span>
+          Email MKT Tracker
+        </div>
+        <h1 className="page-title">Sign in</h1>
         <p className="muted">
           Sign in with your company Google account. Only staff on the access list can use this app.
         </p>

@@ -6,7 +6,7 @@ import { REASON_LABELS } from "../../../lib/crm/eligibility";
 import { queryContacts } from "../../../lib/crm/queries";
 import { getDb } from "../../../lib/db/client";
 import { recordConsentAction } from "../../crm-actions";
-import { AppHeader } from "../../app-header";
+import { AppShell } from "../../app-shell";
 import { CONSENT_TONE, Flash, Pill, fmtTime } from "../../ui";
 
 export const dynamic = "force-dynamic";
@@ -22,16 +22,16 @@ export default async function ContactDetail({ params, searchParams }: { params: 
   const history = c.emailNormalized ? await consentHistory(db, c.emailNormalized) : [];
 
   return (
-    <main className="shell">
-      <AppHeader staff={staff} />
+    <AppShell staff={staff}>
       <p>
         <Link href="/contacts">← Contacts</Link>
       </p>
       <Flash ok={sp.ok} error={sp.error} />
       <section className="card" data-testid="contact-detail">
-        <h1 className="page-title" style={{ marginTop: 0 }}>
+        <h1 className="page-title">
           {c.fullName ?? <em className="muted">(no name)</em>}
         </h1>
+        <div className="table-wrap" tabIndex={0}>
         <table>
           <tbody>
             <tr>
@@ -96,13 +96,14 @@ export default async function ContactDetail({ params, searchParams }: { params: 
             </tr>
           </tbody>
         </table>
+        </div>
       </section>
 
       <section className="card" data-testid="consent-section">
         <h2>
           Marketing consent: <Pill tone={CONSENT_TONE[c.marketingConsent]}>{c.marketingConsent}</Pill>
         </h2>
-        <p className="muted" style={{ marginTop: 0, fontSize: 13 }}>
+        <p className="muted small mt0">
           Consent history for this address (append-only). Imports never grant consent. An evidence reference found in Notion
           {c.notionConsentEvidence ? (
             <>
@@ -112,7 +113,7 @@ export default async function ContactDetail({ params, searchParams }: { params: 
           ) : null}{" "}
           must be checked by staff before recording consent.
         </p>
-        <div className="table-wrap">
+        <div className="table-wrap" tabIndex={0}>
           <table data-testid="consent-history">
             <thead>
               <tr>
@@ -155,7 +156,7 @@ export default async function ContactDetail({ params, searchParams }: { params: 
         {staff.role === "admin" && c.emailNormalized && c.emailStatus === "valid" && (
           <form action={recordConsentAction} className="stack" data-testid="consent-form">
             <h3>Record consent (admin)</h3>
-            <p className="muted" style={{ fontSize: 13, margin: 0 }}>
+            <p className="muted small m0">
               Only record consent you can prove. A grant requires an evidence reference or note, and never lifts a suppression.
             </p>
             <input type="hidden" name="contactId" value={c.id} />
@@ -201,6 +202,6 @@ export default async function ContactDetail({ params, searchParams }: { params: 
           </form>
         )}
       </section>
-    </main>
+    </AppShell>
   );
 }

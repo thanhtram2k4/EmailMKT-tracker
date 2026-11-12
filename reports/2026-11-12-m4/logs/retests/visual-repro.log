@@ -1,0 +1,55 @@
+[core] WARNING: Executable file detection not yet supported on 'win32'.
+Your pool doesn't have all of the error handlers! See: https://err.red/wpeh?v=0.18.0&method=connect
+migrations applied (app + graphile_worker)
+[stack] postgres ready on 54332; logs in D:\AI Studio\Email MKT Tracker\.local\logs\repro-visual
+[stack] building web app (next build)…
+[stack] web + worker healthy at http://localhost:3100
+
+Running 1 test using 1 worker
+
+  x  1 [chromium] › tests\e2e\ui-shell.spec.ts:150:1 › R-UI-03/04 (detail pages): email editor and contact detail — axe light/dark and no page scroll at 375px (10.0s)
+
+
+  1) [chromium] › tests\e2e\ui-shell.spec.ts:150:1 › R-UI-03/04 (detail pages): email editor and contact detail — axe light/dark and no page scroll at 375px 
+
+    Error: expect(locator).toBeHidden() failed
+
+    Locator:  getByTestId('menu-toggle')
+    Expected: hidden
+    Received: visible
+    Timeout:  5000ms
+
+    Call log:
+      - Expect "toBeHidden" getByTestId('menu-toggle') with timeout 5000ms
+      - waiting for getByTestId('menu-toggle')
+        14 × locator resolved to <button type="button" aria-label="Mở menu" aria-expanded="false" data-testid="menu-toggle" aria-controls="app-sidebar" class="btn ghost icon-btn menu-toggle mobile-menu">…</button>
+           - unexpected value "visible"
+
+
+      190 |   // Defects found by screenshot review (M4 QA): the drawer button must be hidden on desktop, and
+      191 |   // the single-line subject input must not be stretched vertically.
+    > 192 |   await expect(page.getByTestId("menu-toggle")).toBeHidden();
+          |                                                 ^
+      193 |   const subjectHeight = (await page.getByTestId("subject-input").boundingBox())?.height ?? 999;
+      194 |   expect(subjectHeight).toBeLessThan(60);
+      195 |   await page.screenshot({ path: path.join(SHOTS, "editor-1440.png"), fullPage: true });
+        at D:\AI Studio\Email MKT Tracker\tests\e2e\ui-shell.spec.ts:192:49
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results\ui-shell-R-UI-03-04-detail-7065b-and-no-page-scroll-at-375px-chromium\test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results\ui-shell-R-UI-03-04-detail-7065b-and-no-page-scroll-at-375px-chromium\error-context.md
+
+    attachment #3: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results\ui-shell-R-UI-03-04-detail-7065b-and-no-page-scroll-at-375px-chromium\trace.zip
+    Usage:
+
+        npx playwright show-trace test-results\ui-shell-R-UI-03-04-detail-7065b-and-no-page-scroll-at-375px-chromium\trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  1 failed
+    [chromium] › tests\e2e\ui-shell.spec.ts:150:1 › R-UI-03/04 (detail pages): email editor and contact detail — axe light/dark and no page scroll at 375px 
+[stack] cleanup ok: 5 owned process(es) stopped, none left
+[stack] stopped (exit 1)

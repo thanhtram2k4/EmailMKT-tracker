@@ -3,7 +3,7 @@ import { requireStaff } from "../../../lib/auth/session";
 import { duplicateGroups, queryContacts, syncOverview } from "../../../lib/crm/queries";
 import { getDb } from "../../../lib/db/client";
 import { choosePrimaryAction, clearPrimaryAction } from "../../crm-actions";
-import { AppHeader } from "../../app-header";
+import { AppShell } from "../../app-shell";
 import { Flash, Pill } from "../../ui";
 
 export const dynamic = "force-dynamic";
@@ -22,17 +22,16 @@ export default async function DataIssues({ searchParams }: { searchParams: Promi
   const admin = staff.role === "admin";
 
   return (
-    <main className="shell wide">
-      <AppHeader staff={staff} />
+    <AppShell staff={staff} wide>
       <h1 className="page-title">Data issues</h1>
       <Flash ok={sp.ok} error={sp.error} />
-      <p className="muted" style={{ marginTop: 0 }}>
+      <p className="muted mt0">
         Fix names, emails and duplicates in Notion. The app never edits or deletes Notion pages for these issues.
       </p>
 
       <section className="card" data-testid="duplicates">
         <h2>Duplicate emails ({groups.length} groups)</h2>
-        <p className="muted" style={{ marginTop: 0, fontSize: 13 }}>
+        <p className="muted small mt0">
           Until a primary contact is chosen, every page in the group is excluded from audiences.
         </p>
         {groups.map((g) => (
@@ -48,6 +47,7 @@ export default async function DataIssues({ searchParams }: { searchParams: Promi
                 </form>
               )}
             </div>
+            <div className="table-wrap" tabIndex={0}>
             <table>
               <tbody>
                 {g.members.map((m) => (
@@ -71,6 +71,7 @@ export default async function DataIssues({ searchParams }: { searchParams: Promi
                 ))}
               </tbody>
             </table>
+            </div>
           </div>
         ))}
         {groups.length === 0 && <p className="muted">None.</p>}
@@ -78,6 +79,7 @@ export default async function DataIssues({ searchParams }: { searchParams: Promi
 
       <section className="card" data-testid="invalid-emails">
         <h2>Invalid or missing email ({invalid.length})</h2>
+        <div className="table-wrap" tabIndex={0}>
         <table>
           <tbody>
             {invalid.map((c) => (
@@ -95,11 +97,12 @@ export default async function DataIssues({ searchParams }: { searchParams: Promi
             ))}
           </tbody>
         </table>
+        </div>
       </section>
 
       <section className="card" data-testid="missing-greeting">
         <h2>Missing greeting name ({missingGreeting.length})</h2>
-        <p className="muted" style={{ marginTop: 0, fontSize: 13 }}>
+        <p className="muted small mt0">
           These contacts will receive the fallback greeting (configured per template in M4).
         </p>
         <p>
@@ -115,7 +118,7 @@ export default async function DataIssues({ searchParams }: { searchParams: Promi
       {changed.length > 0 && (
         <section className="card" data-testid="email-changed">
           <h2>Email changed away from a suppressed address ({changed.length})</h2>
-          <p className="muted" style={{ marginTop: 0, fontSize: 13 }}>
+          <p className="muted small mt0">
             The old address stays suppressed; the new address is not. Check that this is a genuine change, not a way around an unsubscribe.
           </p>
           <ul>
@@ -130,6 +133,7 @@ export default async function DataIssues({ searchParams }: { searchParams: Promi
 
       <section className="card" data-testid="sync-page-issues">
         <h2>Problems found by the latest sync ({overview.latestIssues.length})</h2>
+        <div className="table-wrap" tabIndex={0}>
         <table>
           <tbody>
             {overview.latestIssues.map((i) => (
@@ -148,8 +152,9 @@ export default async function DataIssues({ searchParams }: { searchParams: Promi
             ))}
           </tbody>
         </table>
+        </div>
         {overview.latestIssues.length === 0 && <p className="muted">None.</p>}
       </section>
-    </main>
+    </AppShell>
   );
 }

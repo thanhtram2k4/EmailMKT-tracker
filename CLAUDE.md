@@ -16,7 +16,8 @@ This is an internal email-marketing app for a single company. Campaigns go out t
 - **M3 (editor) is done, corrected in rev 2.** Branch `m3-editor-trial`; tags `m3-checkpoint` (trial) and `m3-rev2-checkpoint` (paste workflow). See `reports/2026-11-12-m3-rev2/report.md` (Vietnamese).
   - The primary workflow is **Paste HTML → Import → Preview → Edit → Save → Reopen**. Real templates are **not** a requirement; never search the user's folders for templates.
   - Browser (Chromium) validation only. Gmail, Outlook and mobile rendering are NOT RUN.
-- **M4 and later are not authorized yet.**
+- **M4 (UI redesign, personalization, test sends) is authorized for local work with mock/fake SES only.** Branch `m4-ui-testsend`. See `reports/2026-11-12-m4/report.md` (Vietnamese). A real SES test send needs separate approval.
+- **M5 and later are not authorized yet.**
 - **Verified only locally:** Google OAuth, staging, CI and live Notion are unverified.
 
 Ask the user explicitly before any of these:
@@ -44,7 +45,8 @@ TypeScript on Node 22.18+ (developed on Node 24).
 - Tests: Vitest and Playwright.
 - Local Postgres: `embedded-postgres` (real PostgreSQL 17 binaries; no Docker needed). Its exit hooks are partly removed in `scripts/lib/embedded-pg.ts`, because they forced exit code 0.
 - Notion: API version pinned to `2026-03-11` (`src/lib/notion/`). The CRM sync, outbox, consent and eligibility code is in `src/lib/crm/`. The mock server is in `scripts/notion-mock/`.
-- Planned: SES v2 in ap-southeast-1, LiquidJS, Luxon, and hosting on Render in Singapore.
+- SES v2 (`@aws-sdk/client-sesv2`, ap-southeast-1), used for test sends only from M4. UI: lucide-react, Be Vietnam Pro (`@fontsource`), axe via `@axe-core/playwright` in E2E.
+- Planned: Luxon, and hosting on Render in Singapore.
 
 ## Commands
 | Task | Command |
@@ -57,6 +59,7 @@ TypeScript on Node 22.18+ (developed on Node 24).
 | Checks | `npm run lint` · `npm run typecheck` · `npm run test:unit` · `npm run test:integration` · `npm run test:tooling` |
 | Paste workflow / editor trial | `npm run e2e -- tests/e2e/paste-workflow.spec.ts` · `npm run e2e -- tests/e2e/editor-trial.spec.ts` (results in `test-results/editor-trial/`; extra local inputs only via `EDITOR_TRIAL_EXTRA_DIR`) |
 | E2E / smoke | `npm run e2e` · `npm run smoke:local` (each starts an isolated stack, runs, then tears it down) |
+| Mock test sends | `npm run e2e:mock-send` · `npm run smoke:mock-send` (stack with `SEND_MODE=mock`) |
 | New migration | edit `src/lib/db/schema.ts`, then `npm run db:generate` |
 
 ## Sending rules (do not break)
@@ -76,8 +79,8 @@ TypeScript on Node 22.18+ (developed on Node 24).
   - `src/lib/config.ts` (startup validation);
   - `src/lib/sending/guard.ts` (per-send decision);
   - `src/lib/sending/transport.ts` (factory).
-- **M1 contains no real transport.** The factory refuses to build one.
-- **Not permitted under the M1 or M2 authorizations:** any real email sending or deployment.
+- **M4 adds an SES transport for test sends only.** The factory builds it only after the guard approves and `SES_FROM_ADDRESS` is set, and it still refuses customer campaigns (M5).
+- **Not permitted under the M1–M4 authorizations:** any real email sending (including test sends), any AWS call, or deployment.
 
 ## CRM rules (M2; do not break)
 - **Identity is the Notion page id.** An email change keeps the same contact. Suppressions and consent follow the **address**.
@@ -114,6 +117,23 @@ TypeScript on Node 22.18+ (developed on Node 24).
 - **Preview** runs in a sandboxed iframe with CSP `script-src 'none'`. Editor annotations (`data-emt-id`) never reach stored or exported HTML.
 - **Template versions are immutable** (DB trigger). Saving always creates a new version.
 - **Real customer templates:** keep inputs under `.local/` (git-ignored). Never commit their content or screenshots.
+
+## Test-send rules (M4; do not break)
+- Code: `src/lib/sending/test-send.ts`, `src/lib/sending/ses-transport.ts`.
+- In every send mode (mock included), each typed address must be on `TEST_RECIPIENT_ALLOWLIST` or be an SES simulator address. Refusals never reveal the list. Suppressed addresses are refused even if allowlisted.
+- Write-ahead `claimed` row per address, unique on (idempotency key, address). `retryable` and `unknown` are never retried automatically; "Send again" is a new, audited row with `resend_of`. A DB trigger enforces forward-only status and blocks deletes. The worker reaper turns claims older than 10 minutes into `unknown`.
+- SES SDK retries stay off (`maxAttempts: 1`). AWS credentials come only from an AWS profile outside the repo; never in env files, logs, chat or Git.
+- `test_sends` has no campaign link. Audit rows store masked addresses only. Subjects get `[TEST] `.
+- The local stack accepts only `--send-mode disabled|mock`.
+- Unresolved personalization (unknown field or filter, syntax, no subject, a missing value without `default:`, a line break in the subject) blocks a test send.
+
+## UI rules (M4)
+- Plain CSS tokens in `src/app/globals.css` (light/dark, cookie theme). No Tailwind. lucide icons, no emoji icons.
+- Staff pages render inside `AppShell` (`src/app/app-shell.tsx`). Never link `/internal` from the chrome.
+- Keep every existing `data-testid` and the copy that tests assert. Never add a test id starting with `region-` (the editor tests prefix-match it). Test ids must stay unique per page (`getByTestId` is strict).
+- Do not change the editor's logic for styling purposes (`template-editor.tsx`, `preview/route.ts`).
+- E2E screenshots go to the folder named by `PASTE_WORKFLOW_SHOTS`, `UI_SHOTS` or `TEST_SEND_SHOTS`. Never overwrite committed evidence from an earlier cycle.
+- Some checked-out files use CRLF. When scripting edits, normalize line endings first, and prefer the Edit/Write tools for code that contains backslashes.
 
 ## Test tooling rules
 - Spawn long-running test processes with `spawnOwned` (`scripts/lib/owned-processes.ts`). Clean up with `cleanupOwned`, which targets only this run's PIDs and their descendants. Never kill by name or port.

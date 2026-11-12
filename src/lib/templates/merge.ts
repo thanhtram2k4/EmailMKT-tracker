@@ -129,3 +129,107 @@ export const SAMPLE_RECIPIENTS: Array<{ id: string; label: string; data: Recipie
   { id: "sample-no-greeting", label: "Mẫu: thiếu tên gọi", data: { full_name: "Lê Hoàng Phúc", greeting_name: null, company: "Phúc Lợi JSC", email: "phuc.le@example.org", unsubscribe_url: "https://app.example/u/preview" } },
   { id: "sample-no-company", label: "Mẫu: thiếu công ty và tên gọi", data: { full_name: "Võ Minh Thư", greeting_name: null, company: null, email: "thu.vo@example.net", unsubscribe_url: "https://app.example/u/preview" } },
 ];
+
+// ---------------------------------------------------------------- M4: subject lines
+
+/** Same rules as the body, but values are NOT HTML-escaped: the subject is a plain-text header. */
+const textEngine = new Liquid({
+  relativeReference: false,
+  strictFilters: true,
+  strictVariables: false,
+  ownPropertyOnly: true,
+  fs: {
+    exists: async () => false,
+    existsSync: () => false,
+    readFile: async () => {
+      throw new Error("file access disabled");
+    },
+    readFileSync: () => {
+      throw new Error("file access disabled");
+    },
+    resolve: () => "",
+  },
+  root: [],
+});
+
+export const MAX_SUBJECT_LENGTH = 200;
+
+export type SubjectProblem = { raw: string; error: string };
+
+/** Static problems in a subject template (independent of any recipient). */
+export function scanSubject(subject: string): SubjectProblem[] {
+  const problems: SubjectProblem[] = [];
+  if (/[\r\n]/.test(subject)) problems.push({ raw: "(line break)", error: "line breaks are not allowed in a subject" });
+  if (subject.length > MAX_SUBJECT_LENGTH) problems.push({ raw: subject.slice(0, 30) + "…", error: `longer than ${MAX_SUBJECT_LENGTH} characters` });
+  for (const t of subject.match(TAG) ?? []) problems.push({ raw: t, error: "Liquid tags are not allowed (only {{ field }} output)" });
+  for (const u of scanMergeFields(subject).uses) {
+    if (u.problem) problems.push({ raw: u.raw, error: u.problem.replace(/_/g, " ") });
+    else if (u.field === "unsubscribe_url") problems.push({ raw: u.raw, error: "unsubscribe_url cannot be used in a subject" });
+  }
+  return problems;
+}
+
+export type SubjectRender = { subject: string; missingWithoutFallback: string[]; errors: SubjectProblem[] };
+
+/**
+ * Render a subject for one recipient. Liquid tags stay literal (never executed). The result is
+ * refused (error) if it contains a line break — that would allow header injection.
+ */
+export function renderSubject(subject: string, r: Recipient): SubjectRender {
+  const errors = scanSubject(subject);
+  const missing = new Set<string>();
+  const ctx: Record<string, string> = {};
+  for (const k of Object.keys(MERGE_FIELDS)) {
+    const v = r[k as MergeField];
+    if (v !== null && v !== undefined && String(v).trim() !== "") ctx[k] = String(v);
+  }
+  const out = subject.replace(OUTPUT, (raw, inner: string) => {
+    const p = parseExpr(inner);
+    if (!p || !(p.field in MERGE_FIELDS) || p.filters.some((f) => !(ALLOWED_FILTERS as readonly string[]).includes(f))) return raw;
+    if (!(p.field in ctx) && !p.fallback) missing.add(p.field);
+    try {
+      return textEngine.parseAndRenderSync(`{{${decodeInside(inner)}}}`, ctx);
+    } catch (e) {
+      errors.push({ raw, error: e instanceof Error ? e.message : String(e) });
+      return raw;
+    }
+  });
+  const rendered = out.replace(/\s+/g, " ").trim();
+  if (/[\r\n]/.test(out.trim()) && !errors.some((e) => e.raw === "(line break)")) errors.push({ raw: "(value)", error: "a merge value contains a line break" });
+  return { subject: rendered, missingWithoutFallback: [...missing], errors };
+}
+
+/** Fields used WITHOUT a `default:` fallback in a subject or body (each needs a value per recipient). */
+export function fieldsNeedingValues(...templates: string[]): string[] {
+  const need = new Set<string>();
+  for (const t of templates) {
+    for (const u of scanMergeFields(t).uses) {
+      if (!u.problem && u.field && !u.hasFallback && u.field !== "unsubscribe_url") need.add(u.field);
+    }
+  }
+  return [...need].sort();
+}
+
+/** Render merge fields in the plain-text part (no HTML escaping; line breaks kept). */
+export function renderText(text: string, r: Recipient): { text: string; errors: SubjectProblem[] } {
+  const errors: SubjectProblem[] = [];
+  const ctx: Record<string, string> = {};
+  for (const k of Object.keys(MERGE_FIELDS)) {
+    const v = r[k as MergeField];
+    if (v !== null && v !== undefined && String(v).trim() !== "") ctx[k] = String(v);
+  }
+  const out = text.replace(OUTPUT, (raw, inner: string) => {
+    const p = parseExpr(inner);
+    if (!p || !(p.field in MERGE_FIELDS) || p.filters.some((f) => !(ALLOWED_FILTERS as readonly string[]).includes(f))) {
+      errors.push({ raw, error: "invalid merge field" });
+      return raw;
+    }
+    try {
+      return textEngine.parseAndRenderSync(`{{${decodeInside(inner)}}}`, ctx);
+    } catch (e) {
+      errors.push({ raw, error: e instanceof Error ? e.message : String(e) });
+      return raw;
+    }
+  });
+  return { text: out, errors };
+}

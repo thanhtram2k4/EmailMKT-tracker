@@ -3,7 +3,7 @@ import { getDb } from "../../../lib/db/client";
 import { requireInternalTools } from "../../../lib/internal-tools";
 import { FIXTURES } from "../../../lib/templates/fixtures";
 import { listTemplates } from "../../../lib/templates/service";
-import { AppHeader } from "../../app-header";
+import { AppShell } from "../../app-shell";
 import { Flash } from "../../ui";
 import { importFixtureAction } from "./actions";
 
@@ -15,8 +15,7 @@ export default async function EditorLabPage({ searchParams }: { searchParams: Pr
   const sp = await searchParams;
   const rows = await listTemplates(getDb());
   return (
-    <main className="shell wide">
-      <AppHeader staff={staff} />
+    <AppShell staff={staff} wide>
       <h1 className="page-title">INTERNAL · Editor lab</h1>
       <Flash error={sp.error} />
       <div className="banner warn" data-testid="lab-banner">
@@ -35,7 +34,7 @@ export default async function EditorLabPage({ searchParams }: { searchParams: Pr
           ))}
         </div>
       </section>
-      <section className="card table-wrap">
+      <section className="card table-wrap" tabIndex={0}>
         <h2>GrapesJS comparison (candidate b)</h2>
         <table data-testid="lab-table">
           <tbody>
@@ -52,6 +51,6 @@ export default async function EditorLabPage({ searchParams }: { searchParams: Pr
           </tbody>
         </table>
       </section>
-    </main>
+    </AppShell>
   );
 }

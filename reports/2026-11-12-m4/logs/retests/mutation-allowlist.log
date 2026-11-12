@@ -1,0 +1,89 @@
+
+ RUN  v5.1.0 D:/AI Studio/Email MKT Tracker
+
+{"level":"info","time":"2026-11-12T08:46:22.750Z","service":"web","env":"unknown","build":"dev","request_id":"req-test","task":"test_send","test_send_id":"ef6207e1-b3ea-4832-ae94-660efd71d503","status":"accepted","transport":"mock","to":"q***@example.com","msg":"test send attempted"}
+{"level":"info","time":"2026-11-12T08:46:22.831Z","service":"web","env":"unknown","build":"dev","request_id":"req-test","task":"test_send","test_send_id":"3737de69-a64d-4f0b-aa01-d699930d95ec","status":"accepted","transport":"mock","to":"s***@example.net","msg":"test send attempted"}
+{"level":"info","time":"2026-11-12T08:46:22.837Z","service":"web","env":"unknown","build":"dev","request_id":"req-test","task":"test_send","test_send_id":"069db4b2-ea33-460d-a401-5ad9b4115d8d","status":"accepted","transport":"mock","to":"q***@example.com","msg":"test send attempted"}
+{"level":"info","time":"2026-11-12T08:46:22.941Z","service":"web","env":"unknown","build":"dev","request_id":"req-test","task":"test_send","test_send_id":"1d384c7b-1783-47a5-a104-a808060e4dff","status":"accepted","transport":"mock","to":"q***@example.com","msg":"test send attempted"}
+{"level":"info","time":"2026-11-12T08:46:23.031Z","service":"web","env":"unknown","build":"dev","request_id":"req-test","task":"test_send","test_send_id":"747c176c-9873-4c47-866b-5455d1d429b7","status":"unknown","transport":"mock","to":"q***@example.com","msg":"test send attempted"}
+{"level":"info","time":"2026-11-12T08:46:23.045Z","service":"web","env":"unknown","build":"dev","request_id":"req-test","task":"test_send","test_send_id":"e81818e6-4ee7-4855-8a6a-00a3ade42825","status":"unknown","transport":"mock","to":"q***@example.com","msg":"test send attempted"}
+{"level":"info","time":"2026-11-12T08:46:23.084Z","service":"web","env":"unknown","build":"dev","request_id":"req-test","task":"test_send","test_send_id":"be46eda2-d1f6-4332-9f60-958f343dc6d4","status":"unknown","transport":"mock","to":"q***@example.com","msg":"test send attempted"}
+{"level":"info","time":"2026-11-12T08:46:23.117Z","service":"web","env":"unknown","build":"dev","request_id":"req-test","task":"test_send","test_send_id":"1c62f684-c0e2-4fe2-ac94-ed3c2ebbceea","status":"accepted","transport":"mock","to":"q***@example.com","msg":"test send attempted"}
+{"level":"info","time":"2026-11-12T08:46:23.120Z","service":"web","env":"unknown","build":"dev","request_id":"req-test","task":"test_send","test_send_id":"873d4a14-368a-447c-9f8f-5bb608cabc1e","status":"accepted","transport":"mock","to":"n***@example.net","msg":"test send attempted"}
+{"level":"info","time":"2026-11-12T08:46:23.223Z","service":"web","env":"unknown","build":"dev","request_id":"req-d5678524-775a-4af1-8da7-8099c05d3af7","task":"test_send","test_send_id":"3eae183e-8f1c-4201-acaa-7d4b1ccc4a1e","status":"accepted","transport":"mock","to":"q***@example.com","msg":"test send attempted"}
+{"level":"info","time":"2026-11-12T08:46:23.225Z","service":"web","env":"unknown","build":"dev","request_id":"req-d5678524-775a-4af1-8da7-8099c05d3af7","task":"test_send","test_send_id":"8fb69d35-e479-43d5-8805-c7bf3d7d8a6e","status":"accepted","transport":"mock","to":"s***@example.net","msg":"test send attempted"}
+stderr | tests/integration/test-send.test.ts
+[core] WARNING: Executable file detection not yet supported on 'win32'.
+Your pool doesn't have all of the error handlers! See: https://err.red/wpeh?v=0.18.0&method=connect
+
+ ❯ |integration| tests/integration/test-send.test.ts (15 tests | 3 failed) 1630ms
+   ❯ test sends (MOCK transport, real PostgreSQL) (14)
+     × R-TS-02: an address that is not allowlisted is refused by the server, without revealing the list 87ms
+     × R-TS-08: per-person hourly limit (refusals do not count) 39ms
+     × R-TS-11: audit rows contain only the masked address 35ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 3 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  |integration| tests/integration/test-send.test.ts > test sends (MOCK transport, real PostgreSQL) > R-TS-02: an address that is not allowlisted is refused by the server, without revealing the list
+AssertionError: expected [ 'accepted', 'accepted' ] to deeply equal [ 'refused', 'accepted' ]
+
+- Expected
++ Received
+
+  [
+-   "refused",
++   "accepted",
+    "accepted",
+  ]
+
+ ❯ tests/integration/test-send.test.ts:100:38
+     98|     const s = scripted(() => ({ kind: "accepted", providerMessageId: "…
+     99|     const out = await sendTestEmail(db, deps(s.mock), input({ recipien…
+    100|     expect(out.map((o) => o.status)).toEqual(["refused", "accepted"]);
+       |                                      ^
+    101|     expect(out[0].message).toMatch(/not on the list of permitted test …
+    102|     expect(out[0].message).not.toContain(ALLOWED);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/3]⎯
+
+ FAIL  |integration| tests/integration/test-send.test.ts > test sends (MOCK transport, real PostgreSQL) > R-TS-08: per-person hourly limit (refusals do not count)
+TestSendError: Rate limit: at most 2 test emails per person per hour.
+ ❯ sendTestEmail src/lib/sending/test-send.ts:177:70
+    175|   const [mine] = await db.select({ n: count() }).from(testSends).where…
+    176|   const [all] = await db.select({ n: count() }).from(testSends).where(…
+    177|   if (mine.n + recipients.length > cfg.TEST_SEND_MAX_PER_HOUR) throw n…
+       |                                                                      ^
+    178|   if (all.n + recipients.length > cfg.TEST_SEND_MAX_PER_DAY) throw new…
+    179|
+ ❯ tests/integration/test-send.test.ts:150:5
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/3]⎯
+
+ FAIL  |integration| tests/integration/test-send.test.ts > test sends (MOCK transport, real PostgreSQL) > R-TS-11: audit rows contain only the masked address
+AssertionError: expected [ 'test_send.accepted', …(1) ] to deeply equal [ 'test_send.accepted', …(1) ]
+
+- Expected
++ Received
+
+  [
+    "test_send.accepted",
+-   "test_send.refused",
++   "test_send.accepted",
+  ]
+
+ ❯ tests/integration/test-send.test.ts:177:46
+    175|     await sendTestEmail(db, deps(s.mock), input({ recipients: `${ALLOW…
+    176|     const rows = await db.select().from(auditLog).where(eq(auditLog.co…
+    177|     expect(rows.map((r) => r.action).sort()).toEqual(["test_send.accep…
+       |                                              ^
+    178|     const text = JSON.stringify(rows);
+    179|     expect(text).not.toContain(ALLOWED);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/3]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  3 failed | 12 passed (15)
+   Start at  15:46:13
+   Duration  9.74s (tests 58%, import 37%, transform 5%)
+

@@ -400,6 +400,47 @@ claimed ─▶ unknown (timeout, network error after the request was sent, worke
 - **Previews:** desktop (600 px+) and mobile (375 px) in a sandboxed iframe with scripts disallowed, plus a plain-text part that can be edited.
 - **No promise of lossless editing of arbitrary HTML.** Unsupported constructs are shown as read-only regions.
 
+### 4.5 Personalization and test sends (M4)
+
+- **Subject.** Stored on each template version (`subject`, nullable for pre-M4 versions). Saving a subject stores a new immutable version with the same HTML. The same field and filter allowlist as the body applies. The subject is rendered as plain text (no HTML escaping). Line breaks in the template or in a merged value are refused (header injection). `{% %}` tags are never executed, and `unsubscribe_url` is not allowed in a subject.
+- **Blocking rules.** A test send, and later campaign review, is refused on: an unknown field or filter, a syntax error, a missing subject, or a missing value with no `default:` fallback for the chosen recipient.
+- **Personalization check.** For every active contact with a valid email, the check lists those missing a value for a field used without a fallback. Campaign audience and eligibility rules are applied later, in M5.
+- **Test sends** (`src/lib/sending/test-send.ts`):
+  - staff type 1–3 addresses. In every send mode, including mock, each address must be on `TEST_RECIPIENT_ALLOWLIST` or be an SES simulator address. Refusals never reveal the list;
+  - suppressed addresses are refused even when allowlisted; the sending guard then decides the transport (`disabled` refuses);
+  - each address is a `test_sends` row, committed as `claimed` before the provider call (write-ahead), with a unique (idempotency key, address). A double submit therefore calls the provider once;
+  - outcomes are `accepted`, `rejected`, `retryable` or `unknown`. `retryable` and `unknown` are never retried automatically. "Send again" is an explicit, audited new row (`resend_of`);
+  - a DB trigger allows only `claimed → final` and `unknown → accepted` (later reconciliation) and blocks deletes;
+  - a worker reaper turns claims older than 10 minutes into `unknown`;
+  - the subject gets a `[TEST] ` prefix. Rate limits default to 10 per person per hour and 50 per day;
+  - there is no campaign id, so test sends can never be counted in campaign metrics;
+  - the audit log stores masked addresses only.
+- **SES transport** (`src/lib/sending/ses-transport.ts`): SES v2 `SendEmail` (simple content, UTF-8, custom headers, `msg_id` tag, optional configuration set). SDK retries are off (`maxAttempts: 1`) and a timeout gives `unknown`. Credentials come from the AWS default chain (an AWS profile outside the repository). `accepted` is not proof of inbox delivery. Delivery and bounce events need SNS and a public HTTPS endpoint (M5, after deployment is authorized). Customer campaigns are still refused by the factory until M5.
+
+### 4.6 UI system (M4)
+
+- **Approach.** Plain CSS with custom properties (`src/app/globals.css`), layered as tokens → base → shell → components → editor. No CSS framework, so the DOM the tests rely on is unchanged.
+- **Tokens.**
+  - Light: slate neutrals, primary `#1D4ED8`, muted text `#475569` (4.5:1 or better).
+  - Dark: a matching set.
+  - Theme follows the system by default. A toggle stores `light`, `dark` or `system` in a cookie, so the server renders the theme without a flash.
+- **Type and icons.**
+  - Be Vietnam Pro, self-hosted through `@fontsource` (no Google Fonts request), with tabular numbers for data.
+  - lucide SVG icons; no emoji icons.
+- **Shell.**
+  - Grouped sidebar (Overview, CRM, Content, Admin) with `aria-current`; a drawer below 860 px.
+  - Topbar with the send-mode badge, the user, the theme toggle and sign-out.
+  - A skip link, then `<main id="main">`.
+  - `/internal` is never linked.
+- **Accessibility and interaction rules.**
+  - Visible focus rings.
+  - Hover changes colour or border only, never scale.
+  - Transitions of 150–200 ms, all disabled under `prefers-reduced-motion`.
+  - Touch targets of 44 px or more on phones.
+  - Status is never shown by colour alone: badges carry text.
+- **Sources.** From the `ui-ux-pro-max` skill only the data-dense dashboard style, the font pairing and the checklist were adopted. The skill is a design aid, not a substitute for the QA process.
+- **Copy.** Existing English copy that tests assert is unchanged. A full Vietnamese localisation is a separate decision.
+
 ---
 
 ## 5. Screens and end-to-end flow

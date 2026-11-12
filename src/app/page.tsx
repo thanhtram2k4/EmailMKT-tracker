@@ -1,11 +1,13 @@
+import Link from "next/link";
+import { Activity, ClipboardPaste, Database, RefreshCw, Server, Users } from "lucide-react";
 import { requireStaff } from "../lib/auth/session";
 import { systemClock } from "../lib/clock";
 import { getConfig } from "../lib/config";
 import { getDb } from "../lib/db/client";
 import { checkHealth } from "../lib/health";
-import Link from "next/link";
 import { contactStats, syncOverview } from "../lib/crm/queries";
-import { AppHeader } from "./app-header";
+import { AppShell } from "./app-shell";
+import { Alert, Kpi, PageHeader, Pill } from "./ui";
 
 export const dynamic = "force-dynamic";
 
@@ -28,63 +30,74 @@ export default async function Dashboard() {
     sendMode: cfg.SEND_MODE,
     maxHeartbeatAgeS: cfg.HEALTH_MAX_HEARTBEAT_AGE_S,
   });
+  const db = health.checks.database;
+  const worker = health.checks.worker;
 
   return (
-    <main className="shell">
-      <AppHeader staff={staff} />
+    <AppShell staff={staff}>
+      <PageHeader
+        title="Dashboard"
+        sub={<>Welcome, {staff.name || staff.email}. Contacts are synchronized from the Notion CRM; emails are pasted and edited here. Campaigns, scheduling and analytics arrive in later milestones.</>}
+        actions={
+          <>
+            <Link className="btn primary" href="/templates">
+              <ClipboardPaste className="icon-sm" aria-hidden /> Paste HTML
+            </Link>
+            <Link className="btn" href="/sync">
+              <RefreshCw className="icon-sm" aria-hidden /> Sync
+            </Link>
+          </>
+        }
+      />
 
-      <div className={`banner ${cfg.SEND_MODE === "live" ? "" : "warn"}`} data-testid="send-mode-banner">
+      <Alert tone={cfg.SEND_MODE === "live" ? "bad" : cfg.SEND_MODE === "disabled" ? "warn" : "info"} testId="send-mode-banner">
         <strong>SEND_MODE={cfg.SEND_MODE}</strong> · APP_ENV={cfg.APP_ENV}. {SEND_MODE_TEXT[cfg.SEND_MODE]}
-      </div>
+      </Alert>
 
-      {!health.checks.worker.ok && (
-        <div className="banner bad" data-testid="worker-banner">
-          <strong>Background worker not running.</strong> Scheduled and queued work will not run until it is back.{" "}
-          <span className="muted">({health.checks.worker.error})</span>
-        </div>
+      {!worker.ok && (
+        <Alert tone="bad" testId="worker-banner" title="Background worker not running.">
+          Scheduled and queued work will not run until it is back. <span className="muted">({worker.error})</span>
+        </Alert>
       )}
 
-      <section className="card">
-        <h2>Welcome, {staff.name || staff.email}</h2>
-        <p className="muted" style={{ margin: 0 }}>
-          M2: contacts are synchronized from the Notion CRM. Templates, campaigns, scheduling and analytics arrive in later milestones.
-        </p>
-      </section>
-
-      <section className="card" data-testid="crm-card">
-        <h2>CRM</h2>
-        <p style={{ margin: 0 }}>
-          <strong>{stats.active}</strong> active contacts · {stats.duplicates} duplicates · {stats.invalid + stats.missing} invalid/missing email ·{" "}
-          {stats.suppressions} suppressed addresses · NOTION_MODE={cfg.NOTION_MODE} · last sync:{" "}
-          {sync.latestRun ? `${sync.latestRun.status} (${sync.latestRun.mode})` : "never"} · <Link href="/contacts">Contacts</Link> ·{" "}
-          <Link href="/sync">Sync</Link>
-        </p>
-      </section>
+      <div className="kpis" data-testid="crm-card">
+        <Kpi label="Active contacts" icon={<Users className="icon-sm" aria-hidden />} value={stats.active} note={<Link href="/contacts">Open contacts</Link>} />
+        <Kpi
+          label="Need attention"
+          icon={<Activity className="icon-sm" aria-hidden />}
+          value={stats.duplicates + stats.invalid + stats.missing}
+          note={
+            <>
+              {stats.duplicates} duplicates · {stats.invalid + stats.missing} invalid/missing email · <Link href="/contacts/issues">Data issues</Link>
+            </>
+          }
+        />
+        <Kpi label="Suppressed addresses" value={stats.suppressions} note="Never re-subscribed automatically" />
+        <Kpi
+          label="Last Notion sync"
+          icon={<Database className="icon-sm" aria-hidden />}
+          value={sync.latestRun ? <Pill tone={sync.latestRun.status === "succeeded" ? "ok" : sync.latestRun.status === "failed" ? "bad" : "warn"}>{sync.latestRun.status}</Pill> : "never"}
+          note={<>NOTION_MODE={cfg.NOTION_MODE}{sync.latestRun ? ` · ${sync.latestRun.mode}` : ""}</>}
+        />
+      </div>
 
       <section className="card" data-testid="health-card">
-        <h2>System health</h2>
+        <h2>
+          <Server className="icon" aria-hidden /> System health
+        </h2>
         <table>
           <tbody>
             <tr>
               <th>Database</th>
               <td>
-                <span className={`pill ${health.checks.database.ok ? "ok" : "bad"}`}>
-                  {health.checks.database.ok ? "ok" : "unreachable"}
-                </span>{" "}
-                {health.checks.database.latencyMs !== undefined && (
-                  <span className="muted">{health.checks.database.latencyMs} ms</span>
-                )}
+                <Pill tone={db.ok ? "ok" : "bad"}>{db.ok ? "ok" : "unreachable"}</Pill> {db.latencyMs !== undefined && <span className="muted">{db.latencyMs} ms</span>}
               </td>
             </tr>
             <tr>
               <th>Worker</th>
               <td>
-                <span className={`pill ${health.checks.worker.ok ? "ok" : "bad"}`}>
-                  {health.checks.worker.ok ? "running" : "not running"}
-                </span>{" "}
-                {health.checks.worker.ageSeconds !== undefined && (
-                  <span className="muted">last heartbeat {health.checks.worker.ageSeconds}s ago</span>
-                )}
+                <Pill tone={worker.ok ? "ok" : "bad"}>{worker.ok ? "running" : "not running"}</Pill>{" "}
+                {worker.ageSeconds !== undefined && <span className="muted">last heartbeat {worker.ageSeconds}s ago</span>}
               </td>
             </tr>
             <tr>
@@ -96,6 +109,6 @@ export default async function Dashboard() {
           </tbody>
         </table>
       </section>
-    </main>
+    </AppShell>
   );
 }

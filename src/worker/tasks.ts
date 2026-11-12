@@ -4,6 +4,7 @@ import { flushOutbox } from "../lib/crm/outbox";
 import { notionEnvFromConfig, type NotionEnv } from "../lib/crm/notion-env";
 import { syncContacts, type SyncMode, type SyncTrigger } from "../lib/crm/sync";
 import { getDb } from "../lib/db/client";
+import { reapStaleTestSends } from "../lib/sending/test-send";
 import { systemProbes } from "../lib/db/schema";
 import { withCorrelation } from "../lib/logger";
 
@@ -22,6 +23,12 @@ export const CRM_CRONTAB = [
   `0 19 * * * crm_sync ?id=crm_sync_nightly&max=1&jobKey=crm_sync_nightly {"mode":"full","trigger":"nightly"}`,
   `* * * * * notion_outbox_flush ?id=notion_outbox_flush&max=1&jobKey=notion_outbox_flush`,
 ].join("\n");
+
+/** M4: stale test-send claims become `unknown` (never retried). Every 5 minutes. */
+export const TEST_SEND_CRONTAB = `*/5 * * * * test_send_reaper ?id=test_send_reaper&max=1&jobKey=test_send_reaper`;
+
+/** Everything the worker schedules. */
+export const SCHEDULED_CRONTAB = [CRM_CRONTAB, TEST_SEND_CRONTAB].join("\n");
 
 export function makeTaskList(ctx: { workerId: string; databaseUrl: string; notionEnv?: () => NotionEnv }): TaskList {
   const env = () => ctx.notionEnv?.() ?? notionEnvFromConfig(getConfig());
@@ -62,5 +69,11 @@ export function makeTaskList(ctx: { workerId: string; databaseUrl: string; notio
     if (r.claimed) log.info(r, "notion outbox flushed");
   };
 
-  return { system_probe: systemProbe, crm_sync: crmSync, notion_outbox_flush: outboxFlush };
+  const testSendReaper: Task = async (_payload, helpers) => {
+    const log = withCorrelation({ job_id: String(helpers.job.id), task: "test_send_reaper" });
+    const n = await reapStaleTestSends(getDb(ctx.databaseUrl));
+    if (n) log.warn({ count: n }, "stale test-send claims marked unknown (not retried)");
+  };
+
+  return { system_probe: systemProbe, crm_sync: crmSync, notion_outbox_flush: outboxFlush, test_send_reaper: testSendReaper };
 }

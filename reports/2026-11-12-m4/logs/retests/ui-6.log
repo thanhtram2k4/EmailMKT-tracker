@@ -1,0 +1,14 @@
+[core] WARNING: Executable file detection not yet supported on 'win32'.
+Your pool doesn't have all of the error handlers! See: https://err.red/wpeh?v=0.18.0&method=connect
+migrations applied (app + graphile_worker)
+[stack] postgres ready on 54332; logs in D:\AI Studio\Email MKT Tracker\.local\logs\retest6
+[stack] building web app (next build)…
+[stack] web + worker healthy at http://localhost:3100
+
+Running 1 test using 1 worker
+
+  ok 1 [chromium] › tests\e2e\ui-shell.spec.ts:150:1 › R-UI-03/04 (detail pages): email editor and contact detail — axe light/dark and no page scroll at 375px (5.9s)
+
+  1 passed (7.2s)
+[stack] cleanup ok: 5 owned process(es) stopped, none left
+[stack] stopped (exit 0)

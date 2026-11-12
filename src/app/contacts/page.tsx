@@ -2,7 +2,7 @@ import Link from "next/link";
 import { requireStaff } from "../../lib/auth/session";
 import { allTags, contactStats, getRequireConsent, queryContacts, type ContactFilters } from "../../lib/crm/queries";
 import { getDb } from "../../lib/db/client";
-import { AppHeader } from "../app-header";
+import { AppShell } from "../app-shell";
 import { CONSENT_TONE, Pill, ReasonList } from "../ui";
 
 export const dynamic = "force-dynamic";
@@ -33,10 +33,9 @@ export default async function ContactsPage({ searchParams }: { searchParams: Pro
   };
 
   return (
-    <main className="shell wide">
-      <AppHeader staff={staff} />
+    <AppShell staff={staff} wide>
       <h1 className="page-title">Contacts</h1>
-      <p className="muted" style={{ marginTop: 0 }}>
+      <p className="muted mt0">
         Read-only copy of the Notion CRM. Edit names, emails, companies and tags in Notion; suppression and consent are managed by this app.
       </p>
       <div className="stats" data-testid="contact-stats">
@@ -137,7 +136,7 @@ export default async function ContactsPage({ searchParams }: { searchParams: Pro
       <p className="muted" data-testid="result-count">
         {rows.length} contact{rows.length === 1 ? "" : "s"} · page {page} of {pages}
       </p>
-      <div className="card table-wrap">
+      <div className="card table-wrap" tabIndex={0}>
         <table data-testid="contacts-table">
           <thead>
             <tr>
@@ -192,6 +191,6 @@ export default async function ContactsPage({ searchParams }: { searchParams: Pro
           {page < pages && <Link href={qs({ page: String(page + 1) })}>Next →</Link>}
         </nav>
       )}
-    </main>
+    </AppShell>
   );
 }

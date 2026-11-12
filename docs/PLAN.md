@@ -35,6 +35,9 @@ Legend: `[ ]` todo · `[x]` done (with a link to evidence) · results are PASS /
 | 2026-11-12 | **M3 requirement corrected by the user.** The primary workflow is Paste HTML → Import → Preview → Edit text/images/links → Save → Reopen. The two-real-templates prerequisite is **withdrawn**; templates are not searched for on the user's machine. The product UI has no fixture gallery or GrapesJS controls; internal fixtures and the GrapesJS comparison live in `/internal/editor-lab` (admins, APP_ENV local/test only) | User |
 | 2026-11-12 | **Text editing preserves formatting by default (M3 rev 2).** Text is edited in the preview; a text-only edit rewrites text nodes only. Any edit that would remove formatting needs an explicit choice (undo, keep, or HTML source); the toolbar (TipTap) is an opt-in conversion that first lists what it removes. The server refuses a formatting removal without `acceptFormatChange` | Implementation |
 | 2026-11-12 | M3 rev 2 checkpointed on `m3-editor-trial`: tag `m3-rev2-checkpoint` (the original `m3-checkpoint` is kept) | Implementation |
+| 2026-11-12 | **M4 authorized** (UI redesign, full personalization, SES test send) on branch `m4-ui-testsend`: local development with a mock/fake SES only. Real test sends, AWS calls, deployment, push and live Notion each need separate approval | User |
+| 2026-11-12 | Test-send recipients are typed in by staff (1–3), but the server accepts only addresses on `TEST_RECIPIENT_ALLOWLIST`; the list itself is never shown in the UI | User |
+| 2026-11-12 | UI redesign scope: design system plus the existing screens; no placeholder screens for future milestones. Plain CSS with custom properties (no Tailwind). From the `ui-ux-pro-max` skill only the data-dense dashboard style, the Be Vietnam Pro font and the accessibility checklist were adopted; its pink palette and "waitlist" page pattern were rejected as unsuitable for an internal tool. The skill does not replace the QA process | User and implementation |
 | 2026-11-12 | Test tooling: processes are spawned as "owned" and cleanup targets only those PIDs and their descendants (`scripts/lib/owned-processes.ts`); a stack run fails if any survive | Implementation |
 
 ## Open items (need user input)
@@ -156,16 +159,68 @@ Primary workflow, tested through the UI in Chromium with a labelled INTERNAL fix
 - [x] R-TPL-03: an image-heavy template triggers a warning (unit). **PASS**
 - [x] Regression coverage for the M1/M2 tooling defects: exit code (a failing test exits non-zero) and owned-process cleanup. **PASS**, each proven by a mutation check
 
-## M4: Personalization and test sends
-- [ ] LiquidJS with strict variables and allowlisted fields, in subject and body; `default:` fallbacks; HTML escaping
-- [ ] Preview as a chosen recipient
-- [ ] Unresolved fields block review and list the affected recipients
-- [ ] Test sends to the allowlist or simulator; a separate `test_sends` table; `[TEST]` subject prefix
+## M4: UI redesign, personalization and test sends — implemented 2026-11-12 with mock/fake SES only (evidence: [reports/2026-11-12-m4/report.md](../reports/2026-11-12-m4/report.md), in Vietnamese)
+Branch `m4-ui-testsend` from `m3-rev2-checkpoint`. Not authorized: real email (including test sends), any AWS call, deployment, push, live Notion.
 
-**Acceptance:**
-- [ ] A missing greeting name renders its fallback (R-PERS-01); Vietnamese diacritics render correctly (R-PERS-02)
-- [ ] An unknown field blocks review (R-PERS-03)
-- [ ] Test sends and their opens and clicks never change campaign metrics (R-PERS-04; S5 LIVE)
+**UI system and screens**
+- [x] Design tokens (light/dark), Be Vietnam Pro (self-hosted), lucide icons, shared components, focus/hover/reduced-motion rules
+- [x] App shell: grouped sidebar with `aria-current`, mobile drawer, topbar with send-mode badge and theme toggle, skip link, `lang="vi"`
+- [x] Re-skin every existing screen; the M3 paste workflow and editor logic stay unchanged (same test hooks and asserted copy)
+- [x] `/settings/sending` (admin, read-only): environment, send mode, SES region/From/configuration set, authorization ref present, allowlist **count**
+
+**Personalization**
+- [x] `subject` on template versions (saving a subject creates a new version); merge fields in the subject with the same allowlist and filters
+- [x] Unknown field/filter, syntax error, CR/LF in a rendered subject, or a missing value without `default:` blocks a test send
+- [x] "Personalization check": active, valid-email contacts affected by missing values, with counts
+- [x] Preview as any contact (search), rendered subject shown
+
+**Test sends**
+- [x] SES v2 transport behind the existing guard and factory; injected client (fake in tests); outcome mapping accepted / rejected / retryable / unknown
+- [x] `test_sends` table (no campaign link); write-ahead `claimed`; idempotency key; rate limits; suppression check; `[TEST]` prefix; audit with redacted address
+- [x] Manual recipient entry (1–3); the server refuses any address not on `TEST_RECIPIENT_ALLOWLIST` without revealing the list
+- [x] Reaper: `claimed` older than 10 minutes → `unknown`; never retried automatically; "Send again" creates a new row
+
+**Acceptance (MOCK unless stated):**
+- [x] Baseline suite on `m3-rev2-checkpoint` recorded before changes
+- [x] All existing unit, integration, tooling and E2E tests still pass, including `paste-workflow` and `editor-trial`
+- [x] R-UI-01…06, R-PERS-01…03 and 05…07, R-TS-01…12 pass
+- [x] Smoke S1–S4, S5-mock/S5-disabled and S10 pass on the final build (re-smoke), MOCK
+- [~] R-PERS-04 (test-send opens/clicks never count): structural part PASS (MOCK); tracking is M7, so opens/clicks are NOT RUN
+- [ ] S5-LIVE (one real test send to an allowlisted inbox): **needs separate authorization**; Delivery event BLOCKED until a public HTTPS SNS endpoint exists
+
+- Not done in M4: the preheader column exists but is not used in sends or the UI; Firefox/Safari not tested; full Vietnamese UI localisation out of scope
+
+### M4 operation reproduction scenarios (written before implementation)
+| ID | Prerequisites | Test data | Steps | Expected (source) |
+|---|---|---|---|---|
+| OR-UI-01 | Local stack, dev sign-in (MOCK identity), admin and member accounts | Synthetic contacts | Visit every sidebar item by mouse, then by keyboard only (Tab/Enter, skip link) at 1440 px and 375 px | Each page opens; current item marked; admin-only items hidden for members; no horizontal page scroll; focus always visible (brief QA §A; this plan) |
+| OR-M3-01 | As above | INTERNAL fixture pasted through the clipboard | Paste HTML → Import → Preview → edit text (formatted block), image, link → Save → reopen from the list → Export | Same result as M3 rev 2: only the edited nodes change; formatting kept; merge fields intact (brief §4; M3 rev 2) |
+| OR-TS-01 | As above, `SEND_MODE=mock`, allowlist contains a reserved-domain address | Subject `Chào {{ greeting_name \| default: "bạn" }}` | Save subject → preview as a sample without a greeting → enter an allowlisted address → Send test → view history; then enter a non-allowlisted address | First send recorded `accepted` with `[TEST]` prefix and the fallback "bạn"; non-allowlisted address refused without revealing the list; no campaign metric touched (brief §5; DESIGN M4) |
+
+### M4 regression additions
+| ID | Scenario |
+|---|---|
+| R-UI-01 | Every page renders for admin and member without console errors |
+| R-UI-02 | Keyboard: skip link, visible focus, `aria-current` on the active item |
+| R-UI-03 | No horizontal page scroll at 375, 768, 1024 and 1440 px (tables scroll inside their wrapper) |
+| R-UI-04 | axe: no serious or critical violations, light and dark |
+| R-UI-05 | `prefers-reduced-motion` disables transitions |
+| R-UI-06 | Navigation never links to `/internal`; members do not see admin items |
+| R-PERS-05 | The personalization check lists exactly the contacts missing a value without fallback |
+| R-PERS-06 | `{% %}` in the subject is not executed |
+| R-PERS-07 | CR/LF in a rendered subject is refused |
+| R-TS-01 | Guard × environment × SEND_MODE matrix, including the transport factory |
+| R-TS-02 | A non-allowlisted address is refused by the server even when the UI is bypassed |
+| R-TS-03 | A suppressed address is refused even if allowlisted |
+| R-TS-04 | Double submit with one idempotency key → one provider call |
+| R-TS-05 | Provider timeout → `unknown`, no automatic retry; "Send again" creates a new row |
+| R-TS-06 | SES error mapping: rejected, throttled, credentials |
+| R-TS-07 | `[TEST]` subject prefix and message tags |
+| R-TS-08 | Rate limits per user and per day |
+| R-TS-09 | `test_sends` rows have no campaign link |
+| R-TS-10 | Reaper turns stale `claimed` into `unknown` |
+| R-TS-11 | Audit rows contain only the redacted address |
+| R-TS-12 | `SEND_MODE=disabled`: the button is disabled and the server refuses |
 
 ## M5: Send-now engine and compliance
 - [ ] Snapshot freeze in one transaction (content, links, recipients with frozen merge values); exclusion counts shown at review

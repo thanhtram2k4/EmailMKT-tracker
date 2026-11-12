@@ -37,25 +37,25 @@ export function SignInPanel(props: { googleEnabled: boolean; devLogin: boolean; 
 
   return (
     <div>
-      <button className="btn primary" onClick={google} disabled={!props.googleEnabled || busy} data-testid="google-sign-in">
+      <button className="btn primary big" style={{ width: "100%" }} onClick={google} disabled={!props.googleEnabled || busy} data-testid="google-sign-in">
         Sign in with Google
       </button>
       {!props.googleEnabled && (
-        <p className="muted" style={{ fontSize: 13 }}>
+        <p className="muted small">
           Google sign-in is not configured in this environment (no OAuth client).
         </p>
       )}
 
       {props.devLogin && (
-        <form onSubmit={devSignIn} style={{ marginTop: 20, paddingTop: 16, borderTop: "1px solid var(--border)" }}>
+        <form onSubmit={devSignIn} className="group" style={{ marginTop: 20 }}>
           <p style={{ margin: "0 0 8px", fontWeight: 600 }}>
             Dev sign-in <span className="pill">APP_ENV={props.appEnv} only</span>
           </p>
-          <p className="muted" style={{ fontSize: 13, marginTop: 0 }}>
+          <p className="muted small mt0">
             For local testing without Google. The same domain and access-list checks apply. Nothing is emailed.
           </p>
           <div className="row">
-            <label htmlFor="dev-email" className="muted" style={{ fontSize: 13 }}>
+            <label htmlFor="dev-email" className="sr-only">
               Email
             </label>
             <input
@@ -74,7 +74,7 @@ export function SignInPanel(props: { googleEnabled: boolean; devLogin: boolean; 
         </form>
       )}
       {error && (
-        <p role="alert" style={{ color: "var(--bad)" }}>
+        <p role="alert" className="field-error">
           {error}
         </p>
       )}

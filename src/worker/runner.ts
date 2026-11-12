@@ -12,7 +12,7 @@ import { getDb } from "../lib/db/client";
 import { workerHeartbeats } from "../lib/db/schema";
 import { getLogger } from "../lib/logger";
 import type { NotionEnv } from "../lib/crm/notion-env";
-import { CRM_CRONTAB, makeTaskList } from "./tasks";
+import { SCHEDULED_CRONTAB, makeTaskList } from "./tasks";
 
 export type WorkerHandle = { workerId: string; runner: Runner; stop: () => Promise<void> };
 
@@ -68,7 +68,7 @@ export async function startWorker(opts: {
     pollInterval: opts.pollIntervalMs ?? 2000,
     logger: gwLogger,
     taskList: makeTaskList({ workerId, databaseUrl: opts.databaseUrl, notionEnv: opts.notionEnv }),
-    ...(opts.enableCrmSchedules ? { crontab: CRM_CRONTAB } : {}),
+    ...(opts.enableCrmSchedules ? { crontab: SCHEDULED_CRONTAB } : {}),
   });
   log.info({ concurrency: opts.concurrency }, "worker started");
 

@@ -409,8 +409,65 @@ export const templateVersions = pgTable(
     ops: jsonb("ops"),
     sanitizeReport: jsonb("sanitize_report"),
     note: text("note"),
+    /** M4: subject line (merge fields allowed). Null for versions saved before M4. */
+    subject: text("subject"),
+    /** M4: optional preheader (inbox preview text). */
+    preheader: text("preheader"),
     createdBy: text("created_by").notNull(),
     createdAt: ts("created_at").notNull().defaultNow(),
   },
   (t) => [uniqueIndex("template_versions_no_idx").on(t.templateId, t.versionNo)],
+);
+
+// ================================================================ M4: test sends
+
+/**
+ * Status of one test-send attempt (one row per recipient address):
+ *  - claimed:   written BEFORE the provider is called (write-ahead); a stale claim becomes unknown;
+ *  - accepted:  the provider accepted the message (NOT proof of inbox delivery);
+ *  - rejected:  the provider refused it definitively;
+ *  - retryable: the provider confirmed it did not accept (e.g. throttling); never retried automatically;
+ *  - unknown:   the outcome is uncertain (timeout, crash after the call); never retried automatically;
+ *  - refused:   our own checks refused it before any provider call (allowlist, suppression, guard…).
+ */
+export const testSendStatus = pgEnum("test_send_status", ["claimed", "accepted", "rejected", "retryable", "unknown", "refused"]);
+
+/** Test sends are deliberately separate from campaigns: no campaign id, never part of campaign metrics. */
+export const testSends = pgTable(
+  "test_sends",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    /** One per submitted form and recipient; a double submit reuses it, so the provider is called once. */
+    idempotencyKey: text("idempotency_key").notNull(),
+    templateId: uuid("template_id")
+      .notNull()
+      .references(() => templates.id),
+    templateVersionId: uuid("template_version_id")
+      .notNull()
+      .references(() => templateVersions.id),
+    requestedBy: text("requested_by").notNull(),
+    recipientEmail: text("recipient_email").notNull(),
+    /** Whose data filled the merge fields (sample id or contact:<uuid>). */
+    mergeSource: text("merge_source").notNull(),
+    renderedSubject: text("rendered_subject"),
+    status: testSendStatus("status").notNull(),
+    transport: text("transport"),
+    providerMessageId: text("provider_message_id"),
+    errorCode: text("error_code"),
+    errorMessage: text("error_message"),
+    sendMode: text("send_mode").notNull(),
+    authorizationRef: text("authorization_ref"),
+    requestId: text("request_id"),
+    /** Set when a staff member explicitly sends again after an uncertain or failed attempt. */
+    resendOf: uuid("resend_of"),
+    createdAt: ts("created_at").notNull().defaultNow(),
+    claimedAt: ts("claimed_at"),
+    completedAt: ts("completed_at"),
+  },
+  (t) => [
+    uniqueIndex("test_sends_idem_idx").on(t.idempotencyKey, t.recipientEmail),
+    index("test_sends_template_idx").on(t.templateId, t.createdAt),
+    index("test_sends_requested_by_idx").on(t.requestedBy, t.createdAt),
+    index("test_sends_status_idx").on(t.status, t.claimedAt),
+  ],
 );

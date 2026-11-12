@@ -4,7 +4,7 @@ import { requireInternalTools } from "../../../../../lib/internal-tools";
 import { getDb } from "../../../../../lib/db/client";
 import { parseHtml } from "../../../../../lib/templates/html-doc";
 import { getTemplate, getVersion } from "../../../../../lib/templates/service";
-import { AppHeader } from "../../../../app-header";
+import { AppShell } from "../../../../app-shell";
 import { GrapesLab } from "./grapes-lab";
 
 export const dynamic = "force-dynamic";
@@ -29,8 +29,7 @@ export default async function GrapesPage({ params, searchParams }: { params: Pro
   const bodyAttrs = Object.entries($("body").attr() ?? {}).map(([k, val]) => `${k}="${String(val).replace(/"/g, "&quot;")}"`).join(" ");
 
   return (
-    <main className="shell wide">
-      <AppHeader staff={staff} />
+    <AppShell staff={staff} wide>
       <p>
         <Link href="/internal/editor-lab">← Internal editor lab</Link> · <Link href={`/templates/${id}?v=${v.id}`}>open in the editor</Link>
       </p>
@@ -39,6 +38,6 @@ export default async function GrapesPage({ params, searchParams }: { params: Pro
         Trial of candidate (b). Export = the original &lt;head&gt; + GrapesJS body with inlined CSS. Results are measured in the M3 report; browser preview only.
       </div>
       <GrapesLab templateId={id} versionId={v.id} body={body} css={css} head={head} doctype={doctypeMatch?.[0] ?? "<!doctype html>"} htmlAttrs={htmlAttrs} bodyAttrs={bodyAttrs} />
-    </main>
+    </AppShell>
   );
 }
