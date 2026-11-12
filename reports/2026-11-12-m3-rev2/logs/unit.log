@@ -1,0 +1,32 @@
+
+> email-mkt-tracker@0.1.0 test:unit
+> vitest run --project unit
+
+
+ RUN  v5.1.0 D:/AI Studio/Email MKT Tracker
+
+{"level":"warn","time":"2026-11-12T06:21:31.312Z","service":"web","env":"unknown","build":"dev","component":"notion-client","method":"POST","path":"/v1/data_sources/03a119ed-37f9-46d7-a7c7-29163e1d503c/query","status":429,"code":"rate_limited","attempt":1,"retryable":true,"retry_after_ms":7000,"msg":"notion request failed"}
+{"level":"warn","time":"2026-11-12T06:21:31.319Z","service":"web","env":"unknown","build":"dev","component":"notion-client","method":"POST","path":"/v1/data_sources/03a119ed-37f9-46d7-a7c7-29163e1d503c/query","status":429,"code":"rate_limited","attempt":2,"retryable":true,"retry_after_ms":7000,"msg":"notion request failed"}
+{"level":"warn","time":"2026-11-12T06:21:31.321Z","service":"web","env":"unknown","build":"dev","component":"notion-client","method":"GET","path":"/v1/data_sources/7943013f-b158-40da-be3e-7bd4e13bf360","status":529,"code":"service_overload","attempt":1,"retryable":true,"msg":"notion request failed"}
+{"level":"warn","time":"2026-11-12T06:21:31.323Z","service":"web","env":"unknown","build":"dev","component":"notion-client","method":"GET","path":"/v1/data_sources/7943013f-b158-40da-be3e-7bd4e13bf360","status":503,"code":"service_unavailable","attempt":1,"retryable":true,"msg":"notion request failed"}
+{"level":"warn","time":"2026-11-12T06:21:31.323Z","service":"web","env":"unknown","build":"dev","component":"notion-client","method":"GET","path":"/v1/data_sources/7943013f-b158-40da-be3e-7bd4e13bf360","status":503,"code":"service_unavailable","attempt":2,"retryable":true,"msg":"notion request failed"}
+{"level":"warn","time":"2026-11-12T06:21:31.323Z","service":"web","env":"unknown","build":"dev","component":"notion-client","method":"GET","path":"/v1/data_sources/7943013f-b158-40da-be3e-7bd4e13bf360","status":503,"code":"service_unavailable","attempt":3,"retryable":true,"msg":"notion request failed"}
+{"level":"warn","time":"2026-11-12T06:21:31.327Z","service":"web","env":"unknown","build":"dev","component":"notion-client","method":"GET","path":"/v1/data_sources/2d6e80fe-1aac-4168-ade6-40a543d570de","status":502,"code":"bad_gateway","attempt":1,"retryable":true,"msg":"notion request failed"}
+{"level":"warn","time":"2026-11-12T06:21:31.327Z","service":"web","env":"unknown","build":"dev","component":"notion-client","method":"GET","path":"/v1/data_sources/2d6e80fe-1aac-4168-ade6-40a543d570de","status":502,"code":"bad_gateway","attempt":2,"retryable":true,"msg":"notion request failed"}
+{"level":"warn","time":"2026-11-12T06:21:31.328Z","service":"web","env":"unknown","build":"dev","component":"notion-client","method":"GET","path":"/v1/data_sources/2d6e80fe-1aac-4168-ade6-40a543d570de","status":502,"code":"bad_gateway","attempt":3,"retryable":true,"msg":"notion request failed"}
+{"level":"warn","time":"2026-11-12T06:21:31.328Z","service":"web","env":"unknown","build":"dev","component":"notion-client","method":"GET","path":"/v1/data_sources/2d6e80fe-1aac-4168-ade6-40a543d570de","status":502,"code":"bad_gateway","attempt":4,"retryable":true,"msg":"notion request failed"}
+{"level":"warn","time":"2026-11-12T06:21:31.329Z","service":"web","env":"unknown","build":"dev","component":"notion-client","method":"GET","path":"/v1/data_sources/2d6e80fe-1aac-4168-ade6-40a543d570de","status":502,"code":"bad_gateway","attempt":5,"retryable":true,"msg":"notion request failed"}
+{"level":"warn","time":"2026-11-12T06:21:31.333Z","service":"web","env":"unknown","build":"dev","component":"notion-client","method":"GET","path":"/v1/data_sources/7db23c81-9830-4421-8426-2b652daad51b","status":401,"code":"unauthorized","attempt":1,"retryable":false,"msg":"notion request failed"}
+{"level":"warn","time":"2026-11-12T06:21:31.333Z","service":"web","env":"unknown","build":"dev","component":"notion-client","method":"GET","path":"/v1/data_sources/does-not-exist","status":404,"code":"object_not_found","attempt":1,"retryable":false,"msg":"notion request failed"}
+{"level":"warn","time":"2026-11-12T06:21:31.334Z","service":"web","env":"unknown","build":"dev","component":"notion-client","method":"POST","path":"/v1/data_sources/7db23c81-9830-4421-8426-2b652daad51b/query","status":400,"code":"validation_error","attempt":1,"retryable":false,"msg":"notion request failed"}
+{"level":"warn","time":"2026-11-12T06:21:31.337Z","service":"web","env":"unknown","build":"dev","component":"notion-client","method":"GET","path":"/v1/data_sources/8e44513f-ac8d-4cc5-a318-4ea32c3fa5b8","attempt":1,"err":"fetch failed (simulated network error)","msg":"notion request transport error"}
+{"level":"warn","time":"2026-11-12T06:21:31.337Z","service":"web","env":"unknown","build":"dev","component":"notion-client","method":"GET","path":"/v1/data_sources/8e44513f-ac8d-4cc5-a318-4ea32c3fa5b8","attempt":2,"err":"fetch failed (simulated network error)","msg":"notion request transport error"}
+{"level":"warn","time":"2026-11-12T06:21:31.338Z","service":"web","env":"unknown","build":"dev","component":"notion-client","method":"POST","path":"/v1/databases","attempt":1,"err":"fetch failed (simulated network error)","msg":"notion request transport error"}
+{"level":"warn","time":"2026-11-12T06:21:31.340Z","service":"web","env":"unknown","build":"dev","component":"notion-client","method":"POST","path":"/v1/databases","status":503,"code":"service_unavailable","attempt":1,"retryable":false,"msg":"notion request failed"}
+{"level":"warn","time":"2026-11-12T06:21:31.342Z","service":"web","env":"unknown","build":"dev","component":"notion-client","method":"GET","path":"/v1/data_sources/50a57436-144e-4479-8912-772eaed9b2c0","status":429,"code":"rate_limited","attempt":1,"retryable":true,"retry_after_ms":600000,"msg":"notion request failed"}
+
+ Test Files  11 passed (11)
+      Tests  145 passed (145)
+   Start at  13:21:30
+   Duration  2.70s (import 82%, tests 12%, transform 6%, worker 1%)
+

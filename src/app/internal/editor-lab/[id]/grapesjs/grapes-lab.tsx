@@ -3,7 +3,7 @@ import "grapesjs/dist/css/grapes.min.css";
 import type { Editor } from "grapesjs";
 import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
-import { saveGrapesAction } from "../../../templates-actions";
+import { saveGrapesAction } from "../../actions";
 
 type Props = { templateId: string; versionId: string; body: string; css: string; head: string; doctype: string; htmlAttrs: string; bodyAttrs: string };
 

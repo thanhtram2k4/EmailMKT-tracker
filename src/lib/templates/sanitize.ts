@@ -182,12 +182,21 @@ export function sanitizeEmailHtml(input: string): { html: string; report: Saniti
 }
 
 /** Inline-only allowlist for edited text blocks (TipTap output). Merge fields are plain text. */
-export function sanitizeInline(html: string): string {
+/**
+ * Sanitize the inner HTML of one text block (rich-text, HTML-source and changed-format edits).
+ * Allows the same inline tags and attributes as the document sanitizer, so an edit is never
+ * stripped of formatting the stored template may legitimately have; block-level tags are
+ * unwrapped and anything dangerous is removed. keepEditorIds keeps data-emt-id on links (editor
+ * bookkeeping only; applyEdits removes every annotation before storing).
+ */
+const INLINE_TAGS = ["b", "strong", "i", "em", "u", "s", "strike", "br", "a", "span", "font", "sup", "sub", "small", "big", "code", "abbr"];
+export function sanitizeInline(html: string, opts: { keepEditorIds?: boolean } = {}): string {
   return sanitizeHtml(html, {
-    allowedTags: ["b", "strong", "i", "em", "u", "s", "br", "a", "span", "sup", "sub", "small", "code"],
-    allowedAttributes: { a: ["href", "target", "rel", "style"], span: ["style"] },
+    allowedTags: INLINE_TAGS,
+    allowedAttributes: { "*": COMMON_ATTRS, a: ["href", "target", "rel", "name", ...(opts.keepEditorIds ? ["data-emt-id"] : [])] },
     allowedSchemes: ["http", "https", "mailto", "tel"],
     disallowedTagsMode: "discard",
+    nonTextTags: ["script", "style", "textarea", "option", "noscript", "button", "select", "title", "iframe", "object", "svg", "math"],
     parser: { decodeEntities: true },
     transformTags: {
       "*": (tagName, attribs) => {

@@ -1,0 +1,29 @@
+
+ RUN  v5.1.0 D:/AI Studio/Email MKT Tracker
+
+ ❯ |unit| tests/unit/text-edits.test.ts (21 tests | 1 failed) 52ms
+   ❯ formatting loss needs an explicit choice (4)
+     × an HTML replacement that removes formatting is refused without acceptFormatChange 7ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  |unit| tests/unit/text-edits.test.ts > formatting loss needs an explicit choice > an HTML replacement that removes formatting is refused without acceptFormatChange
+AssertionError: expected [Function] to throw an error
+
+- Expected:
+null
+
++ Received:
+undefined
+
+ ❯ tests/unit/text-edits.test.ts:116:79
+
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 20 passed (21)
+   Start at  13:21:04
+   Duration  1.02s (import 83%, transform 10%, tests 6%, worker 1%)
+

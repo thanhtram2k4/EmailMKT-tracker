@@ -1,0 +1,53 @@
+
+> email-mkt-tracker@0.1.0 e2e
+> tsx scripts/local-stack.ts --log-dir .local/logs/e2e -- playwright test tests/e2e/paste-workflow.spec.ts tests/e2e/editor-trial.spec.ts --repeat-each=2
+
+[core] WARNING: Executable file detection not yet supported on 'win32'.
+Your pool doesn't have all of the error handlers! See: https://err.red/wpeh?v=0.18.0&method=connect
+migrations applied (app + graphile_worker)
+[stack] postgres ready on 54332; logs in D:\AI Studio\Email MKT Tracker\.local\logs\e2e
+[stack] building web app (next build)…
+[stack] web + worker healthy at http://localhost:3100
+
+Running 36 tests using 1 worker
+
+  ok  1 [chromium] › tests\e2e\editor-trial.spec.ts:86:5 › SYNTHETIC A › import, sanitize report, regions, checks (2.1s)
+  ok  2 [chromium] › tests\e2e\editor-trial.spec.ts:115:5 › SYNTHETIC A › edit text, image, button and link; save; reopen; export (2.1s)
+  ok  3 [chromium] › tests\e2e\editor-trial.spec.ts:199:5 › SYNTHETIC A › recipient previews and missing-name fallbacks (1.5s)
+  ok  4 [chromium] › tests\e2e\editor-trial.spec.ts:218:5 › SYNTHETIC A › responsive browser renderings and import fidelity (Chromium only) (4.0s)
+  ok  5 [chromium] › tests\e2e\editor-trial.spec.ts:242:5 › SYNTHETIC A › GrapesJS (candidate b): no-edit export fidelity, then an edit + save (3.1s)
+  ok  6 [chromium] › tests\e2e\editor-trial.spec.ts:86:5 › SYNTHETIC B › import, sanitize report, regions, checks (1.3s)
+  ok  7 [chromium] › tests\e2e\editor-trial.spec.ts:115:5 › SYNTHETIC B › edit text, image, button and link; save; reopen; export (2.1s)
+  ok  8 [chromium] › tests\e2e\editor-trial.spec.ts:199:5 › SYNTHETIC B › recipient previews and missing-name fallbacks (1.4s)
+  ok  9 [chromium] › tests\e2e\editor-trial.spec.ts:218:5 › SYNTHETIC B › responsive browser renderings and import fidelity (Chromium only) (8.1s)
+  ok 10 [chromium] › tests\e2e\editor-trial.spec.ts:242:5 › SYNTHETIC B › GrapesJS (candidate b): no-edit export fidelity, then an edit + save (5.2s)
+  ok 11 [chromium] › tests\e2e\editor-trial.spec.ts:290:1 › TipTap paste (candidate c): formatted text from a Google-Docs-like clipboard keeps bold/italic/links, drops styles (1.3s)
+  ok 12 [chromium] › tests\e2e\paste-workflow.spec.ts:54:1 › main UI: Paste HTML is the entry point; no fixture gallery or GrapesJS controls (709ms)
+  ok 13 [chromium] › tests\e2e\paste-workflow.spec.ts:67:1 › paste → import → preview → edit text, image and link → save → reopen → export (2.8s)
+  ok 14 [chromium] › tests\e2e\paste-workflow.spec.ts:160:1 › formatting loss needs a choice: undo, keep, or HTML source (sanitized on save) (2.3s)
+  ok 15 [chromium] › tests\e2e\paste-workflow.spec.ts:213:1 › formatting toolbar is an explicit conversion with a preview of what it removes, and undo (1.7s)
+  ok 16 [chromium] › tests\e2e\paste-workflow.spec.ts:241:1 › a pasted fragment (no <html>/<body>) and a typed-markup attempt (1.3s)
+  ok 17 [chromium] › tests\e2e\paste-workflow.spec.ts:257:1 › internal tools are separate: members cannot open the lab (511ms)
+  ok 18 [chromium] › tests\e2e\paste-workflow.spec.ts:263:1 › internal tools are separate: admin-only lab, not linked from the product UI (616ms)
+  ok 19 [chromium] › tests\e2e\editor-trial.spec.ts:86:5 › SYNTHETIC A › import, sanitize report, regions, checks (1.3s)
+  ok 20 [chromium] › tests\e2e\editor-trial.spec.ts:115:5 › SYNTHETIC A › edit text, image, button and link; save; reopen; export (1.8s)
+  ok 21 [chromium] › tests\e2e\editor-trial.spec.ts:199:5 › SYNTHETIC A › recipient previews and missing-name fallbacks (1.3s)
+  ok 22 [chromium] › tests\e2e\editor-trial.spec.ts:218:5 › SYNTHETIC A › responsive browser renderings and import fidelity (Chromium only) (3.8s)
+  ok 23 [chromium] › tests\e2e\editor-trial.spec.ts:242:5 › SYNTHETIC A › GrapesJS (candidate b): no-edit export fidelity, then an edit + save (3.3s)
+  ok 24 [chromium] › tests\e2e\editor-trial.spec.ts:86:5 › SYNTHETIC B › import, sanitize report, regions, checks (1.2s)
+  ok 25 [chromium] › tests\e2e\editor-trial.spec.ts:115:5 › SYNTHETIC B › edit text, image, button and link; save; reopen; export (2.2s)
+  ok 26 [chromium] › tests\e2e\editor-trial.spec.ts:199:5 › SYNTHETIC B › recipient previews and missing-name fallbacks (1.3s)
+  ok 27 [chromium] › tests\e2e\editor-trial.spec.ts:218:5 › SYNTHETIC B › responsive browser renderings and import fidelity (Chromium only) (8.1s)
+  ok 28 [chromium] › tests\e2e\editor-trial.spec.ts:242:5 › SYNTHETIC B › GrapesJS (candidate b): no-edit export fidelity, then an edit + save (5.4s)
+  ok 29 [chromium] › tests\e2e\editor-trial.spec.ts:290:1 › TipTap paste (candidate c): formatted text from a Google-Docs-like clipboard keeps bold/italic/links, drops styles (1.5s)
+  ok 30 [chromium] › tests\e2e\paste-workflow.spec.ts:54:1 › main UI: Paste HTML is the entry point; no fixture gallery or GrapesJS controls (747ms)
+  ok 31 [chromium] › tests\e2e\paste-workflow.spec.ts:67:1 › paste → import → preview → edit text, image and link → save → reopen → export (2.7s)
+  ok 32 [chromium] › tests\e2e\paste-workflow.spec.ts:160:1 › formatting loss needs a choice: undo, keep, or HTML source (sanitized on save) (2.3s)
+  ok 33 [chromium] › tests\e2e\paste-workflow.spec.ts:213:1 › formatting toolbar is an explicit conversion with a preview of what it removes, and undo (1.7s)
+  ok 34 [chromium] › tests\e2e\paste-workflow.spec.ts:241:1 › a pasted fragment (no <html>/<body>) and a typed-markup attempt (1.3s)
+  ok 35 [chromium] › tests\e2e\paste-workflow.spec.ts:257:1 › internal tools are separate: members cannot open the lab (527ms)
+  ok 36 [chromium] › tests\e2e\paste-workflow.spec.ts:263:1 › internal tools are separate: admin-only lab, not linked from the product UI (636ms)
+
+  36 passed (1.5m)
+[stack] cleanup ok: 5 owned process(es) stopped, none left
+[stack] stopped (exit 0)

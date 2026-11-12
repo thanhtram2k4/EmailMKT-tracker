@@ -1,6 +1,6 @@
 # Email MKT Tracker
 
-This is an internal email-marketing tool. **Current state: M2.** Contacts are synchronized from a Notion CRM, and the foundation from M1 is in place.
+This is an internal email-marketing tool. **Current state: M3** (paste-and-edit email editor). Contacts are synchronized from a Notion CRM, and the foundation from M1 is in place.
 
 M1 foundation:
 - staff sign-in limited to the company domain and a staff allowlist
@@ -76,20 +76,19 @@ npm run dev:crm              # web at http://localhost:3000, the worker, and the
    npm run notion:mock:ctl -- reset                                  # reseed the synthetic data
    ```
 
-### Walkthrough: template editor trial (M3)
-1. Open **Templates**. Click **Import TỔNG HỢP A…** (table newsletter with Outlook conditional comments and merge fields) or **Import TỔNG HỢP B…** (unsafe markup, to see sanitization).
-2. To try your own file, use **HTML file**:
-   - If the email sits inside a tool page, set **Only import part of the page** to its selector, e.g. `#email`.
-   - The file stays in your local database. Nothing is sent anywhere.
-3. In the editor:
-   - **Edit regions.** Click a text block, image, link or button in the preview, or pick one from **Editable regions**.
-     - Text uses a rich-text field with a **merge-field picker**.
-     - Images take a URL and alt text; links and buttons take a destination, and buttons also take their text.
-     - A warning appears if a block has formatting the rich-text field cannot keep.
-   - **Save as new version.** Earlier versions stay listed and can be reopened.
-   - **Preview as a recipient**, e.g. "Mẫu: thiếu tên gọi", to see the fallbacks (`Quý khách`) and any "missing values without fallback".
-   - **Desktop 640px / Mobile 375px.** These are **your browser's** rendering only, not Gmail, Outlook or a phone mail app.
-   - **Side panels:** checks (images, links, size, merge fields), the sanitization report, **Export HTML / plain text**, and **Open in GrapesJS (trial)** for comparison.
+### Walkthrough: your own email (M3)
+1. Open **Emails**. Paste your email's complete HTML into **Paste HTML** and click **Import**. No selector or file is needed; the name defaults to the email's `<title>`. (File upload, and importing only part of a web page, are under **More import options**.)
+2. The editor opens with a **preview** of the imported email (sanitized: scripts, forms, event handlers and `javascript:` links removed; layout, styles, Outlook comments and merge fields kept).
+3. **Edit text:** click text in the preview and type. Only the text changes; colours, fonts, links and merge fields around it are kept, and the panel says "Only the text changed. All formatting is kept."
+   - **Insert merge field** puts e.g. `{{ greeting_name | default: "Quý khách" }}` at the cursor.
+   - If an edit would remove formatting (e.g. you replaced a whole coloured word), saving is blocked until you choose **Undo changes to this block**, **Keep this change** or **Edit HTML source instead**.
+   - **Formatting toolbar** (bold, italic, link) first lists what it cannot keep; **HTML source** edits the block's inline HTML directly.
+4. **Edit an image or link:** click it in the preview and change the URL / alt text / destination.
+5. **Save as new version.** Reopen the email any time from **Emails → Your emails**; older versions stay listed.
+6. **Preview as a recipient** (e.g. "Mẫu: thiếu tên gọi") to see fallbacks; **Desktop 640px / Mobile 375px** are your browser's rendering only, not Gmail, Outlook or a phone mail app.
+7. **Export HTML / plain text** from the Versions panel.
+
+Internal test tooling (labelled fixtures, GrapesJS comparison) is at `/internal/editor-lab` for admins when APP_ENV is local or test; it is not part of the user workflow.
 
 **Stopping:** press Ctrl+C in both terminals. On Windows, check that no `node`/`postgres` processes from this folder remain if a terminal was closed abruptly (see `CLAUDE.md` → "Windows process hygiene").
 

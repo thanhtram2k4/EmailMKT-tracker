@@ -13,7 +13,7 @@ import { getVersion } from "../../../../lib/templates/service";
 
 export const dynamic = "force-dynamic";
 
-const EDIT_CSS = `<style data-emt-editor>[data-emt-id]{cursor:pointer}[data-emt-id]:hover{outline:2px dashed #1f5f8b;outline-offset:2px}[data-emt-selected]{outline:3px solid #d9480f!important;outline-offset:2px}</style>`;
+const EDIT_CSS = `<style data-emt-editor>[data-emt-id]{cursor:pointer}[data-emt-id]:hover{outline:2px dashed #1f5f8b;outline-offset:2px}[data-emt-selected]{outline:3px solid #d9480f!important;outline-offset:2px}[contenteditable]{cursor:text}[contenteditable]:focus{outline:3px solid #1f5f8b!important;outline-offset:2px}</style>`;
 
 export async function GET(req: Request, ctx: { params: Promise<{ id: string }> }) {
   if (!(await getCurrentStaff())) return new NextResponse("Unauthorized", { status: 401 });

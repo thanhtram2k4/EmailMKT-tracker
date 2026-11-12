@@ -1,0 +1,24 @@
+
+> email-mkt-tracker@0.1.0 e2e
+> tsx scripts/local-stack.ts --log-dir .local/logs/e2e -- playwright test tests/e2e/paste-workflow.spec.ts
+
+[core] WARNING: Executable file detection not yet supported on 'win32'.
+Your pool doesn't have all of the error handlers! See: https://err.red/wpeh?v=0.18.0&method=connect
+migrations applied (app + graphile_worker)
+[stack] postgres ready on 54332; logs in D:\AI Studio\Email MKT Tracker\.local\logs\e2e
+[stack] building web app (next build)…
+[stack] web + worker healthy at http://localhost:3100
+
+Running 7 tests using 1 worker
+
+  ok 1 [chromium] › tests\e2e\paste-workflow.spec.ts:54:1 › main UI: Paste HTML is the entry point; no fixture gallery or GrapesJS controls (1.4s)
+  ok 2 [chromium] › tests\e2e\paste-workflow.spec.ts:67:1 › paste → import → preview → edit text, image and link → save → reopen → export (3.0s)
+  ok 3 [chromium] › tests\e2e\paste-workflow.spec.ts:160:1 › formatting loss needs a choice: undo, keep, or HTML source (sanitized on save) (2.4s)
+  ok 4 [chromium] › tests\e2e\paste-workflow.spec.ts:213:1 › formatting toolbar is an explicit conversion with a preview of what it removes, and undo (1.7s)
+  ok 5 [chromium] › tests\e2e\paste-workflow.spec.ts:241:1 › a pasted fragment (no <html>/<body>) and a typed-markup attempt (1.4s)
+  ok 6 [chromium] › tests\e2e\paste-workflow.spec.ts:257:1 › internal tools are separate: members cannot open the lab (547ms)
+  ok 7 [chromium] › tests\e2e\paste-workflow.spec.ts:263:1 › internal tools are separate: admin-only lab, not linked from the product UI (673ms)
+
+  7 passed (13.5s)
+[stack] cleanup ok: 5 owned process(es) stopped, none left
+[stack] stopped (exit 0)

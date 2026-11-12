@@ -13,8 +13,9 @@ This is an internal email-marketing app for a single company. Campaigns go out t
 ## Status
 - **M1 (foundation) is implemented** and checkpointed as Git tag `m1-checkpoint`. See `reports/2026-11-12-m1/report.md`.
 - **M2 (Notion CRM) is implemented with mocks and synthetic data only.** Tag `m2-checkpoint`. See `reports/2026-11-12-m2/report.md`.
-- **M3 (editor trial) is done.** Tag `m3-checkpoint`, branch `m3-editor-trial`. See `reports/2026-11-12-m3/report.md` (Vietnamese).
-  - The editor recommendation is **provisional**: only one unconfirmed real template was available, and no real email client was tested.
+- **M3 (editor) is done, corrected in rev 2.** Branch `m3-editor-trial`; tags `m3-checkpoint` (trial) and `m3-rev2-checkpoint` (paste workflow). See `reports/2026-11-12-m3-rev2/report.md` (Vietnamese).
+  - The primary workflow is **Paste HTML → Import → Preview → Edit → Save → Reopen**. Real templates are **not** a requirement; never search the user's folders for templates.
+  - Browser (Chromium) validation only. Gmail, Outlook and mobile rendering are NOT RUN.
 - **M4 and later are not authorized yet.**
 - **Verified only locally:** Google OAuth, staging, CI and live Notion are unverified.
 
@@ -54,7 +55,7 @@ TypeScript on Node 22.18+ (developed on Node 24).
 | Run | `npm run dev:all` (web on :3000 and worker) · `npm run dev:crm` (plus the mock Notion server on :4010) |
 | Mock Notion control | `npm run notion:mock:ctl -- list` · `set <key> subscription=Subscribed` · `trash <key>` · `fault 503 3` |
 | Checks | `npm run lint` · `npm run typecheck` · `npm run test:unit` · `npm run test:integration` · `npm run test:tooling` |
-| Editor trial | `npm run e2e -- tests/e2e/editor-trial.spec.ts` (results in `test-results/editor-trial/`) · `npx tsx scripts/editor-trial/probe.ts` (counts only) |
+| Paste workflow / editor trial | `npm run e2e -- tests/e2e/paste-workflow.spec.ts` · `npm run e2e -- tests/e2e/editor-trial.spec.ts` (results in `test-results/editor-trial/`; extra local inputs only via `EDITOR_TRIAL_EXTRA_DIR`) |
 | E2E / smoke | `npm run e2e` · `npm run smoke:local` (each starts an isolated stack, runs, then tears it down) |
 | New migration | edit `src/lib/db/schema.ts`, then `npm run db:generate` |
 
@@ -104,6 +105,11 @@ TypeScript on Node 22.18+ (developed on Node 24).
   - Keep DOCTYPE, tables, inline styles, `<style>`/`@media` and MSO conditional comments.
   - HTML between `<!--[if !mso]><!-->` and `<!--<![endif]-->` **must still be sanitized**: it is visible in non-Outlook clients.
 - **Merge fields:** Liquid **output only** (`{{ field | filter }}`), with allowlisted fields and filters, and HTML-escaped values. Liquid tags (`{% %}`) are never executed (file access).
+- **Text edits keep formatting** (`src/lib/templates/text-runs.ts`).
+  - The default edit is in the preview; a text-only change is saved as a `text-runs` op that rewrites text nodes only (typed text is escaped, never parsed as HTML).
+  - An edit that **removes** formatting must never be saved silently: the editor blocks saving until the user chooses undo, keep or HTML source, and the server refuses it without `acceptFormatChange`. A warning alone is not enough.
+  - The TipTap toolbar is an opt-in conversion that first lists exactly what it removes, with undo.
+- **Product UI vs internal tools:** the Emails page shows Paste HTML + Import and the user's own saved emails only. Fixtures and the GrapesJS comparison stay in `/internal/editor-lab` (admin, APP_ENV local/test).
 - **Plain-text part:** never change letter case.
 - **Preview** runs in a sandboxed iframe with CSP `script-src 'none'`. Editor annotations (`data-emt-id`) never reach stored or exported HTML.
 - **Template versions are immutable** (DB trigger). Saving always creates a new version.

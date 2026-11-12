@@ -1,0 +1,13 @@
+
+> email-mkt-tracker@0.1.0 test:integration
+> vitest run --project integration
+
+
+ RUN  v5.1.0 D:/AI Studio/Email MKT Tracker
+
+
+ Test Files  4 passed (4)
+      Tests  37 passed (37)
+   Start at  13:21:34
+   Duration  40.06s (tests 92%, import 7%)
+

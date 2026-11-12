@@ -1,5 +1,7 @@
 # Báo cáo kiểm thử: M3 — Thử nghiệm trình soạn thảo email (editor trial)
 
+> **Đã được thay thế một phần bởi [M3 rev 2](../2026-11-12-m3-rev2/report.md) (cùng ngày).** Bạn đã rút lại yêu cầu "hai template thật". Vì vậy việc xác nhận template #1 và template #2 bị thiếu **không còn là việc chặn M3**. Lỗi mất định dạng khi sửa chữ (mục TipTap bên dưới) đã được sửa bằng cách sửa chữ có giữ định dạng. Báo cáo này được giữ nguyên làm bằng chứng lịch sử.
+
 | | |
 |---|---|
 | Build | `src-071125b4e5f2`: mã băm nội dung của cây làm việc trên nhánh `m3-editor-trial`, tách từ `m2-checkpoint` (`63cad42`). Commit checkpoint M3 ở cuối báo cáo |

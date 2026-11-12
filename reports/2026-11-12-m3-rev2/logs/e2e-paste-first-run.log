@@ -1,0 +1,91 @@
+
+> email-mkt-tracker@0.1.0 e2e
+> tsx scripts/local-stack.ts --log-dir .local/logs/e2e -- playwright test tests/e2e/paste-workflow.spec.ts
+
+[core] WARNING: Executable file detection not yet supported on 'win32'.
+Your pool doesn't have all of the error handlers! See: https://err.red/wpeh?v=0.18.0&method=connect
+migrations applied (app + graphile_worker)
+[stack] postgres ready on 54332; logs in D:\AI Studio\Email MKT Tracker\.local\logs\e2e
+[stack] building web app (next build)…
+[stack] web + worker healthy at http://localhost:3100
+
+Running 7 tests using 1 worker
+
+  ok 1 [chromium] › tests\e2e\paste-workflow.spec.ts:52:1 › main UI: Paste HTML is the entry point; no fixture gallery or GrapesJS controls (1.6s)
+  x  2 [chromium] › tests\e2e\paste-workflow.spec.ts:65:1 › paste → import → preview → edit text, image and link → save → reopen → export (1.4s)
+  ok 3 [chromium] › tests\e2e\paste-workflow.spec.ts:158:1 › formatting loss needs a choice: undo, keep, or HTML source (sanitized on save) (2.7s)
+  ok 4 [chromium] › tests\e2e\paste-workflow.spec.ts:211:1 › formatting toolbar is an explicit conversion with a preview of what it removes, and undo (2.0s)
+  ok 5 [chromium] › tests\e2e\paste-workflow.spec.ts:239:1 › a pasted fragment (no <html>/<body>) and a typed-markup attempt (1.4s)
+  ok 6 [chromium] › tests\e2e\paste-workflow.spec.ts:255:1 › internal tools are separate: members cannot open the lab (631ms)
+  ok 7 [chromium] › tests\e2e\paste-workflow.spec.ts:261:1 › internal tools are separate: admin-only lab, not linked from the product UI (770ms)
+
+
+  1) [chromium] › tests\e2e\paste-workflow.spec.ts:65:1 › paste → import → preview → edit text, image and link → save → reopen → export 
+
+    Error: expect(received).toBe(expected) // Object.is equality
+
+    - Expected  - 4
+    + Received  + 4
+
+    @@ -1,10 +1,10 @@
+      <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+      <html xmlns="http://www.w3.org/1999/xhtml" lang="vi">
+      <head>
+    - <meta charset="utf-8" />
+    + <meta charset="utf-8">
+    - <meta name="viewport" content="width=device-width, initial-scale=1" />
+    + <meta name="viewport" content="width=device-width, initial-scale=1">
+      <title>INTERNAL FIXTURE – Paste workflow</title>
+      <!--[if mso]><style>table{border-collapse:collapse}</style><![endif]-->
+      <style>
+        body { margin:0; background:#f3f4f6; }
+        @media only screen and (max-width:620px) { .wrap { width:100% !important; } .pad { padding:16px !important; } }
+    @@ -13,17 +13,17 @@
+      <body style="margin:0;padding:0;background:#f3f4f6">
+      <div style="display:none;max-height:0;overflow:hidden;mso-hide:all">Ưu đãi tháng 11 dành cho {{ company | default: "quý công ty" }}</div>
+      <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background:#f3f4f6">
+      <tr><td align="center" style="padding:24px 0">
+      <table role="presentation" class="wrap" width="600" cellpadding="0" cellspacing="0" border="0" style="width:600px;background:#ffffff;border-radius:8px">
+    - <tr><td align="center" style="padding:24px"><img src="/fixtures/email/logo.png" width="160" height="48" alt="Logo An Phát" style="display:block;border:0" /></td></tr>
+    + <tr><td align="center" style="padding:24px"><img src="/fixtures/email/logo.png" width="160" height="48" alt="Logo An Phát" style="display:block;border:0"></td></tr>
+      <tr><td class="pad" style="padding:0 32px;font-family:Arial,Helvetica,sans-serif">
+      <h1 style="margin:0 0 12px;font-size:26px;line-height:32px;color:#111827">Bản tin tháng 11</h1>
+      <p style="margin:0 0 12px;font-size:16px;line-height:24px;color:#374151">Kính gửi {{ greeting_name | default: "Quý khách" }}, chương trình <span style="color:#c0392b;font-weight:bold">GIẢM 30%</span> cho <font color="#1f5f8b" face="Georgia">khách hàng thân thiết</font> đã bắt đầu. Hãy đăng ký sớm.</p>
+      <p style="margin:0 0 16px;font-size:14px;line-height:22px;color:#6b7280">Xem <a href="https://anphat.example/uu-dai" style="color:#1f5f8b;text-decoration:underline">chi tiết ưu đãi</a> &amp; điều kiện áp dụng.</p>
+      </td></tr>
+    - <tr><td align="center" style="padding:0 32px 24px"><img src="/fixtures/email/hero.png" width="536" alt="Ảnh chương trình" style="display:block;width:100%;max-width:536px;height:auto;border:0" /></td></tr>
+    + <tr><td align="center" style="padding:0 32px 24px"><img src="/fixtures/email/hero.png" width="536" alt="Ảnh chương trình" style="display:block;width:100%;max-width:536px;height:auto;border:0"></td></tr>
+      <tr><td align="center" style="padding:0 32px 24px">
+      <!--[if mso]><v:roundrect xmlns:v="urn:schemas-microsoft-com:vml" href="https://anphat.example/dang-ky" style="height:44px;v-text-anchor:middle;width:220px;" arcsize="12%" fillcolor="#1f5f8b" stroke="f"><center style="color:#ffffff;font-family:Arial;font-size:16px;">Đăng ký ngay</center></v:roundrect><![endif]-->
+      <!--[if !mso]><!-- --><a href="https://anphat.example/dang-ky" class="btn" style="display:inline-block;background:#1f5f8b;color:#ffffff;padding:12px 28px;border-radius:6px;font-family:Arial,sans-serif;font-size:16px;text-decoration:none">Đăng ký ngay</a><!--<![endif]-->
+      </td></tr>
+      <tr><td style="padding:16px 32px;font-family:Arial,sans-serif;font-size:12px;line-height:18px;color:#9ca3af">Bạn nhận email này vì đã đăng ký nhận tin. <a href="{{ unsubscribe_url }}" style="color:#9ca3af">Hủy đăng ký</a></td></tr>
+
+      71 |   // Import: stored exactly as the sanitizer output of the pasted HTML (no selector, whole document).
+      72 |   const v1 = await exportOf(page, id);
+    > 73 |   expect(v1).toBe(V1);
+         |              ^
+      74 |   expect(v1).not.toContain("&nbsp;");
+      75 |   await expect(page.getByTestId("template-title")).toHaveText("INTERNAL FIXTURE – Paste workflow");
+      76 |   await expect(page.locator('[data-testid="open-grapesjs"]')).toHaveCount(0);
+        at D:\AI Studio\Email MKT Tracker\tests\e2e\paste-workflow.spec.ts:73:14
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results\paste-workflow-paste-→-imp-36fc6-nk-→-save-→-reopen-→-export-chromium\test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results\paste-workflow-paste-→-imp-36fc6-nk-→-save-→-reopen-→-export-chromium\error-context.md
+
+    attachment #3: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results\paste-workflow-paste-→-imp-36fc6-nk-→-save-→-reopen-→-export-chromium\trace.zip
+    Usage:
+
+        npx playwright show-trace test-results\paste-workflow-paste-→-imp-36fc6-nk-→-save-→-reopen-→-export-chromium\trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  1 failed
+    [chromium] › tests\e2e\paste-workflow.spec.ts:65:1 › paste → import → preview → edit text, image and link → save → reopen → export 
+  6 passed (13.8s)
+[stack] cleanup ok: 5 owned process(es) stopped, none left
+[stack] stopped (exit 1)

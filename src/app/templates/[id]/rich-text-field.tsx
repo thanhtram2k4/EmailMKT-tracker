@@ -1,30 +1,17 @@
 "use client";
 /**
- * TipTap field for editing one text block of a template (candidate (c) in the plan: formatted-
- * text paste). Output is converted to INLINE HTML (no <p> wrappers) because the block lives inside
- * an existing table cell / paragraph of the template. Supported marks: bold, italic, underline,
- * strike, code, links, line breaks. Other inline formatting (colours, font sizes, <font>) is not
- * representable and is dropped when the block is edited — the editor warns before that happens.
+ * Formatting-toolbar field (TipTap) for one text block: bold, italic, links and pasted formatted
+ * text. It is an explicit, opt-in conversion: TipTap cannot represent every inline style, so the
+ * editor shows what the conversion removes and offers undo before this field is used.
  */
 import { EditorContent, useEditor } from "@tiptap/react";
-import StarterKit from "@tiptap/starter-kit";
 import { useEffect } from "react";
 import { toInlineHtml } from "../../../lib/templates/inline";
+import { richTextExtensions } from "./rich-text-extensions";
 
 export function RichTextField(props: { initialHtml: string; onChange: (inlineHtml: string) => void; insertText?: string | null; onInserted?: () => void }) {
   const editor = useEditor({
-    extensions: [
-      StarterKit.configure({
-        heading: false,
-        bulletList: false,
-        orderedList: false,
-        listItem: false,
-        blockquote: false,
-        codeBlock: false,
-        horizontalRule: false,
-        link: { openOnClick: false, autolink: false },
-      }),
-    ],
+    extensions: richTextExtensions,
     content: props.initialHtml,
     immediatelyRender: false,
     onUpdate: ({ editor: e }) => props.onChange(toInlineHtml(e.getHTML())),

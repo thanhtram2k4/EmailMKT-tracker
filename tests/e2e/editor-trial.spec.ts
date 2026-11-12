@@ -1,10 +1,11 @@
 /**
  * M3 editor trial, end to end in Chromium (MOCK environment, no email is sent).
  *
- * For each input — SYNTHETIC fixtures A and B, and the real-template CANDIDATE if present on this
- * machine (.local/real-templates/, git-ignored) — it imports, edits text/image/button/link in the
- * structure-preserving editor, saves, reopens, exports, checks merge fields and recipient
- * fallbacks, captures desktop/mobile browser renderings, and measures GrapesJS on the same input.
+ * For each input — SYNTHETIC fixtures A and B (imported from the INTERNAL editor lab), plus any
+ * extra local files ONLY if EDITOR_TRIAL_EXTRA_DIR is set explicitly (nothing is searched for) —
+ * it imports, edits text/image/button/link in the structure-preserving editor, saves, reopens,
+ * exports, checks merge fields and recipient fallbacks, captures desktop/mobile browser
+ * renderings, and measures the GrapesJS comparison on the same input.
  *
  * Results (counts/metrics only) are written to test-results/editor-trial/*.json for the report.
  * IMPORTANT: renderings are Chromium only — NOT Gmail, Outlook or mobile mail apps.
@@ -20,9 +21,9 @@ import { extractFragment } from "../../src/lib/templates/sanitize";
 
 const OUT = "test-results/editor-trial";
 fs.mkdirSync(OUT, { recursive: true });
-// Real templates are optional, local-only and git-ignored. Absent → only synthetic inputs run.
-const REAL_DIR = ".local/real-templates";
-const REAL = fs.existsSync(REAL_DIR)
+// Extra local inputs are opt-in only (M3 rev 2: real templates are not an M3 requirement).
+const REAL_DIR = process.env.EDITOR_TRIAL_EXTRA_DIR ?? "";
+const REAL = REAL_DIR && fs.existsSync(REAL_DIR)
   ? fs
       .readdirSync(REAL_DIR, { withFileTypes: true })
       .filter((d) => d.isFile() && d.name.endsWith(".html"))
@@ -33,7 +34,7 @@ type Input = { key: string; label: string; kind: "fixture" | "real"; fixture?: s
 const INPUTS: Input[] = [
   { key: "synthetic-a", label: "SYNTHETIC A", kind: "fixture", fixture: "synthetic-a" },
   { key: "synthetic-b", label: "SYNTHETIC B", kind: "fixture", fixture: "synthetic-b" },
-  ...REAL.map((f, i) => ({ key: `real-${i + 1}`, label: `REAL CANDIDATE ${i + 1}`, kind: "real" as const, file: f, extract: "#email" })),
+  ...REAL.map((f, i) => ({ key: `extra-${i + 1}`, label: `EXTRA LOCAL INPUT ${i + 1}`, kind: "real" as const, file: f, extract: process.env.EDITOR_TRIAL_EXTRACT || undefined })),
 ];
 
 async function signIn(page: Page) {
@@ -84,11 +85,13 @@ for (const input of INPUTS) {
 
     test("import, sanitize report, regions, checks", async ({ page }) => {
       await signIn(page);
-      await page.goto("/templates");
       if (input.kind === "fixture") {
+        await page.goto("/internal/editor-lab");
         await page.getByTestId(`fixture-${input.fixture}`).click();
       } else {
+        await page.goto("/templates");
         await page.getByTestId("import-name").fill(`${input.label} (local file)`);
+        await page.getByTestId("import-more").locator("summary").click();
         await page.getByTestId("import-file").setInputFiles(input.file!);
         await page.getByTestId("import-extract").fill(input.extract ?? "");
         await page.getByTestId("import-submit").click();
@@ -122,19 +125,26 @@ for (const input of INPUTS) {
         return true;
       };
 
-      // Text: append a sentence that contains a merge field (inserted via the picker).
-      // Fixture A: the greeting paragraph, which also contains a coloured <span> the rich-text
-      // editor cannot keep — the warning must be shown and the loss is measured below.
-      const textRegion = regions.filter({ hasText: /^text\b/ }).nth(input.key === "synthetic-a" ? 2 : 0);
-      await textRegion.click();
-      metrics.unsupportedInlineWarning = (await page.getByTestId("unsupported-inline").count()) ? await page.getByTestId("unsupported-inline").innerText() : null;
-      if (input.key === "synthetic-a") expect(metrics.unsupportedInlineWarning).toMatch(/inline style on <span>/);
-      const pm = page.getByTestId("edit-text").locator(".ProseMirror");
-      await pm.click();
+      // Text, edited IN THE PREVIEW (rev 2): append a sentence and a merge field (via the picker).
+      // Fixture A: the greeting paragraph, which contains a coloured <span> — it must survive.
+      const frame = page.frameLocator('[data-testid="preview-frame"]');
+      const textIds = await regions.filter({ hasText: /^text\b/ }).evaluateAll((els) => els.map((e) => e.getAttribute("data-testid")!.slice(7)));
+      let textId = input.key === "synthetic-a" ? textIds[2] : "";
+      if (!textId) {
+        for (const t of textIds) {
+          if (await frame.locator(`[data-emt-id="${t}"]`).isVisible()) {
+            textId = t;
+            break;
+          }
+        }
+      }
+      await frame.locator(`[data-emt-id="${textId}"]`).click();
       await page.keyboard.press("Control+End");
       await page.keyboard.type(" Xin cảm ơn ");
       await page.getByTestId("insert-merge").selectOption("greeting_name");
       await page.keyboard.type("!");
+      metrics.textEditFormatStatus = await page.getByTestId("format-status").getAttribute("data-state");
+      if (input.kind === "fixture") expect(metrics.textEditFormatStatus).toBe("text-only");
       edits.push("text");
 
       if (await pick("image")) {
@@ -162,7 +172,7 @@ for (const input of INPUTS) {
       await expect(page.getByTestId("version-info")).toContainText("Version 2");
       const v2Html = await (await page.request.get(`/templates/${templateId}/export`)).text();
       expect(v2Html).toContain("Xin cảm ơn");
-      expect(v2Html).toContain('{{ greeting_name | default: "Quý khách" }}!');
+      expect(v2Html.split("&nbsp;").join(" ")).toContain('Xin cảm ơn {{ greeting_name | default: "Quý khách" }}!');
       if (edits.includes("image")) expect(v2Html).toContain('src="/fixtures/email/hero-alt.png"');
       if (edits.includes("button")) {
         expect(v2Html).toContain(">Mua ngay</a>");
@@ -177,6 +187,8 @@ for (const input of INPUTS) {
       metrics.mergeFieldsV2 = v2Merge;
       metrics.inlineStyledSpansV1 = (v1Html.match(/<span[^>]*style=/gi) ?? []).length;
       metrics.inlineStyledSpansV2 = (v2Html.match(/<span[^>]*style=/gi) ?? []).length;
+      // Rev 2: in-place text editing keeps every styled span (M3 rev 1 lost one in fixture A).
+      expect(metrics.inlineStyledSpansV2).toBe(metrics.inlineStyledSpansV1);
       metrics.msoMarkersV2 = countConditionalComments(v2Html);
       metrics.bytesV2 = Buffer.byteLength(v2Html);
       const txt = await (await page.request.get(`/templates/${templateId}/export?format=txt`)).text();
@@ -230,7 +242,7 @@ for (const input of INPUTS) {
     test("GrapesJS (candidate b): no-edit export fidelity, then an edit + save", async ({ page, browser, context }) => {
       test.setTimeout(120_000);
       await signIn(page);
-      await page.goto(`/templates/${templateId}/grapesjs?v=${v1}`);
+      await page.goto(`/internal/editor-lab/${templateId}/grapesjs?v=${v1}`);
       await page.waitForFunction(() => window.__gjs?.ready === true, null, { timeout: 60_000 });
       const exported = await page.evaluate(() => window.__gjs!.exportHtml());
       fs.writeFileSync(path.join(dir, "grapesjs-noedit-export.html.txt"), input.kind === "fixture" ? exported : "(real template content not stored)");
@@ -265,7 +277,7 @@ for (const input of INPUTS) {
       });
       await page.getByTestId("gjs-save").click();
       await expect(page).toHaveURL(new RegExp(`/templates/${templateId}\\?v=`), { timeout: 30_000 });
-      await expect(page.getByTestId("version-info")).toContainText("grapesjs");
+      await expect(page.getByTestId("version-info")).toContainText("GrapesJS");
       const saved = await (await page.request.get(`/templates/${templateId}/export`)).text();
       g.savedContainsEdit = saved.includes("(sửa bằng GrapesJS)");
       g.savedMergeFields = mergeRaws(saved);
@@ -277,10 +289,15 @@ for (const input of INPUTS) {
 
 test("TipTap paste (candidate c): formatted text from a Google-Docs-like clipboard keeps bold/italic/links, drops styles", async ({ page }) => {
   await signIn(page);
-  await page.goto("/templates");
+  await page.goto("/internal/editor-lab");
   await page.getByTestId("fixture-synthetic-a").click();
   await expect(page.getByTestId("version-info")).toContainText("Version 1");
   await page.locator('[data-testid^="region-"]').filter({ hasText: /^text\b/ }).nth(2).click();
+  // Rev 2: the toolbar is an explicit conversion; it lists what it would remove first.
+  await page.getByTestId("mode-rich").click();
+  const conversionRemoves = await page.getByTestId("convert-confirm").locator("li").allInnerTexts();
+  expect(conversionRemoves.join(" ")).toMatch(/<span style=/);
+  await page.getByTestId("convert-yes").click();
   const pm = page.getByTestId("edit-text").locator(".ProseMirror");
   await pm.click();
   await page.keyboard.press("Control+A");
@@ -295,6 +312,7 @@ test("TipTap paste (candidate c): formatted text from a Google-Docs-like clipboa
   }, clip);
   const result = await pm.innerHTML();
   const metrics = {
+    conversionRemoves,
     resultHtml: result,
     keptBold: /<strong>Đậm từ Docs<\/strong>/.test(result),
     keptItalic: /<em>\s*và nghiêng<\/em>/.test(result),

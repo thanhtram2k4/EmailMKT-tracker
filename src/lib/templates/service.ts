@@ -4,7 +4,9 @@ import { convert } from "html-to-text";
 import { writeAudit } from "../audit";
 import type { Db } from "../db/client";
 import { templates, templateVersions } from "../db/schema";
-import { applyEdits, type EditOp } from "./editable";
+import { applyEdits, type EditOp, type FormatChange } from "./editable";
+import { parseHtml } from "./html-doc";
+import { describeFormat } from "./text-runs";
 import { extractFragment, sanitizeEmailHtml, type SanitizeReport } from "./sanitize";
 
 export const MAX_TEMPLATE_BYTES = 2 * 1024 * 1024;
@@ -23,6 +25,23 @@ export function plainTextOf(html: string): string {
       { selector: "head", format: "skip" },
     ],
   }).trim();
+}
+
+/** Default name for an imported email: its <title>, else the first heading. */
+export function nameFromHtml(html: string): string | null {
+  const $ = parseHtml(html);
+  const t = ($("title").first().text() || $("h1,h2").first().text()).replace(/\s+/g, " ").trim();
+  return t ? t.slice(0, 120) : null;
+}
+
+/** Human-readable summary of a save, stored as the version note. */
+export function editNote(ops: EditOp[], changes: FormatChange[]): string {
+  const parts = ops.map((o) => (o.kind === "text-runs" ? `${o.id}: text (all formatting kept)` : o.kind === "text" ? `${o.id}: text (${o.mode ?? "html"})` : `${o.id}: ${o.kind}`));
+  for (const c of changes) {
+    if (c.removed.length) parts.push(`${c.id}: formatting removed (accepted): ${c.removed.map(describeFormat).join("; ")}`);
+    if (c.added.length) parts.push(`${c.id}: formatting added: ${c.added.map(describeFormat).join("; ")}`);
+  }
+  return parts.join(" · ").slice(0, 2000);
 }
 
 export type ImportInput = {
@@ -52,7 +71,7 @@ export async function importTemplate(db: Db, i: ImportInput) {
   return db.transaction(async (tx) => {
     const [t] = await tx
       .insert(templates)
-      .values({ name: i.name.trim() || "Untitled template", sourceKind: i.sourceKind, sourceFilename: i.sourceFilename ?? null, sourceSha256: sha256, extractSelector: i.extractSelector?.trim() || null, createdBy: i.actor })
+      .values({ name: i.name.trim() || nameFromHtml(source) || "Untitled email", sourceKind: i.sourceKind, sourceFilename: i.sourceFilename ?? null, sourceSha256: sha256, extractSelector: i.extractSelector?.trim() || null, createdBy: i.actor })
       .returning();
     const [v] = await tx
       .insert(templateVersions)
@@ -87,15 +106,16 @@ export async function saveStructuredEdits(db: Db, i: { templateId: string; baseV
   const edited = applyEdits(base.html, i.ops);
   // Re-sanitize the full document after editing (defence in depth).
   const { html, report } = sanitizeEmailHtml(edited.html);
+  const note = i.note ?? editNote(i.ops, edited.formatChanges);
   return db.transaction(async (tx) => {
     await tx.execute(sql`select pg_advisory_xact_lock(hashtext(${"template:" + i.templateId}))`);
     const versionNo = await nextVersionNo(tx, i.templateId);
     const [v] = await tx
       .insert(templateVersions)
-      .values({ templateId: i.templateId, versionNo, baseVersionId: base.id, editor: "structured", html, plainText: plainTextOf(html), ops: i.ops, sanitizeReport: report, note: i.note ?? null, createdBy: i.actor })
+      .values({ templateId: i.templateId, versionNo, baseVersionId: base.id, editor: "structured", html, plainText: plainTextOf(html), ops: i.ops, sanitizeReport: report, note, createdBy: i.actor })
       .returning();
     await tx.update(templates).set({ updatedAt: new Date() }).where(eq(templates.id, i.templateId));
-    await writeAudit(tx as unknown as Db, { actor: i.actor, action: "template.version_saved", entityType: "template", entityId: i.templateId, after: { versionNo, editor: "structured", ops: i.ops.map((o) => `${o.kind}:${o.id}`) }, correlationId: i.correlationId });
+    await writeAudit(tx as unknown as Db, { actor: i.actor, action: "template.version_saved", entityType: "template", entityId: i.templateId, after: { versionNo, editor: "structured", ops: i.ops.map((o) => `${o.kind}:${o.id}`), formatChanges: edited.formatChanges.map((c) => ({ id: c.id, mode: c.mode, removed: c.removed.length, added: c.added.length })) }, correlationId: i.correlationId });
     return v;
   });
 }

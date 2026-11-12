@@ -36,6 +36,7 @@
     "test:tooling": "vitest run --project tooling"
   },
   "dependencies": {
+    "@tiptap/core": "3.33.1",
     "@tiptap/extension-link": "3.33.1",
     "@tiptap/pm": "3.33.1",
     "@tiptap/react": "3.33.1",
@@ -48,6 +49,7 @@
     "grapesjs-preset-newsletter": "1.0.2",
     "graphile-worker": "0.18.0",
     "html-to-text": "10.0.1",
+    "htmlparser2": "10.1.0",
     "liquidjs": "10.30.1",
     "next": "16.4.6",
     "pg": "8.23.1",

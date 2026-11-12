@@ -32,12 +32,15 @@ Legend: `[ ]` todo · `[x]` done (with a link to evidence) · results are PASS /
 | 2026-11-12 | **Confirmed by the user:** contacts with *unknown* consent stay **ineligible for marketing sends by default**, but remain fully manageable in the CRM (`crm.require_marketing_consent=true`) | User |
 | 2026-11-12 | Reply language switched to **Vietnamese** at the user's request (M3 onwards); repository docs stay English | User |
 | 2026-11-12 | **Editor recommendation (PROVISIONAL):** (a) structure-preserving editor for imported builder HTML, with (c) TipTap for text blocks and paste. (b) GrapesJS is **not** used for imported templates: its no-edit export changed Chromium rendering by 2.9–13.8% and collapsed fixture B's columns. Provisional because only one unconfirmed real template was available and no real email client was tested | Trial result, pending user |
+| 2026-11-12 | **M3 requirement corrected by the user.** The primary workflow is Paste HTML → Import → Preview → Edit text/images/links → Save → Reopen. The two-real-templates prerequisite is **withdrawn**; templates are not searched for on the user's machine. The product UI has no fixture gallery or GrapesJS controls; internal fixtures and the GrapesJS comparison live in `/internal/editor-lab` (admins, APP_ENV local/test only) | User |
+| 2026-11-12 | **Text editing preserves formatting by default (M3 rev 2).** Text is edited in the preview; a text-only edit rewrites text nodes only. Any edit that would remove formatting needs an explicit choice (undo, keep, or HTML source); the toolbar (TipTap) is an opt-in conversion that first lists what it removes. The server refuses a formatting removal without `acceptFormatChange` | Implementation |
+| 2026-11-12 | M3 rev 2 checkpointed on `m3-editor-trial`: tag `m3-rev2-checkpoint` (the original `m3-checkpoint` is kept) | Implementation |
 | 2026-11-12 | Test tooling: processes are spawned as "owned" and cleanup targets only those PIDs and their descendants (`scripts/lib/owned-processes.ts`); a stack run fails if any survive | Implementation |
 
 ## Open items (need user input)
 - [ ] Confirm assumptions A1–A7 ([DESIGN.md](DESIGN.md) "Assumptions")
 - [ ] Wix reference screenshots or a recording (audience, editor, test send, review, schedule picker, scheduled list, stats)
-- [ ] Two real builder-exported HTML templates. Candidate #1 found in Downloads (`wildcats-email-gmail.html`) **needs confirmation**; #2 not found
+- [x] ~~Two real builder-exported HTML templates~~ **Withdrawn by the user (M3 rev 2)**: not an M3 prerequisite. The user pastes their own HTML into the app
 - [ ] Authorization for test sends to designated inboxes, or a rendering service (Litmus / Email on Acid), to validate Gmail/Outlook/mobile rendering
 - [ ] Legal: research recorded in [COMPLIANCE.md](COMPLIANCE.md). Counsel review is still needed (8 questions). Correction: the Decree 91 subject label is `[QC]` or `[AD]`, not "[ADV]" (secondary source)
 - [ ] Choice of sending subdomain (e.g. `news.company.com`) and tracking subdomain
@@ -115,7 +118,21 @@ Proposed in [COMPLIANCE.md](COMPLIANCE.md) §6, to be adopted only after counsel
 - [x] R-SYNC-06: simulated 429 (`Retry-After`) and 5xx are backed off and the sync succeeds; exhausted retries end partial, with the cursor kept and nothing archived. **PASS (MOCK)**
 - [ ] S3-live: a live sync against the separate Notion test database matches the counts. **BLOCKED** (no test database or token; live access not authorized)
 
+## M3 rev 2: Paste workflow (corrected requirement) — run 2026-11-12 (evidence: [reports/2026-11-12-m3-rev2/report.md](../reports/2026-11-12-m3-rev2/report.md), in Vietnamese)
+Primary workflow, tested through the UI in Chromium with a labelled INTERNAL fixture pasted via the real clipboard (`tests/e2e/paste-workflow.spec.ts`):
+- [x] A visible **Paste HTML** box and **Import** button are the main entry point (Emails page). File upload is optional, under "More import options". **PASS**
+- [x] A normal email document needs **no CSS selector**; the whole document is imported (DOCTYPE, head styles, MSO kept). The selector is an advanced option only. **PASS**
+- [x] No synthetic-fixture buttons, template gallery or GrapesJS controls in the product UI. Internal tools are at `/internal/editor-lab` (admin only, 404 outside APP_ENV local/test; members get the forbidden page). **PASS**
+- [x] Import → preview → edit text (two blocks, one with a coloured `<span>`, a `<font>` and a merge field), an image and a link inside a text block → save → reopen from the list → export. **PASS**: the exported v2 equals v1 with exactly those four changes; every other byte is identical
+- [x] Personalization placeholders are intact (all v1 merge fields present plus the inserted one); recipient previews show values and fallbacks after reopening. **PASS**
+- [x] Formatting loss is handled with real alternatives, not a warning: in-place text edits keep formatting; a formatting-removing edit blocks saving until the user chooses **Undo**, **Keep** (recorded in the version note) or **HTML source**; the toolbar conversion lists what it removes first and can be undone. **PASS**
+- [x] Sanitization unchanged in strength: HTML-source edits are sanitized on save (script, `onerror`, `javascript:` removed); text typed in the preview is stored as text (`&lt;b&gt;`). **PASS**
+- [x] A pasted fragment (no `<html>`/`<body>`) imports and edits. **PASS**
+- [ ] Gmail, Outlook and mobile mail-app rendering. **NOT RUN** (sending not authorized). Browser validation is Chromium only
+- [ ] Image hosting (relative or local images are flagged, not re-hosted). **NOT DONE** (planned with S3)
+
 ## M3: Editor trial — run 2026-11-12 (evidence: [reports/2026-11-12-m3/report.md](../reports/2026-11-12-m3/report.md), in Vietnamese)
+> Superseded in part by **M3 rev 2** above: the real-template inputs below are no longer required, and the TipTap span loss is fixed by formatting-preserving editing.
 - [~] Trial on templates × (a) structure-preserving, (b) GrapesJS, (c) TipTap paste:
   - edited headline/paragraph, image, link and button; saved; reopened; exported;
   - DOM and pixel comparison in **Chromium**;

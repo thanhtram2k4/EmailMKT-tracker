@@ -9,6 +9,7 @@
 import type { AnyNode, Element } from "domhandler";
 import { parseHtml, serialize, type Doc } from "./html-doc";
 import { isAllowedUrl, sanitizeInline } from "./sanitize";
+import { describeFormat, encodeText, formatDiff, plainTextOf, sameTags, textStructure, type FormatEl } from "./text-runs";
 
 export type RegionKind = "text" | "image" | "link" | "button";
 export type Region = {
@@ -22,8 +23,10 @@ export type Region = {
   src?: string;
   alt?: string;
   width?: string;
-  /** Inline formatting the rich-text editor cannot reproduce (warn before editing). */
+  /** Inline formatting the rich-text editor cannot reproduce (warn before converting). */
   unsupportedInline?: string[];
+  /** text: formatting skeleton (element tags in order), for formatting-preserving edits. */
+  tags?: string[];
 };
 
 const INLINE = new Set(["b", "strong", "i", "em", "u", "s", "strike", "br", "span", "a", "font", "sup", "sub", "small", "big", "code", "abbr"]);
@@ -111,14 +114,16 @@ export function annotate(html: string): { $: Doc; regions: Region[] } {
       if (parent && TEXT_CONTAINERS.has(parent.name) && inlineOnly(parent) && hasText($, parent) && parent.name !== "body") return;
       const id = `t${++counters.t}`;
       $(el).attr("data-emt-id", id);
+      const plain = plainTextOf($(el).html() ?? "").replace(/\s+/g, " ").trim(); // decoded (&amp; -> &)
       regions.push({
         id,
         kind: "text",
-        label: $(el).text().replace(/\s+/g, " ").trim().slice(0, 70),
+        label: plain.slice(0, 70),
         hidden: isHidden($, el),
         html: $(el).html() ?? "",
-        text: $(el).text().replace(/\s+/g, " ").trim(),
+        text: plain,
         unsupportedInline: unsupportedInline($, el),
+        tags: textStructure($(el).html() ?? "").tags,
       });
       // Links inside the text block stay individually editable (href).
       $(el)
@@ -144,10 +149,19 @@ export function annotatedHtml(html: string): string {
 }
 
 export type EditOp =
-  | { id: string; kind: "text"; html: string }
+  /** Formatting-preserving text edit: only text nodes change (see text-runs.ts). */
+  | { id: string; kind: "text-runs"; tags: string[]; gaps: string[][] }
+  /**
+   * Replace a block's inner HTML (rich-text toolbar, HTML source, or an in-place edit whose
+   * formatting changed). If it would REMOVE formatting, acceptFormatChange must be true: the
+   * user explicitly chose it in the editor.
+   */
+  | { id: string; kind: "text"; html: string; mode?: "inplace" | "rich" | "source"; acceptFormatChange?: boolean }
   | { id: string; kind: "image"; src?: string; alt?: string }
   | { id: string; kind: "link"; href: string }
   | { id: string; kind: "button"; href?: string; text?: string };
+
+export type FormatChange = { id: string; mode: string; removed: FormatEl[]; added: FormatEl[] };
 
 export class EditError extends Error {
   constructor(message: string) {
@@ -167,19 +181,96 @@ function setDeepText($: Doc, el: Element, text: string) {
   $(target).text(text);
 }
 
+const isElNode = (n: AnyNode): n is Element => n.type === "tag" || n.type === "script" || n.type === "style";
+
+/** Rewrite only the text nodes of a text block; elements and attributes are left untouched. */
+function applyTextRuns($: Doc, root: Element, op: Extract<EditOp, { kind: "text-runs" }>) {
+  const cur = textStructure($(root).html() ?? "");
+  if (!Array.isArray(op.tags) || !sameTags(cur.tags, op.tags.map(String))) {
+    throw new EditError(`The formatting of ${op.id} differs from this version; reload the editor and try again`);
+  }
+  const shapeOk =
+    Array.isArray(op.gaps) &&
+    op.gaps.length === cur.gaps.length &&
+    op.gaps.every((g, i) => Array.isArray(g) && g.length === cur.gaps[i].length && g.every((x) => typeof x === "string"));
+  if (!shapeOk) throw new EditError(`Text of ${op.id} does not match its structure`);
+  const els: Element[] = [];
+  const collect = (e: Element) => {
+    els.push(e);
+    for (const c of e.children) if (isElNode(c)) collect(c);
+  };
+  collect(root);
+  els.forEach((e, k) => {
+    const groups: AnyNode[][] = [[]];
+    const kids: Element[] = [];
+    for (const c of [...e.children]) {
+      if (c.type === "text") groups[groups.length - 1].push(c);
+      else if (isElNode(c)) {
+        kids.push(c);
+        groups.push([]);
+      }
+    }
+    groups.forEach((nodes, gi) => {
+      const want = op.gaps[k][gi];
+      if (want === cur.gaps[k][gi]) return; // unchanged gap: keep the stored bytes as they are
+      const enc = encodeText(want);
+      if (nodes.length) {
+        nodes.slice(1).forEach((n) => $(n).remove());
+        if (want) (nodes[0] as unknown as { data: string }).data = enc;
+        else $(nodes[0]).remove();
+      } else if (want) {
+        if (gi < kids.length) $(kids[gi]).before(enc);
+        else $(e).append(enc);
+      }
+    });
+  });
+}
+
+const TEXT_FIRST = (o: EditOp) => (o.kind === "text" || o.kind === "text-runs" ? 0 : 1);
+
 /** Apply edits and return the new canonical HTML (annotations removed). */
-export function applyEdits(html: string, ops: EditOp[]): { html: string; applied: string[] } {
+export function applyEdits(html: string, ops: EditOp[]): { html: string; applied: string[]; formatChanges: FormatChange[] } {
   const { $ } = annotate(html);
   const applied: string[] = [];
-  for (const op of ops) {
-    const el = $(`[data-emt-id="${op.id}"]`).first();
+  const formatChanges: FormatChange[] = [];
+  // Text blocks first: links nested inside a block keep their region ids, so link edits still apply.
+  const ordered = ops
+    .map((o, i) => [o, i] as const)
+    .sort((a, b) => TEXT_FIRST(a[0]) - TEXT_FIRST(b[0]) || a[1] - b[1])
+    .map(([o]) => o);
+  for (const op of ordered) {
+    if (!op || typeof op.id !== "string") throw new EditError("Invalid edit operation");
+    const el = $(`[data-emt-id="${op.id.replace(/[^a-z0-9]/gi, "")}"]`).first();
     if (!el.length) throw new EditError(`Region ${op.id} no longer exists in this version`);
     const node = el.get(0) as Element;
     switch (op.kind) {
-      case "text":
-        if (node.name === "img" || node.name === "a") throw new EditError(`${op.id} is not a text block`);
-        el.html(sanitizeInline(op.html));
+      case "text-runs":
+        if (!op.id.startsWith("t")) throw new EditError(`${op.id} is not a text block`);
+        applyTextRuns($, node, op);
         break;
+      case "text": {
+        if (node.name === "img" || node.name === "a" || !op.id.startsWith("t")) throw new EditError(`${op.id} is not a text block`);
+        const before = el.html() ?? "";
+        const nestedIds = new Set(
+          el
+            .find("[data-emt-id]")
+            .map((_, x) => $(x).attr("data-emt-id"))
+            .get(),
+        );
+        const next = sanitizeInline(String(op.html ?? ""), { keepEditorIds: true });
+        const d = formatDiff(before, next);
+        if (d.removed.length && op.acceptFormatChange !== true) {
+          throw new EditError(
+            `Saving ${op.id} would remove formatting: ${d.removed.map(describeFormat).join("; ")}. Undo the change, keep it explicitly, or edit the HTML source.`,
+          );
+        }
+        el.html(next);
+        el.find("[data-emt-id]").each((_, x) => {
+          if (!nestedIds.has($(x).attr("data-emt-id") ?? "")) $(x).removeAttr("data-emt-id");
+        });
+        if (!d.textOnly) formatChanges.push({ id: op.id, mode: op.mode ?? "html", removed: d.removed, added: d.added });
+        break;
+      }
       case "image":
         if (node.name !== "img") throw new EditError(`${op.id} is not an image`);
         if (op.src !== undefined) {
@@ -197,11 +288,13 @@ export function applyEdits(html: string, ops: EditOp[]): { html: string; applied
         }
         if (op.kind === "button" && op.text !== undefined) setDeepText($, node, op.text);
         break;
+      default:
+        throw new EditError("Unknown edit operation");
     }
     applied.push(op.id);
   }
   $("[data-emt-id]").removeAttr("data-emt-id");
-  return { html: serialize($), applied };
+  return { html: serialize($), applied, formatChanges };
 }
 
 /** Strip editor annotations (defensive; canonical HTML never stores them). */

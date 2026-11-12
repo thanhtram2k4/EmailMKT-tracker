@@ -34,16 +34,15 @@ export default async function TemplatePage({ params, searchParams }: { params: P
     <main className="shell wide">
       <AppHeader staff={staff} />
       <p>
-        <Link href="/templates">← Templates</Link>
+        <Link href="/templates">← Emails</Link>
       </p>
       <h1 className="page-title" data-testid="template-title">
         {t.template.name}
       </h1>
       <p className="muted" style={{ marginTop: 0 }} data-testid="version-info">
-        Version <strong>{v.versionNo}</strong> ({v.editor}) · {fmtTime(v.createdAt)}
+        Version <strong>{v.versionNo}</strong> · saved {fmtTime(v.createdAt)}{v.editor === "grapesjs" ? " (internal GrapesJS comparison)" : ""}
         {latest && latest.id !== v.id && <> · <Link href={`/templates/${id}`}>latest is v{latest.versionNo}</Link></>}
         {t.template.sourceFilename && <> · source {t.template.sourceFilename}</>}
-        {t.template.sourceSha256 && <> · sha256 {t.template.sourceSha256.slice(0, 16)}…</>}
       </p>
 
       <TemplateEditor
@@ -148,7 +147,8 @@ export default async function TemplatePage({ params, searchParams }: { params: P
           <ul className="plain">
             {t.versions.map((x) => (
               <li key={x.id}>
-                <Link href={`/templates/${id}?v=${x.id}`}>v{x.versionNo}</Link> · {x.editor} · {fmtTime(x.createdAt)} {x.id === v.id && <Pill>viewing</Pill>}
+                <Link href={`/templates/${id}?v=${x.id}`}>v{x.versionNo}</Link> · {fmtTime(x.createdAt)} {x.id === v.id && <Pill>viewing</Pill>}
+                {x.note && <div className="muted small" data-testid={`version-note-${x.versionNo}`}>{x.note}</div>}
               </li>
             ))}
           </ul>
@@ -159,9 +159,6 @@ export default async function TemplatePage({ params, searchParams }: { params: P
             <a className="btn" href={`/templates/${id}/export?v=${v.id}&format=txt`} data-testid="export-txt">
               Export plain text
             </a>
-            <Link className="btn" href={`/templates/${id}/grapesjs?v=${v.id}`} data-testid="open-grapesjs">
-              Open in GrapesJS (trial)
-            </Link>
           </div>
         </section>
       </div>

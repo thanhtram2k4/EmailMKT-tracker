@@ -10,7 +10,7 @@ export function AppHeader({ staff }: { staff: CurrentStaff }) {
         <Link href="/">Dashboard</Link>
         <Link href="/contacts">Contacts</Link>
         <Link href="/contacts/issues">Data issues</Link>
-        <Link href="/templates">Templates</Link>
+        <Link href="/templates">Emails</Link>
         <Link href="/sync">Sync</Link>
         {staff.role === "admin" && <Link href="/settings/notion">Notion settings</Link>}
         {staff.role === "admin" && <Link href="/staff">Staff &amp; audit</Link>}
