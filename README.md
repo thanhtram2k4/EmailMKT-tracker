@@ -1,6 +1,6 @@
 # Email MKT Tracker
 
-This is an internal email-marketing tool. **Current state: M6** (scheduled sends on top of the M5 send-now engine), verified locally with a mock transport only. Contacts are synchronized from a Notion CRM; emails are pasted, edited, personalized and test-sent (M3–M4).
+This is an internal email-marketing tool. **Current state: M7** (open/click tracking and analytics on top of the M5–M6 send engine and scheduling), verified locally with a mock transport only. Contacts are synchronized from a Notion CRM; emails are pasted, edited, personalized and test-sent (M3–M4).
 
 M1 foundation:
 - staff sign-in limited to the company domain and a staff allowlist
@@ -119,6 +119,13 @@ Internal test tooling (labelled fixtures, GrapesJS comparison) is at `/internal/
 4. **Scheduled** lists every scheduled campaign with local and UTC time, revision and next action; it warns when the worker has not reported for 2 minutes.
 5. On a scheduled campaign an admin can **reschedule** (the revision increases), **Unschedule and edit** (back to draft) or **cancel**.
 6. The background worker starts the campaign at the scheduled time (no browser needed). If it starts more than the grace period late (default 30 minutes, Settings → Sending), the campaign is **held** and admins are alerted; nothing is sent until an admin chooses send now, reschedule or cancel.
+
+### Walkthrough: tracking and analytics (M7)
+1. **Settings → Sending → Open/click tracking:** only addresses with tracking consent (default, pending counsel), all recipients, or off. It is decided per message when it is sent.
+2. Tracked messages get rewritten links (`/c/<token>/<n>`) and an invisible open pixel (`/o/<token>.gif`); a click always redirects to the URL frozen in the campaign snapshot.
+3. A sent campaign's page shows **Analytics**: unique openers and clickers, rates of Delivered and of Sent, click-to-open, unsubscribes, per-link clicks, and both "all recorded" and "automated filtered out" numbers (scanners, link pre-checks, very fast or burst clicks are flagged).
+4. Click a recipient's name for their **timeline** (sent, delivery events, opens, clicks, unsubscribe, with flags).
+5. Test sends are never tracked or counted.
 
 ## Checks
 ```bash

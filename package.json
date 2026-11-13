@@ -27,7 +27,7 @@
     "smoke": "tsx scripts/smoke.ts",
     "e2e:existing": "playwright test",
     "e2e:mock-send": "tsx scripts/local-stack.ts --send-mode mock --log-dir .local/logs/e2e-mock-send -- playwright test tests/e2e/test-send.spec.ts",
-    "e2e:mock-campaign": "tsx scripts/local-stack.ts --send-mode mock --log-dir .local/logs/e2e-mock-campaign -- playwright test tests/e2e/campaign-send.spec.ts tests/e2e/campaign-schedule.spec.ts",
+    "e2e:mock-campaign": "tsx scripts/local-stack.ts --send-mode mock --log-dir .local/logs/e2e-mock-campaign -- playwright test tests/e2e/campaign-send.spec.ts tests/e2e/campaign-schedule.spec.ts tests/e2e/campaign-tracking.spec.ts",
     "smoke:mock-send": "tsx scripts/local-stack.ts --send-mode mock --log-dir .local/logs/smoke-mock-send -- tsx scripts/smoke.ts --env local-stack",
     "smoke:local": "tsx scripts/local-stack.ts --log-dir .local/logs/smoke -- tsx scripts/smoke.ts --env local-stack",
     "dev:all": "concurrently -n web,worker -c blue,magenta \"npm:dev\" \"npm:worker\"",

@@ -241,7 +241,10 @@ async function runLocked(db: Db, deps: DispatchDeps, campaignId: string, ctx: Ru
         for (const r of rest()) await release(r, `campaign ${status}`);
         break;
       }
-      const skip = await skipReason(db, m.email_normalized, requireConsent);
+      const pre = await preSendCheck(db, m.email_normalized, requireConsent);
+      const skip = pre.skip;
+      // M7: open/click tracking only as the setting and the address's tracking consent allow (decided now, recorded on the message).
+      const track = settings.trackingMode === "all" || (settings.trackingMode === "consented_only" && pre.trackingGranted);
       if (skip) {
         await db.update(messages).set({ sendStatus: "skipped", skipReason: skip, updatedAt: clock.now() }).where(and(eq(messages.id, m.id), eq(messages.sendStatus, "claimed")));
         continue;
@@ -287,14 +290,14 @@ async function runLocked(db: Db, deps: DispatchDeps, campaignId: string, ctx: Ru
 
       // ---- render from the frozen snapshot
       const rec = (await db.select().from(campaignRecipients).where(eq(campaignRecipients.id, m.recipient_id)).limit(1))[0];
-      const msg = renderMessage(snap, rec.mergeValues as MergeValues, m.tracking_token, deps.cfg.trackingBaseUrl);
+      const msg = renderMessage(snap, rec.mergeValues as MergeValues, m.tracking_token, deps.cfg.trackingBaseUrl, { track });
       if (msg.problems.length) {
         await finish(db, m, { kind: "rejected", code: "render_error", message: msg.problems.join("; ") }, clock);
         continue;
       }
 
       await limiter.take();
-      await db.update(messages).set({ sendStartedAt: clock.now(), updatedAt: clock.now() }).where(and(eq(messages.id, m.id), eq(messages.sendStatus, "claimed")));
+      await db.update(messages).set({ sendStartedAt: clock.now(), trackingEnabled: track, updatedAt: clock.now() }).where(and(eq(messages.id, m.id), eq(messages.sendStatus, "claimed")));
       let result: SendResult;
       try {
         result = await transport.send({
@@ -344,17 +347,21 @@ export function makeRuntimeMock(cfg: Pick<AppConfig, "MOCK_TRANSPORT_LOG" | "MOC
   return new MockTransport(undefined, { logFile: cfg.MOCK_TRANSPORT_LOG, delayMs: cfg.MOCK_SEND_DELAY_MS });
 }
 
-async function skipReason(db: Db, email: string, requireConsent: boolean): Promise<string | null> {
+/** Immediately before a send: suppression and marketing consent (skip), and tracking consent (M7). */
+async function preSendCheck(db: Db, email: string, requireConsent: boolean): Promise<{ skip: string | null; trackingGranted: boolean }> {
   const r = (
     await db.execute(sql`
       select exists(select 1 from suppressions where email_normalized = ${email}) as suppressed,
              coalesce((select status::text from consent_records where email_normalized = ${email} and purpose = 'marketing_email'
-                       order by id desc limit 1), 'unknown') as consent`)
-  ).rows[0] as { suppressed: boolean; consent: string };
-  if (r.suppressed) return "suppressed";
-  if (r.consent === "withdrawn" || r.consent === "refused") return `consent_${r.consent}`;
-  if (r.consent === "unknown" && requireConsent) return "consent_missing";
-  return null;
+                       order by id desc limit 1), 'unknown') as consent,
+             coalesce((select status::text from consent_records where email_normalized = ${email} and purpose = 'email_tracking'
+                       order by id desc limit 1), 'unknown') as tracking`)
+  ).rows[0] as { suppressed: boolean; consent: string; tracking: string };
+  const trackingGranted = r.tracking === "granted";
+  if (r.suppressed) return { skip: "suppressed", trackingGranted };
+  if (r.consent === "withdrawn" || r.consent === "refused") return { skip: `consent_${r.consent}`, trackingGranted };
+  if (r.consent === "unknown" && requireConsent) return { skip: "consent_missing", trackingGranted };
+  return { skip: null, trackingGranted };
 }
 
 /** Fenced: only a row that is still `claimed` changes. */

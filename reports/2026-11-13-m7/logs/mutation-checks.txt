@@ -1,0 +1,20 @@
+CONTROL MT1 untracked tokens accepted (consented_only): exit=0       Tests  1 passed | 7 skipped (8)
+MUTATION MT1 untracked tokens accepted: exit=1 -> CAUGHT       Tests  1 failed | 7 skipped (8)
+    AssertionError: expected true to be false // Object.is equality
+    - Expected
+    + Received
+CONTROL MT2 unknown link index still redirects (R-TRK-02): exit=0       Tests  1 passed | 7 skipped (8)
+MUTATION MT2 unknown link index still redirects: exit=1 -> CAUGHT       Tests  1 failed | 7 skipped (8)
+    AssertionError: expected 'https://shop.example.com/a' to be null
+    - Expected:
+    + Received:
+CONTROL MT3 earlier click of a burst not flagged (R-TRK-03): exit=0       Tests  1 passed | 7 skipped (8)
+MUTATION MT3 earlier click of a burst not flagged: exit=1 -> CAUGHT       Tests  1 failed | 7 skipped (8)
+    AssertionError: expected [ [ '', false ], …(1) ] to deeply equal [ [ 'multi_link_burst', true ], …(1) ]
+    - Expected
+    + Received
+CONTROL MT4 no implied opens (CTOR can exceed 100%) (R-TRK-03): exit=0       Tests  1 passed | 7 skipped (8)
+MUTATION MT4 no implied opens (CTOR can exceed 100%): exit=1 -> CAUGHT       Tests  1 failed | 7 skipped (8)
+    AssertionError: expected { uniqueOpeners: 2, …(3) } to deeply equal { uniqueOpeners: 4, …(3) }
+    - Expected
+    + Received

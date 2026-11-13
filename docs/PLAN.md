@@ -51,6 +51,10 @@ Legend: `[ ]` todo · `[x]` done (with a link to evidence) · results are PASS /
 | 2026-11-13 | **Roles confirmed by the user:** only admins approve, schedule and send campaigns and resolve uncertain sends; members are restricted to creating, editing, reviewing and pausing | User |
 | 2026-11-13 | M5 and M6 committed locally in **one** commit on `m6-scheduling`, tagged `m5-checkpoint` and `m6-checkpoint` (same commit: M6 was built on the uncommitted M5 tree, so no separate M5-only snapshot exists). No remote, no push. From now on each milestone is committed before the next one starts | User and implementation |
 | 2026-11-13 | **M7 authorized** (tracking and analytics), local with the mock transport. The user is tracking M0 (AWS, Notion, staging) and the legal answers (3-email cap, `[QC]` label) and will provide them before staging | User |
+| 2026-11-13 | Tracking mode `consented_only` by default (open/click tracking only with recorded `email_tracking` consent); admins can choose `all` or `off`. **Pending counsel** (COMPLIANCE §3.3) | Implementation (proposal) |
+| 2026-11-13 | Unique openers include implied opens (a click without a recorded open), so CTOR never exceeds 100%; found in the M7 visual review | Implementation |
+| 2026-11-13 | M7 committed locally, tag `m7-checkpoint` (no push) | User |
+| 2026-11-13 | **M8 authorized** (Notion summaries, security hardening, backups, release) in the mock environment. The final live campaign stays BLOCKED until the user provides the M0 accounts and the legal answers (tracking consent, 3-email cap, `[QC]`) | User |
 
 ## Open items (need user input)
 - [ ] Confirm assumptions A1–A7 ([DESIGN.md](DESIGN.md) "Assumptions")
@@ -315,18 +319,42 @@ Written during implementation (not before it), from DESIGN §4.2.
 | OR-SCH-03 | As above | Same | Schedule → Unschedule and edit | Draft with "Schedule removed — review and confirm again" (DESIGN §5) |
 | OR-SCH-04 | As above | Same; scheduled time moved 40 min into the past in the DB (simulated outage) | Wait for the worker's sweeper → dashboard → campaign → Send now | Held, nothing sent, alert shown; admin release sends it (DESIGN §4.2 "Late-send grace period") |
 
-## M7: Tracking and analytics
-- [ ] `/o`, `/c`, `/u` endpoints on the tracking subdomain; opaque tokens; redirects only to snapshot links
-- [ ] Automated-activity flags (fast clicks, multi-link bursts, HEAD requests, scanner user agents and IPs, proxy opens)
-- [ ] Metric engine (definitions in DESIGN §4.3); toggle between recorded and filtered events
-- [ ] Views by campaign, recipient (timeline) and link; first and latest activity
+## M7: Tracking and analytics — implemented 2026-11-13 with the mock transport only (evidence: [reports/2026-11-13-m7/report.md](../reports/2026-11-13-m7/report.md))
+Branch `m7-tracking` from `m6-checkpoint`. Not authorized: real email, AWS calls, deployment, push, live Notion.
 
-**Acceptance:**
-- [ ] Three clicks on one link count as 1 unique clicker and 3 recorded clicks (R-TRK-01)
-- [ ] A tampered link index or token returns 404 with no redirect (R-TRK-02)
-- [ ] Filtered and recorded counts are both shown (R-TRK-03)
-- [ ] GET unsubscribe does not unsubscribe; POST does (R-TRK-04)
-- [ ] A live open and click from an allowlisted inbox are recorded (S8, LIVE)
+- [x] `/o/<token>.gif`, `/c/<token>/<idx>` (GET and HEAD), `/u/<token>` (M5) on `TRACKING_BASE_URL`; opaque tokens; redirects only to the snapshot link table; unknown token / index / untracked message → 404, never a redirect; the query string is never a destination
+- [x] Link rewriting and open pixel at send time, decided per message by the setting `tracking.mode` (`consented_only` default — pending counsel; `all`; `off`) and recorded on the message; plain text and test sends are never tracked
+- [x] Automated-activity flags (fast clicks < 10 s after delivery/sending, different links within 2 s, HEAD requests, scanner / empty user agents; Google/Yahoo proxy opens labelled, not automated). Raw events kept, flags additive; IP stored only as an HMAC
+- [x] Metric engine (DESIGN §4.3): unique per message (with implied opens from clicks), totals raw, rates of Delivered and of Sent, CTOR; recorded and filtered both computed
+- [x] Views: campaign analytics (both columns + toggle for the headline and link table), per link (unique / total, first / latest), per recipient timeline (first / latest activity); contact `last_engagement_at` updated by non-automated activity
+- [ ] Scanner IP lists and Apple MPP detection: **not done** (no reliable signal without provider IP ranges)
+- [ ] Per-contact tracking consent UI is the existing consent form (purpose `email_tracking`); counsel's answer on tracking consent (COMPLIANCE §3.3) is **pending**
+
+**Acceptance (observed 2026-11-13; MOCK unless stated):**
+- [x] Three clicks on one link count as 1 unique clicker and 3 recorded clicks (R-TRK-01). **PASS** (integration + E2E over HTTP)
+- [x] A tampered link index or token returns 404 with no redirect (R-TRK-02). **PASS** (integration + E2E over HTTP)
+- [x] Filtered and recorded counts are both shown (R-TRK-03). **PASS** (integration + E2E)
+- [x] GET unsubscribe does not unsubscribe; POST does (R-TRK-04). **PASS** (M5 R-M5-08, OR-CMP-02; smoke S8-mock)
+- [x] S8-mock: open, click and one-click unsubscribe over HTTP on a worker-sent campaign. **PASS (MOCK)**
+- [ ] A live open and click from an allowlisted inbox are recorded (S8, LIVE). **BLOCKED** (needs real sending, SES, deployed tracking domain)
+- [x] R-PERS-04 (from M4) completed: test sends carry no tracking and never count. **PASS**
+
+### M7 operation reproduction scenarios
+Written during implementation (not before it), from DESIGN §4.3.
+| ID | Prerequisites | Test data | Steps | Expected (source) |
+|---|---|---|---|---|
+| OR-TRK-01 | Mock stack, admin | 2 synthetic contacts with marketing and tracking consent; email with 2 links | Send now → GET pixel → 3 clicks on link 0 (outside the burst and fast-click windows) → `?url=` injection → tampered token / index → HEAD and scanner clicks on the other recipient → analytics (filtered, then recorded) → recipient timelines | Pixel 200 GIF; 302 only to the snapshot URL; 404 for tampering; 1 unique / 3 recorded on link 0; recorded vs filtered differ by the automated events; timeline shows flags (DESIGN §4.3) |
+| OR-ROLE-01 | Mock stack, member | Same | Member creates and reviews a draft; opens a sent campaign | No Send now, no Schedule card, no Cancel (confirmed role rule) |
+
+### M7 regression additions
+| ID | Scenario |
+|---|---|
+| R-TRK-05 | Tracking only per `tracking.mode` and `email_tracking` consent; untracked messages have direct links, no pixel, and their tokens give 404 |
+| R-TRK-06 | Link index n in the email = snapshot link n (same selection; mailto, merge-field and MSO-comment links untouched) |
+| R-TRK-07 | Automation flags: scanner/empty UA, HEAD, fast click, multi-link burst (earlier click flagged too); proxy opens labelled only |
+| R-TRK-08 | Rates of Delivered and of Sent; CTOR ≤ 100% with implied opens; "—" for a zero denominator |
+| R-TRK-09 | `last_engagement_at` only from non-automated activity; recipient timeline order and first/latest activity |
+| R-TRK-10 | IP stored only as a keyed hash |
 
 ## M8: Notion summaries, hardening and release
 - [ ] Notion "Email Campaigns" database with summaries (on completion, +24 h, +72 h, +7 d); last-emailed and last-engagement written back
@@ -354,7 +382,7 @@ Written during implementation (not before it), from DESIGN §4.2.
 | S5 | Test send | Simulator success → Delivery event; campaign metrics unchanged | LIVE |
 | S6 | Send now (3 simulator addresses) | Sent 3, Delivered 2, Bounced 1 | LIVE |
 | S7 | Scheduled send (+3 min, Asia/Ho_Chi_Minh) | Runs with no browser open; scheduled and actual timestamps recorded | LIVE (S7-mock locally from M6) |
-| S8 | Open, click, unsubscribe | Events recorded; redirect goes to the snapshot URL; suppression added; Notion update queued | LIVE |
+| S8 | Open, click, unsubscribe | Events recorded; redirect goes to the snapshot URL; suppression added; Notion update queued | LIVE (S8-mock locally from M7) |
 | S9 | Cancel a scheduled campaign | Never dispatched | LIVE (S9-mock locally from M6) |
 
 Pass rule: every scenario must PASS. Any FAIL blocks the release. A BLOCKED scenario needs a stated reason and the user's acceptance. If the tech lead supplies their own checklist, it replaces this interpretation of "re-smoke".

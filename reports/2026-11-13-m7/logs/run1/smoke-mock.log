@@ -1,0 +1,46 @@
+
+> email-mkt-tracker@0.1.0 smoke:mock-send
+> tsx scripts/local-stack.ts --send-mode mock --log-dir .local/logs/smoke-mock-send -- tsx scripts/smoke.ts --env local-stack
+
+[core] WARNING: Executable file detection not yet supported on 'win32'.
+Your pool doesn't have all of the error handlers! See: https://err.red/wpeh?v=0.18.0&method=connect
+migrations applied (app + graphile_worker)
+[stack] postgres ready on 54332; logs in D:\AI Studio\Email MKT Tracker\.local\logs\smoke-mock-send
+[stack] building web app (next build)…
+[stack] web + worker healthy at http://localhost:3100
+{"level":"info","time":"2026-11-13T11:25:08.746Z","service":"web","env":"test","build":"local-stack","component":"crm-sync","mode":"full","trigger":"test","run_id":"376405a6-7b01-4018-b9c4-d5d1df4af522","status":"succeeded","counts":{"fetched":39,"created":39,"updated":0,"unchanged":0,"archived":0,"reactivated":0,"archivedMissing":0,"invalidEmail":5,"missingEmail":1,"duplicateContacts":5,"suppressionsAdded":4,"outboxQueued":0,"dataIssues":0,"pageErrors":0,"queryPages":1,"queryChunks":1},"msg":"sync finished"}
+{"level":"info","time":"2026-11-13T11:25:09.508Z","service":"web","env":"test","build":"local-stack","component":"crm-sync","mode":"full","trigger":"test","run_id":"dbad9f04-df7e-4516-a718-ed6e893496bc","status":"succeeded","counts":{"fetched":39,"created":0,"updated":0,"unchanged":39,"archived":0,"reactivated":0,"archivedMissing":0,"invalidEmail":5,"missingEmail":1,"duplicateContacts":5,"suppressionsAdded":0,"outboxQueued":0,"dataIssues":0,"pageErrors":0,"queryPages":1,"queryChunks":1},"msg":"sync finished"}
+{"level":"info","time":"2026-11-13T11:25:10.265Z","service":"web","env":"test","build":"local-stack","request_id":"smoke-s5","task":"test_send","test_send_id":"d17eacb1-edde-49e7-aeba-7acff9d5d646","status":"accepted","transport":"mock","to":"q***@example.com","msg":"test send attempted"}
+{"level":"info","time":"2026-11-13T11:25:11.127Z","service":"web","env":"test","build":"local-stack","campaign_id":"2e9d8bef-8a76-4064-844f-8884f553ca6d","snapshot_id":"ef04cfb5-f361-46f3-a97f-5d072704d9b4","recipients":3,"status":"queued","msg":"campaign approved"}
+[core] WARNING: Executable file detection not yet supported on 'win32'.
+{"level":"info","time":"2026-11-13T11:25:11.904Z","service":"web","env":"test","build":"local-stack","campaign_id":"2d78547b-552f-4aea-89a9-77b9c92db3ac","snapshot_id":"fd1b7a83-967d-47b8-a72a-c04009b0b580","recipients":2,"status":"scheduled","msg":"campaign approved"}
+[core] WARNING: Executable file detection not yet supported on 'win32'.
+{"level":"info","time":"2026-11-13T11:25:11.948Z","service":"web","env":"test","build":"local-stack","campaign_id":"985aa7b4-da3f-4964-920a-9013cbde34a0","snapshot_id":"385504fa-adbd-44c3-9b8d-e4080fc9d6b7","recipients":2,"status":"scheduled","msg":"campaign approved"}
+{"level":"info","time":"2026-11-13T11:26:15.809Z","service":"web","env":"test","build":"local-stack","campaign_id":"44d7624f-4dca-40af-80d3-b024968dda45","snapshot_id":"b1dbe41a-27de-42dc-acef-3da291242a34","recipients":2,"status":"queued","msg":"campaign approved"}
+[core] WARNING: Executable file detection not yet supported on 'win32'.
+| ID | Scenario | MOCK/LIVE | Result | Notes |
+|---|---|---|---|---|
+| S1 | App and worker start; /healthz reports DB ok and worker heartbeat < 60 s | MOCK | PASS | HTTP 200; db=true; worker=true; heartbeat age=1s; build=local-stack |
+| S2a | Allowed staff account can sign in (dev identity provider) | MOCK | PASS | verify → 302 /; dashboard HTTP 200; shows signed-in user: true |
+| S2b | Outside-domain account is rejected (dev identity provider) | MOCK | PASS | verify → HTTP 302 → /access-denied?error=ACCESS_DENIED_WRONG_DOMAIN; session cookie set: false |
+| S2c | Company-domain account not on allowlist is rejected (dev identity provider) | MOCK | PASS | verify → HTTP 302 → /access-denied?error=ACCESS_DENIED_NOT_ALLOWLISTED; session cookie set: false |
+| S2-live | Google OAuth sign-in with a real company Workspace account (allowed) and an outside account (rejected) | LIVE | BLOCKED | No Google OAuth client configured (M0 prerequisite). Requires an interactive Google sign-in on a deployed environment. |
+| S3-mock | Notion sync (mock server, synthetic data): contact count matches non-trashed pages; repeat sync creates nothing | MOCK | PASS | run1=succeeded created=39; run2=succeeded created=0; active contacts=39, non-trashed mock pages=39 |
+| S3-live | Sync now against the separate Notion TEST database; counts match | LIVE | BLOCKED | No Notion test database or connection token yet (see docs/NOTION_SETUP.md); live Notion access not authorized under M2. |
+| S4-m3 | Import SYNTHETIC template A; preview for a recipient without greeting name uses the fallback; no unresolved fields | MOCK | PASS | errors=0; missing without fallback=none; fallback used=true |
+| S4 | Subject + body with fallbacks; preview as a synced CRM contact without a greeting name has no unresolved fields | MOCK | PASS | subject="Chào bạn — bản tin"; body errors=0; missing=none; check: 33 contacts, 0 affected, 0 blocking |
+| S5-mock | Test send in SEND_MODE=mock to the allowlisted reserved-domain inbox: accepted by the in-process transport, [TEST] prefix, no network, no campaign link | MOCK | PASS | status=accepted; transport calls=1; subject="[TEST] Smoke Công ty An Phát"; to=q***@example.com |
+| S5-live | Real test send through SES to an allowlisted inbox / the SES simulator; Delivery event; campaign metrics unchanged | LIVE | BLOCKED | Not authorized: needs the user's separate approval, SES setup (verified identity, credentials) and SEND_AUTHORIZATION_REF. Delivery events also need a public HTTPS SNS endpoint (no deployment). |
+| S10 | UI shell: each sidebar page returns 200 with the <main id="main"> landmark for a signed-in admin (dev sign-in) | MOCK | PASS | 11 pages ok |
+| S6-mock | Send now to 3 synthetic recipients through the worker (mock transport) → Sent 3; signed SES events over HTTP → Delivered 2 / Bounced 1 and the bounced address suppressed | MOCK | PASS | status before events=completed; dispatched in 514 ms (worker process); Sent 3 / Delivered 2 / Bounced 1; suppression added: true; SNS posts: 200 processed, 200 processed, 200 processed |
+| S6-live | Send now to 3 SES simulator addresses → Sent 3 / Delivered 2 / Bounced 1 (real SES events via SNS) | LIVE | BLOCKED | Not authorized: needs the user's approval for real sends, SES setup and a deployed HTTPS endpoint subscribed to the SNS topic. |
+| S7-mock | Scheduled send (Asia/Ho_Chi_Minh, next whole minute) is started by the worker process with no browser open, within 60 s, and completes; scheduled and actual times recorded | MOCK | PASS | local 2026-11-13 18:26 Asia/Ho_Chi_Minh; scheduled 2026-11-13T11:26:00.000Z; started 2026-11-13T11:26:00.057Z; delay 57 ms; status completed; sent 2/2 |
+| S9-mock | A scheduled campaign cancelled before its time is never dispatched (start job removed; status stays cancelled after the time passes) | MOCK | PASS | 15 s after the scheduled time: status cancelled; non-cancelled messages 0; start jobs 0 |
+| S7-live | Scheduled send (+3 min, Asia/Ho_Chi_Minh) on a deployed environment with the browser closed and the laptop off | LIVE | BLOCKED | Needs a deployed worker (no hosting account; deployment not authorized) and real sending approval. |
+| S9-live | Cancelled scheduled campaign never dispatches (deployed environment) | LIVE | BLOCKED | Needs a deployed environment (not authorized). |
+| S8-mock | Open pixel, click and one-click unsubscribe over HTTP: events recorded; redirect = snapshot URL; suppression added; Notion update queued | MOCK | PASS | status=completed; tracked=true; open HTTP 200; click HTTP 302 → https://shop.example.com/s8; unsubscribe HTTP 200; events open=1 click=1 unsubscribe=1; suppression=1; Notion outbox rows=1 |
+| S8-live | Open, click and unsubscribe from a real allowlisted inbox; redirect to the snapshot URL; Notion update sent | LIVE | BLOCKED | Needs real sending approval, SES setup, a deployed tracking domain and a live Notion connection. |
+
+smoke: {"PASS":13,"BLOCKED":7} → D:\AI Studio\Email MKT Tracker\.local\logs\smoke-mock-send
+[stack] cleanup ok: 5 owned process(es) stopped, none left
+[stack] stopped (exit 0)

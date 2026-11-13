@@ -649,6 +649,8 @@ export const messages = pgTable(
     providerMessageId: text("provider_message_id"),
     errorCode: text("error_code"),
     lastError: text("last_error"),
+    /** M7: whether open/click tracking was applied when the message was sent (consent / setting at send time). */
+    trackingEnabled: boolean("tracking_enabled"),
     /** Staff decision on an uncertain send (resend_approved / marked_not_sent), audited. */
     resolution: text("resolution"),
     resolvedBy: text("resolved_by"),
@@ -695,8 +697,22 @@ export const messageEvents = pgTable(
     receivedAt: ts("received_at").notNull().defaultNow(),
     /** Minimal, redacted detail (bounce type/subtype, masked diagnostic). No full addresses. */
     detail: jsonb("detail"),
+    // ---- M7 tracking (opens / clicks). Raw events are kept; automation flags are additive.
+    /** Clicked link: index into the snapshot's link table. */
+    linkIdx: integer("link_idx"),
+    /** Keyed hash of the client IP (never the IP itself). */
+    ipHash: text("ip_hash"),
+    userAgent: text("user_agent"),
+    /** True when any flag indicates automated activity (scanner, prefetch, burst, HEAD…). */
+    suspectedAutomated: boolean("suspected_automated").notNull().default(false),
+    /** e.g. fast_click, multi_link_burst, head_request, scanner_ua, proxy_open (label only). */
+    flags: text("flags").array().notNull().default(emptyTextArray),
   },
-  (t) => [index("message_events_message_idx").on(t.messageId), index("message_events_campaign_idx").on(t.campaignId, t.type)],
+  (t) => [
+    index("message_events_message_idx").on(t.messageId),
+    index("message_events_campaign_idx").on(t.campaignId, t.type),
+    index("message_events_activity_idx").on(t.messageId, t.type, t.occurredAt),
+  ],
 );
 
 /** Append-only (DB trigger): every campaign status change, who made it and why. */

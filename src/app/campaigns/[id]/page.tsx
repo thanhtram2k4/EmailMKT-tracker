@@ -19,6 +19,7 @@ import { AudienceFields } from "../audience-fields";
 import { StatusPill } from "../status-pill";
 import { AutoRefresh } from "./auto-refresh";
 import { ScheduleTimeForm, SchedulePreview, type SchedParams } from "./schedule-ui";
+import { AnalyticsSection } from "./analytics-section";
 
 export const dynamic = "force-dynamic";
 
@@ -37,7 +38,7 @@ const FILTERS: Array<[RecipientFilter, string]> = [
 ];
 const reasonLabel = (r: string) => (r in REASON_LABELS ? REASON_LABELS[r as IneligibleReason] : r === "duplicate_address" ? "Same address twice in the audience" : r);
 
-export default async function CampaignPage({ params, searchParams }: { params: Promise<{ id: string }>; searchParams: Promise<{ ok?: string; error?: string; show?: string } & SchedParams> }) {
+export default async function CampaignPage({ params, searchParams }: { params: Promise<{ id: string }>; searchParams: Promise<{ ok?: string; error?: string; show?: string; activity?: string } & SchedParams> }) {
   const staff = await requireStaff();
   const { id } = await params;
   const sp = await searchParams;
@@ -65,7 +66,7 @@ export default async function CampaignPage({ params, searchParams }: { params: P
         }
       />
       <Flash ok={sp.ok} error={sp.error} />
-      {isDraft ? <DraftView id={id} isAdmin={isAdmin} sendMode={cfg.SEND_MODE} sp={sp} /> : <SendingView d={d} isAdmin={isAdmin} filter={filter} sp={sp} ratePerSecond={settings.ratePerSecond} />}
+      {isDraft ? <DraftView id={id} isAdmin={isAdmin} sendMode={cfg.SEND_MODE} sp={sp} /> : <SendingView d={d} isAdmin={isAdmin} filter={filter} sp={sp} ratePerSecond={settings.ratePerSecond} activity={sp.activity === "recorded" ? "recorded" : "filtered"} />}
     </AppShell>
   );
 }
@@ -249,7 +250,21 @@ async function DraftView({ id, isAdmin, sendMode, sp }: { id: string; isAdmin: b
   );
 }
 
-function SendingView({ d, isAdmin, filter, sp, ratePerSecond }: { d: NonNullable<Awaited<ReturnType<typeof campaignDetail>>>; isAdmin: boolean; filter: RecipientFilter; sp: SchedParams; ratePerSecond: number }) {
+function SendingView({
+  d,
+  isAdmin,
+  filter,
+  sp,
+  ratePerSecond,
+  activity,
+}: {
+  d: NonNullable<Awaited<ReturnType<typeof campaignDetail>>>;
+  isAdmin: boolean;
+  filter: RecipientFilter;
+  sp: SchedParams;
+  ratePerSecond: number;
+  activity: "filtered" | "recorded";
+}) {
   const c = d.campaign;
   const m = d.counts;
   const active = ["queued", "sending", "cancelling"].includes(c.status);
@@ -379,6 +394,8 @@ function SendingView({ d, isAdmin, filter, sp, ratePerSecond }: { d: NonNullable
         </div>
       </section>
 
+      {m.sent + m.unknown + m.marked_not_sent > 0 && <AnalyticsSection campaignId={c.id} activity={activity} />}
+
       {m.unknown > 0 && (
         <section className="card" data-testid="uncertain-card">
           <h2>Uncertain sends ({m.unknown})</h2>
@@ -469,7 +486,11 @@ function SendingView({ d, isAdmin, filter, sp, ratePerSecond }: { d: NonNullable
               <tbody>
                 {d.recipients.map((r) => (
                   <tr key={r.id}>
-                    <td>{r.full_name ?? "—"}</td>
+                    <td>
+                      <Link href={`/campaigns/${c.id}/messages/${r.id}`} data-testid="open-timeline">
+                        {r.full_name ?? r.email_normalized}
+                      </Link>
+                    </td>
                     <td>{r.email_normalized}</td>
                     <td>
                       <Pill tone={r.send_status === "sent" ? "ok" : r.send_status === "unknown" || r.send_status === "failed_permanent" ? "bad" : r.send_status === "skipped" ? "warn" : undefined}>{r.send_status.replace(/_/g, " ")}</Pill>

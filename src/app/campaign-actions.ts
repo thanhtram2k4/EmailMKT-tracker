@@ -29,7 +29,7 @@ import {
   resumeCampaign,
   updateDraft,
 } from "../lib/campaigns/service";
-import { SettingsError, updateSendSettings } from "../lib/campaigns/settings";
+import { SettingsError, updateSendSettings, type TrackingMode } from "../lib/campaigns/settings";
 import { suppressAddress } from "../lib/campaigns/suppression";
 
 const actorOf = (s: { userId: string }) => `user:${s.userId}`;
@@ -199,6 +199,7 @@ export async function updateSendingSettingsAction(form: FormData) {
       ratePerSecond: Number(form.get("ratePerSecond")),
       quotaReservePct: Number(form.get("quotaReservePct")),
       graceMinutes: form.get("graceMinutes") === null ? undefined : Number(form.get("graceMinutes")),
+      trackingMode: form.get("trackingMode") === null ? undefined : (String(form.get("trackingMode")) as TrackingMode),
       liveCampaignsEnabled: form.get("liveCampaignsEnabled") === "on" ? true : cfg.APP_ENV === "production" ? false : undefined,
       actor: actorOf(s),
       appEnv: cfg.APP_ENV,

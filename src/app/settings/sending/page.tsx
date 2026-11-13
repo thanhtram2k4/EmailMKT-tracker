@@ -2,7 +2,7 @@ import { Gauge, Send } from "lucide-react";
 import { requireRole } from "../../../lib/auth/session";
 import { getConfig } from "../../../lib/config";
 import { getDb } from "../../../lib/db/client";
-import { GRACE_MAX, GRACE_MIN, getSendSettings, RATE_MAX, RATE_MIN, RESERVE_MAX } from "../../../lib/campaigns/settings";
+import { GRACE_MAX, GRACE_MIN, getSendSettings, RATE_MAX, RATE_MIN, RESERVE_MAX, TRACKING_MODES } from "../../../lib/campaigns/settings";
 import { testSendAvailability } from "../../../lib/sending/test-send";
 import { updateSendingSettingsAction } from "../../campaign-actions";
 import { AppShell } from "../../app-shell";
@@ -93,6 +93,17 @@ export default async function SendingSettings({ searchParams }: { searchParams: 
               Daily quota reserve (%)
               <input name="quotaReservePct" type="number" min={0} max={RESERVE_MAX} step="1" defaultValue={settings.quotaReservePct} required data-testid="setting-reserve" />
               <span className="field-hint">Share of the SES 24-hour quota campaigns never use. When the rest is used up the campaign is blocked until an admin resumes it.</span>
+            </label>
+            <label>
+              Open/click tracking
+              <select name="trackingMode" defaultValue={settings.trackingMode} data-testid="setting-tracking">
+                {TRACKING_MODES.map((m) => (
+                  <option key={m} value={m}>
+                    {m === "consented_only" ? "Only addresses with tracking consent (default)" : m === "all" ? "All recipients" : "Off"}
+                  </option>
+                ))}
+              </select>
+              <span className="field-hint">Pending counsel (docs/COMPLIANCE.md §3.3). Decided per message at send time; untracked messages have direct links and no open pixel.</span>
             </label>
             <label>
               Late-start grace period (minutes)

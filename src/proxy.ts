@@ -9,7 +9,8 @@ import { NextResponse, type NextRequest } from "next/server";
 
 // /fixtures: SYNTHETIC demo images used by the M3 template fixtures (public, no data).
 // M5: /u (recipient unsubscribe, opaque token) and /api/ses-events (SNS, signature-verified) are public.
-const PUBLIC_PREFIXES = ["/sign-in", "/access-denied", "/healthz", "/api/auth", "/api/dev", "/_next", "/favicon.ico", "/fixtures", "/u", "/api/ses-events"];
+// M7: /o (open pixel) and /c (click redirect to snapshot URLs only), opaque tokens.
+const PUBLIC_PREFIXES = ["/sign-in", "/access-denied", "/healthz", "/api/auth", "/api/dev", "/_next", "/favicon.ico", "/fixtures", "/u", "/api/ses-events", "/o", "/c"];
 
 export function proxy(request: NextRequest) {
   const requestId = request.headers.get("x-request-id") || crypto.randomUUID();

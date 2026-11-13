@@ -40,6 +40,13 @@ Baseline: `PROJECT_BRIEF.md` rev 2. Status: approved plan. M1 was authorized and
 >   - Execution-time checks (credentials, sending enabled, quota) remain in the dispatcher (M5) and block with a reason; Notion is not required.
 >   - Admin alerts (`admin_alerts`) for `held_overdue` and `blocked`: shown on the Dashboard and Scheduled list until acknowledged; emailed to active admins only when the sending guard allows (test-send rules outside production; never in `disabled`).
 >   - Worker-down banner on the Scheduled list after 2 minutes without a heartbeat.
+> - **M7 (tracking and analytics, implemented locally with mocks; see `reports/2026-11-13-m7/report.md`):**
+>   - Tracking is decided per message at send time by the setting `tracking.mode` (`consented_only` by default — `email_tracking` consent required, pending counsel; `all`; `off`) and recorded on the message. Untracked messages keep direct links and get no pixel; their tokens produce no tracking events.
+>   - Links are rewritten on the frozen template before merge rendering, with the same selection as the snapshot link table (absolute http(s), no merge field; links inside comments such as MSO conditionals stay direct). The plain-text part is not rewritten. Test sends are never tracked.
+>   - **Unique openers include implied opens** (a click without a recorded open); "Opens (recorded)" stays the raw pixel count. CTOR therefore never exceeds 100%.
+>   - Automated-activity flags: scanner user agents / no user agent, HEAD requests, clicks < 10 s after delivery (or sending), different links within 2 s (all flagged). Google/Yahoo image-proxy opens are labelled `proxy_open` but not treated as automated. Scanner IP lists and Apple MPP detection are not implemented (no reliable signal without IP ranges).
+>   - The IP is stored only as an HMAC (keyed with `BETTER_AUTH_SECRET`); the user agent is truncated to 300 characters.
+>   - Both views (all recorded / automated filtered out) are shown side by side; a toggle selects the headline tiles and the link table.
 
 ## Context
 

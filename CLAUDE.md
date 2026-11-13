@@ -19,8 +19,8 @@ This is an internal email-marketing app for a single company. Campaigns go out t
 - **M4 (UI redesign, personalization, test sends) is authorized for local work with mock/fake SES only.** Branch `m4-ui-testsend`. See `reports/2026-11-12-m4/report.md` (Vietnamese). A real SES test send needs separate approval.
 - **M5 (send-now engine and compliance) is authorized for local work with a mock transport or fake SES client only.** Branch `m5-send-engine` from `m4-checkpoint`. See `reports/2026-11-13-m5/report.md`. Real sends, AWS calls, deployment and push still need separate approval.
 - **M5 and M6 are committed** together on branch `m6-scheduling`; tags `m5-checkpoint` and `m6-checkpoint` point to the same commit. See `reports/2026-11-13-m5/report.md` and `reports/2026-11-13-m6/report.md`.
-- **M7 (tracking and analytics) is authorized for local work with the mock transport** (2026-11-13). Branch `m7-tracking` from `m6-checkpoint`.
-- **M8 and later are not authorized yet.** Commit each milestone before starting the next.
+- **M7 (tracking and analytics) is committed**, tag `m7-checkpoint`. See `reports/2026-11-13-m7/report.md`.
+- **M8 (Notion summaries, hardening, backups, release) is authorized in the mock environment** (2026-11-13). Branch `m8-release` from `m7-checkpoint`. The live controlled campaign is BLOCKED until the user provides the M0 accounts and legal answers. Commit each milestone before starting the next.
 - **Roles (confirmed by the user):** only admins approve, schedule and send campaigns and resolve uncertain sends; members create, edit, review and pause.
 - **No Claude API.** The app uses no LLM API. Never add one; if an AI feature is ever needed, only the free Gemini API, after asking the user (keys never in Git).
 - **Verified only locally:** Google OAuth, staging, CI and live Notion are unverified.
@@ -155,6 +155,14 @@ TypeScript on Node 22.18+ (developed on Node 24).
 - Reschedule increments `schedule_revision`; unschedule returns to draft (revision++, snapshot cleared, unsent messages cancelled — the only snapshot change the DB trigger allows).
 - Late start beyond `scheduling.grace_minutes` (default 30) → `held_overdue`, not sent, admin alert. Default is NOT to send.
 - Admin alerts are emailed only through the guard (never in `disabled`).
+
+## Tracking rules (M7; do not break)
+- Code: `src/lib/campaigns/tracking.ts`, `analytics.ts`, routes `src/app/o/[file]`, `src/app/c/[token]/[idx]`.
+- Click redirects go ONLY to the URL at that index in the message's snapshot link table; anything else is 404. Never take a destination from the request.
+- Tracking is decided per message at send time (`tracking.mode`, default `consented_only` pending counsel) and stored in `messages.tracking_enabled`; untracked tokens give 404. Test sends are never tracked.
+- Link rewriting runs on the frozen template before merge rendering with the same selection as `extractLinks()`.
+- Raw events are kept; automation flags are additive. Store IPs only as an HMAC; truncate user agents.
+- Metrics count only the current snapshot; unique openers include implied opens from clicks.
 
 ## UI rules (M4)
 - Plain CSS tokens in `src/app/globals.css` (light/dark, cookie theme). No Tailwind. lucide icons, no emoji icons.

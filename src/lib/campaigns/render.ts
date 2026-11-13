@@ -4,7 +4,7 @@
  * the message's opaque tracking token, never from an email address.
  */
 import { createHash, randomBytes } from "node:crypto";
-import { parseHtml } from "../templates/html-doc";
+import { parseHtml, serialize } from "../templates/html-doc";
 import { renderForRecipient, renderSubject, renderText, scanMergeFields, type Recipient } from "../templates/merge";
 
 export type MergeValues = { full_name: string | null; greeting_name: string | null; company: string | null; email: string };
@@ -25,11 +25,43 @@ export type RenderedMessage = {
   problems: string[];
 };
 
-export function renderMessage(s: { subjectTemplate: string; html: string; plainText: string }, mv: MergeValues, token: string, trackingBaseUrl: string): RenderedMessage {
+export const clickUrl = (trackingBaseUrl: string, token: string, idx: number) => `${trackingBaseUrl}/c/${encodeURIComponent(token)}/${idx}`;
+export const openPixelUrl = (trackingBaseUrl: string, token: string) => `${trackingBaseUrl}/o/${encodeURIComponent(token)}.gif`;
+
+/** A link that is recorded in the snapshot's link table (and therefore tracked): absolute http(s), no merge field. */
+const isTrackableHref = (href: string) => /^https?:\/\//i.test(href) && !href.includes("{{");
+
+/**
+ * M7: rewrite trackable links to the click endpoint and add the open pixel. Runs on the FROZEN
+ * template HTML before merge fields are rendered, with the same selection and order as
+ * extractLinks(), so link index n always means the snapshot's link n. Links inside comments (e.g.
+ * MSO conditionals) are not seen by either and stay direct. The plain-text part is not rewritten.
+ */
+export function applyTracking(html: string, token: string, trackingBaseUrl: string): string {
+  const $ = parseHtml(html);
+  let idx = 0;
+  $("a[href]").each((_, el) => {
+    const href = ($(el).attr("href") ?? "").trim();
+    if (!isTrackableHref(href)) return;
+    $(el).attr("href", clickUrl(trackingBaseUrl, token, idx++));
+  });
+  const pixel = `<img src="${openPixelUrl(trackingBaseUrl, token)}" width="1" height="1" alt="" style="display:block;width:1px;height:1px;border:0;" />`;
+  if ($("body").length) $("body").first().append(pixel);
+  else $.root().append(pixel);
+  return serialize($);
+}
+
+export function renderMessage(
+  s: { subjectTemplate: string; html: string; plainText: string },
+  mv: MergeValues,
+  token: string,
+  trackingBaseUrl: string,
+  o: { track?: boolean } = {},
+): RenderedMessage {
   const unsub = unsubscribeUrl(trackingBaseUrl, token);
   const data: Recipient = { ...mv, unsubscribe_url: unsub };
   const subj = renderSubject(s.subjectTemplate, data);
-  const body = renderForRecipient(s.html, data);
+  const body = renderForRecipient(o.track ? applyTracking(s.html, token, trackingBaseUrl) : s.html, data);
   const text = renderText(s.plainText, data);
   const problems = [
     ...subj.errors.map((e) => `subject: ${e.raw} — ${e.error}`),
@@ -65,7 +97,7 @@ export function extractLinks(html: string): Array<{ idx: number; url: string; la
   const out: Array<{ idx: number; url: string; label: string | null }> = [];
   $("a[href]").each((_, el) => {
     const href = ($(el).attr("href") ?? "").trim();
-    if (!/^https?:\/\//i.test(href) || href.includes("{{")) return;
+    if (!isTrackableHref(href)) return;
     const label = $(el).text().replace(/\s+/g, " ").trim().slice(0, 200) || $(el).find("img").attr("alt")?.slice(0, 200) || null;
     out.push({ idx: out.length, url: href, label });
   });

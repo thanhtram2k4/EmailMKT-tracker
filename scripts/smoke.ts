@@ -433,11 +433,72 @@ rows.push(
   { id: "S9-live", scenario: "Cancelled scheduled campaign never dispatches (deployed environment)", type: "LIVE", result: "BLOCKED", notes: "Needs a deployed environment (not authorized)." },
 );
 
-for (const [id, s, ms] of [
-  ["S8", "Open, click, unsubscribe recorded; redirect to snapshot URL", "M7"],
-] as const) {
-  rows.push({ id, scenario: s, type: "-", result: "NOT RUN", notes: `Feature not implemented yet (${ms}).` });
+// S8 (M7) — open, click, unsubscribe over HTTP. MOCK variant: a campaign sent by the stack's worker
+// (mock transport) to synthetic contacts with tracking consent; the public endpoints are called directly.
+if (process.env.DATABASE_URL && process.env.NOTION_MODE === "mock" && (process.env.SEND_MODE ?? "disabled") === "mock") {
+  await check("S8-mock", "Open pixel, click and one-click unsubscribe over HTTP: events recorded; redirect = snapshot URL; suppression added; Notion update queued", "MOCK", async () => {
+    const { getConfig } = await import("../src/lib/config.ts");
+    const { getDb, closeDb } = await import("../src/lib/db/client.ts");
+    const { sql } = await import("drizzle-orm");
+    const { importTemplate, saveSubject } = await import("../src/lib/templates/service.ts");
+    const { approveAndSendNow, createCampaign, reviewCampaign } = await import("../src/lib/campaigns/service.ts");
+    const { enqueueDispatch, releaseWorkerUtils } = await import("../src/lib/jobs.ts");
+    const { contacts, consentRecords } = await import("../src/lib/db/schema.ts");
+    const run = Date.now().toString(36);
+    const tag = `smoke-s8-${run}`;
+    const addrs = [0, 1].map((i) => `${tag}-${i}@example.com`);
+    try {
+      const db = getDb();
+      const cfg = getConfig();
+      await db.insert(contacts).values(addrs.map((e, i) => ({ notionPageId: `${tag}-${i}`, fullName: `Smoke ${i}`, email: e, emailNormalized: e, emailStatus: "valid" as const, tags: [tag] })));
+      for (const purpose of ["marketing_email", "email_tracking"] as const) {
+        await db.insert(consentRecords).values(addrs.map((e) => ({ emailNormalized: e, purpose, status: "granted" as const, source: "staff_entry" as const, recordedBy: "smoke", evidenceRef: "SMOKE" })));
+      }
+      const t = await importTemplate(db, { name: "smoke S8", html: '<p>Xin chào</p><p><a href="https://shop.example.com/s8">Ưu đãi</a></p><a href="{{ unsubscribe_url }}">Hủy</a>', sourceKind: "paste", actor: "smoke" });
+      const v = await saveSubject(db, { templateId: t.template.id, baseVersionId: t.version.id, subject: "[QC] Smoke S8", actor: "smoke" });
+      const c = await createCampaign(db, { name: `Smoke S8 ${run}`, templateId: t.template.id, templateVersionId: v.id, audience: { kind: "tags", tags: [tag] }, actor: "system:smoke" });
+      const rv = await reviewCampaign(db, cfg, c.id);
+      await approveAndSendNow(db, { cfg, enqueue: (id) => enqueueDispatch(id, cfg.DATABASE_URL) }, { campaignId: c.id, expectedRevision: rv.campaign.scheduleRevision, expectedRecipients: 2, actor: "system:smoke" });
+      const t0 = Date.now();
+      let status = "";
+      while (Date.now() - t0 < 60_000) {
+        status = ((await db.execute(sql`select status::text as s from campaigns where id = ${c.id}`)).rows[0] as { s: string }).s;
+        if (status === "completed") break;
+        await new Promise((r) => setTimeout(r, 500));
+      }
+      const m = (await db.execute(sql`select id, tracking_token, tracking_enabled, email_normalized from messages where campaign_id = ${c.id} order by email_normalized limit 1`)).rows[0] as {
+        id: string;
+        tracking_token: string;
+        tracking_enabled: boolean;
+        email_normalized: string;
+      };
+      const ua = { "user-agent": "Mozilla/5.0 (Windows NT 10.0) Chrome/130 smoke" };
+      const open = await fetch(`${baseUrl}/o/${m.tracking_token}.gif`, { headers: ua });
+      const click = await fetch(`${baseUrl}/c/${m.tracking_token}/0`, { headers: ua, redirect: "manual" });
+      const unsub = await fetch(`${baseUrl}/u/${m.tracking_token}`, { method: "POST", headers: { ...ua, "content-type": "application/x-www-form-urlencoded" }, body: "List-Unsubscribe=One-Click" });
+      const ev = (await db.execute(sql`select type::text as t, count(*)::int as n from message_events where message_id = ${m.id} group by type`)).rows as Array<{ t: string; n: number }>;
+      const n = (t: string) => ev.find((e) => e.t === t)?.n ?? 0;
+      const sup = ((await db.execute(sql`select count(*)::int as n from suppressions where email_normalized = ${m.email_normalized} and reason = 'unsubscribe'`)).rows[0] as { n: number }).n;
+      const outbox = ((await db.execute(sql`select count(*)::int as n from notion_outbox where notion_page_id = ${`${tag}-0`} and kind = 'set_subscription'`)).rows[0] as { n: number }).n;
+      const loc = click.headers.get("location");
+      const ok = status === "completed" && m.tracking_enabled && open.status === 200 && click.status === 302 && loc === "https://shop.example.com/s8" && unsub.status === 200 && n("open") === 1 && n("click") === 1 && n("unsubscribe") === 1 && sup === 1 && outbox === 1;
+      return {
+        result: ok ? "PASS" : "FAIL",
+        notes: `status=${status}; tracked=${m.tracking_enabled}; open HTTP ${open.status}; click HTTP ${click.status} → ${loc}; unsubscribe HTTP ${unsub.status}; events open=${n("open")} click=${n("click")} unsubscribe=${n("unsubscribe")}; suppression=${sup}; Notion outbox rows=${outbox}`,
+      };
+    } finally {
+      await releaseWorkerUtils();
+      await closeDb();
+    }
+  });
 }
+rows.push({
+  id: "S8-live",
+  scenario: "Open, click and unsubscribe from a real allowlisted inbox; redirect to the snapshot URL; Notion update sent",
+  type: "LIVE",
+  result: "BLOCKED",
+  notes: "Needs real sending approval, SES setup, a deployed tracking domain and a live Notion connection.",
+});
 
 const finished = new Date();
 const summary = {

@@ -1,0 +1,50 @@
+[core] WARNING: Executable file detection not yet supported on 'win32'.
+Your pool doesn't have all of the error handlers! See: https://err.red/wpeh?v=0.18.0&method=connect
+migrations applied (app + graphile_worker)
+[stack] postgres ready on 54332; logs in D:\AI Studio\Email MKT Tracker\.local\logs\e2e-m7-try1
+[stack] building web app (next build)…
+[stack] web + worker healthy at http://localhost:3100
+
+Running 3 tests using 1 worker
+
+  ok 1 [chromium] › tests\e2e\campaign-tracking.spec.ts:46:1 › public tracking endpoints: unknown tokens are 404, never a redirect or a sign-in page (92ms)
+  x  2 [chromium] › tests\e2e\campaign-tracking.spec.ts:59:3 › mock sending › OR-TRK-01: opens and clicks over HTTP; redirect only to the snapshot URL; recorded vs filtered; timeline (6.8s)
+  -  3 [chromium] › tests\e2e\campaign-tracking.spec.ts:146:3 › mock sending › OR-ROLE-01: a member can create and review, but cannot schedule or send (confirmed role rule)
+
+
+  1) [chromium] › tests\e2e\campaign-tracking.spec.ts:59:3 › mock sending › OR-TRK-01: opens and clicks over HTTP; redirect only to the snapshot URL; recorded vs filtered; timeline 
+
+    error: invalid input syntax for type uuid: "campaigns"
+
+      28 |   await c.connect();
+      29 |   try {
+    > 30 |     return (await c.query(text, params)).rows as T[];
+         |             ^
+      31 |   } finally {
+      32 |     await c.end();
+      33 |   }
+        at D:\AI Studio\Email MKT Tracker\node_modules\pg\lib\client.js:694:17
+        at q (D:\AI Studio\Email MKT Tracker\tests\e2e\campaign-tracking.spec.ts:30:13)
+        at D:\AI Studio\Email MKT Tracker\tests\e2e\campaign-tracking.spec.ts:88:18
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results\campaign-tracking-mock-sen-3522c-corded-vs-filtered-timeline-chromium\test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results\campaign-tracking-mock-sen-3522c-corded-vs-filtered-timeline-chromium\error-context.md
+
+    attachment #3: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results\campaign-tracking-mock-sen-3522c-corded-vs-filtered-timeline-chromium\trace.zip
+    Usage:
+
+        npx playwright show-trace test-results\campaign-tracking-mock-sen-3522c-corded-vs-filtered-timeline-chromium\trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  1 failed
+    [chromium] › tests\e2e\campaign-tracking.spec.ts:59:3 › mock sending › OR-TRK-01: opens and clicks over HTTP; redirect only to the snapshot URL; recorded vs filtered; timeline 
+  1 did not run
+  1 passed (7.9s)
+[stack] cleanup ok: 6 owned process(es) stopped, none left
+[stack] stopped (exit 1)
+exit=1

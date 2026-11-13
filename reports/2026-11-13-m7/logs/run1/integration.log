@@ -1,0 +1,22 @@
+
+> email-mkt-tracker@0.1.0 test:integration
+> vitest run --project integration
+
+
+ RUN  v5.1.0 D:/AI Studio/Email MKT Tracker
+
+{"level":"info","time":"2026-11-13T11:13:18.122Z","service":"web","env":"unknown","build":"dev","request_id":"req-test","task":"test_send","test_send_id":"26e63031-c910-421c-b93c-172bac3b4c85","status":"accepted","transport":"mock","to":"q***@example.com","msg":"test send attempted"}
+{"level":"info","time":"2026-11-13T11:13:18.153Z","service":"web","env":"unknown","build":"dev","request_id":"req-test","task":"test_send","test_send_id":"254e674d-c04f-4ef6-b1b7-c8b028b7a681","status":"accepted","transport":"mock","to":"q***@example.com","msg":"test send attempted"}
+{"level":"info","time":"2026-11-13T11:13:18.210Z","service":"web","env":"unknown","build":"dev","request_id":"req-test","task":"test_send","test_send_id":"45d828cd-f916-48ac-8382-ca32ced7e3ff","status":"accepted","transport":"mock","to":"q***@example.com","msg":"test send attempted"}
+{"level":"info","time":"2026-11-13T11:13:18.261Z","service":"web","env":"unknown","build":"dev","request_id":"req-test","task":"test_send","test_send_id":"a5a5a414-ef77-4564-ba67-48164f52ce73","status":"unknown","transport":"mock","to":"q***@example.com","msg":"test send attempted"}
+{"level":"info","time":"2026-11-13T11:13:18.272Z","service":"web","env":"unknown","build":"dev","request_id":"req-test","task":"test_send","test_send_id":"b50bb82b-1823-42be-bc61-e35bd8c05e66","status":"unknown","transport":"mock","to":"q***@example.com","msg":"test send attempted"}
+{"level":"info","time":"2026-11-13T11:13:18.310Z","service":"web","env":"unknown","build":"dev","request_id":"req-test","task":"test_send","test_send_id":"c6e980b2-d2ff-475e-9559-c3f788a59f0c","status":"unknown","transport":"mock","to":"q***@example.com","msg":"test send attempted"}
+{"level":"info","time":"2026-11-13T11:13:18.367Z","service":"web","env":"unknown","build":"dev","request_id":"req-test","task":"test_send","test_send_id":"01380f68-75e1-4b42-8f1f-800ecdb1deaf","status":"accepted","transport":"mock","to":"q***@example.com","msg":"test send attempted"}
+{"level":"info","time":"2026-11-13T11:13:18.377Z","service":"web","env":"unknown","build":"dev","request_id":"req-test","task":"test_send","test_send_id":"627850b3-07ef-4e41-9833-d46c497ec824","status":"accepted","transport":"mock","to":"q***@example.com","msg":"test send attempted"}
+{"level":"info","time":"2026-11-13T11:13:18.463Z","service":"web","env":"unknown","build":"dev","request_id":"req-29d75b58-e129-4e51-9ad4-65aa5e573ce6","task":"test_send","test_send_id":"d745a074-0d83-49bf-8d3a-a244271d3de8","status":"accepted","transport":"mock","to":"q***@example.com","msg":"test send attempted"}
+
+ Test Files  9 passed (9)
+      Tests  96 passed (96)
+   Start at  18:11:11
+   Duration  134.72s (tests 93%, import 6%)
+
