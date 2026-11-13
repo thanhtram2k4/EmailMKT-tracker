@@ -26,6 +26,11 @@ const MEMBER_PAGES = [
   { path: "/contacts/issues", name: "Data issues" },
   { path: "/sync", name: "Sync" },
   { path: "/templates", name: "Emails" },
+  // M5
+  { path: "/campaigns", name: "Campaigns" },
+  { path: "/suppressions", name: "Suppressions" },
+  // M6
+  { path: "/campaigns/scheduled", name: "Scheduled" },
 ];
 const ADMIN_PAGES = [
   { path: "/settings/notion", name: "Notion settings" },

@@ -1,23 +1,29 @@
-import { Send } from "lucide-react";
+import { Gauge, Send } from "lucide-react";
 import { requireRole } from "../../../lib/auth/session";
 import { getConfig } from "../../../lib/config";
+import { getDb } from "../../../lib/db/client";
+import { GRACE_MAX, GRACE_MIN, getSendSettings, RATE_MAX, RATE_MIN, RESERVE_MAX } from "../../../lib/campaigns/settings";
 import { testSendAvailability } from "../../../lib/sending/test-send";
+import { updateSendingSettingsAction } from "../../campaign-actions";
 import { AppShell } from "../../app-shell";
-import { Alert, PageHeader, Pill } from "../../ui";
+import { Alert, Flash, PageHeader, Pill } from "../../ui";
 import { SesCheck } from "./ses-check";
 
 export const dynamic = "force-dynamic";
 
-/** Read-only view of the sending configuration. Settings are changed in the environment, not here. */
-export default async function SendingSettings() {
+/** Sending configuration (environment, read-only) and the M5 runtime settings (rate, quota reserve, live toggle). */
+export default async function SendingSettings({ searchParams }: { searchParams: Promise<{ ok?: string; error?: string }> }) {
   const staff = await requireRole("admin");
+  const sp = await searchParams;
   const cfg = getConfig();
+  const settings = await getSendSettings(getDb());
   const a = testSendAvailability(cfg);
   const real = a.available && (cfg.SEND_MODE === "simulator" || cfg.SEND_MODE === "allowlist" || cfg.SEND_MODE === "live");
 
   return (
     <AppShell staff={staff}>
-      <PageHeader title="Sending" sub="How this environment may send email. These values come from the server environment and are read-only here." />
+      <PageHeader title="Sending" sub="How this environment may send email. The configuration comes from the server environment; the campaign rate and quota reserve can be changed below." />
+      <Flash ok={sp.ok} error={sp.error} />
 
       <Alert tone={a.available ? "info" : "warn"} testId="sending-availability" title={a.available ? "Test sends available." : "Test sends are off."}>
         {a.reason}.
@@ -53,10 +59,57 @@ export default async function SendingSettings() {
             {cfg.TEST_SEND_MAX_PER_HOUR} per person per hour · {cfg.TEST_SEND_MAX_PER_DAY} per day · provider timeout {cfg.SES_TIMEOUT_MS} ms
           </dd>
           <dt>Customer campaigns</dt>
-          <dd>
-            <Pill tone="warn">not available</Pill> <span className="muted">send engine arrives in M5; needs production, SEND_MODE=live and separate approval</span>
+          <dd data-testid="live-campaigns">
+            {cfg.APP_ENV === "production" && cfg.SEND_MODE === "live" && settings.liveCampaignsEnabled ? (
+              <Pill tone="bad">enabled</Pill>
+            ) : (
+              <Pill tone="warn">not enabled</Pill>
+            )}{" "}
+            <span className="muted">
+              need APP_ENV=production, SEND_MODE=live, this admin switch and the compliance gate (docs/COMPLIANCE.md). Outside production, campaigns can only go to the mock transport, the SES simulator or allowlisted test inboxes.
+            </span>
           </dd>
+          <dt>Unsubscribe links</dt>
+          <dd>
+            <code>{cfg.trackingBaseUrl}/u/…</code>
+          </dd>
+          <dt>SES events (SNS)</dt>
+          <dd>{cfg.SES_EVENTS_TOPIC_ARN ? <Pill tone="ok">topic configured</Pill> : <Pill tone="warn">not configured: the event endpoint refuses everything</Pill>}</dd>
         </dl>
+      </section>
+
+      <section className="card" data-testid="campaign-settings">
+        <h2>
+          <Gauge className="icon" aria-hidden /> Campaign sending
+        </h2>
+        <form action={updateSendingSettingsAction} className="stack">
+          <div className="grid2">
+            <label>
+              Messages per second
+              <input name="ratePerSecond" type="number" min={RATE_MIN} max={RATE_MAX} step="0.1" defaultValue={settings.ratePerSecond} required data-testid="setting-rate" />
+              <span className="field-hint">Capped at 80% of the SES account’s maximum rate when sending.</span>
+            </label>
+            <label>
+              Daily quota reserve (%)
+              <input name="quotaReservePct" type="number" min={0} max={RESERVE_MAX} step="1" defaultValue={settings.quotaReservePct} required data-testid="setting-reserve" />
+              <span className="field-hint">Share of the SES 24-hour quota campaigns never use. When the rest is used up the campaign is blocked until an admin resumes it.</span>
+            </label>
+            <label>
+              Late-start grace period (minutes)
+              <input name="graceMinutes" type="number" min={GRACE_MIN} max={GRACE_MAX} step="1" defaultValue={settings.graceMinutes} required data-testid="setting-grace" />
+              <span className="field-hint">A scheduled campaign that starts later than this (for example after the worker was down) is held for an admin instead of being sent.</span>
+            </label>
+          </div>
+          <label className="check">
+            <input type="checkbox" name="liveCampaignsEnabled" defaultChecked={settings.liveCampaignsEnabled} disabled={cfg.APP_ENV !== "production"} data-testid="setting-live" /> Allow live customer campaigns{" "}
+            {cfg.APP_ENV !== "production" && <span className="muted">(only possible in production)</span>}
+          </label>
+          <div className="row">
+            <button className="btn primary" type="submit" data-testid="settings-save">
+              Save
+            </button>
+          </div>
+        </form>
       </section>
 
       <section className="card">

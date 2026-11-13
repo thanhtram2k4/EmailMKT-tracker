@@ -471,3 +471,275 @@ export const testSends = pgTable(
     index("test_sends_status_idx").on(t.status, t.claimedAt),
   ],
 );
+
+// ================================================================ M5: campaigns and the send engine
+// Design: docs/DESIGN.md §3.4 (status model) and §4.1 (durable sending). M6 adds scheduling states.
+
+/**
+ * Campaign status (M5 subset of DESIGN §3.4):
+ *  draft → queued → sending → completed | completed_with_issues
+ *  sending ⇄ paused (user) · sending → blocked (quota / credentials / account) → sending (resume)
+ *  queued|sending|paused|blocked → cancelling → cancelled (partial report) · draft → cancelled
+ * M6: draft → scheduled → (due, fenced start) queued; scheduled → scheduled (reschedule, revision++);
+ *  scheduled|held_overdue → draft (unschedule to edit) | cancelling; scheduled → held_overdue (start
+ *  later than the grace period) → queued (admin "send now") | scheduled (reschedule) | cancelled.
+ */
+export const campaignStatus = pgEnum("campaign_status", [
+  "draft",
+  "scheduled",
+  "held_overdue",
+  "queued",
+  "sending",
+  "paused",
+  "blocked",
+  "cancelling",
+  "cancelled",
+  "completed",
+  "completed_with_issues",
+  "failed",
+]);
+
+export const campaigns = pgTable(
+  "campaigns",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    name: text("name").notNull(),
+    status: campaignStatus("status").notNull().default("draft"),
+    templateId: uuid("template_id")
+      .notNull()
+      .references(() => templates.id),
+    /** The template version chosen for this campaign (content is copied into the snapshot at approval). */
+    templateVersionId: uuid("template_version_id")
+      .notNull()
+      .references(() => templateVersions.id),
+    /** {"kind":"all_eligible"} or {"kind":"tags","tags":[...]} (any of the tags). */
+    audience: jsonb("audience").notNull(),
+    /** Set once at approval; the snapshot is immutable. */
+    snapshotId: uuid("snapshot_id"),
+    /** Incremented by every edit; fences stale jobs (M6 scheduling relies on it too). */
+    scheduleRevision: integer("schedule_revision").notNull().default(0),
+    /** Why the campaign is blocked (quota, credentials, account_paused, …), with a human message. */
+    blockCode: text("block_code"),
+    blockMessage: text("block_message"),
+    approvedBy: text("approved_by"),
+    approvedAt: ts("approved_at"),
+    processingStartedAt: ts("processing_started_at"),
+    finishedAt: ts("finished_at"),
+    // ---- M6 scheduling (DESIGN §4.2). Times are stored in UTC; the IANA zone and the local
+    // wall-clock time as entered are kept for display and audit.
+    scheduledAtUtc: ts("scheduled_at_utc"),
+    scheduleTz: text("schedule_tz"),
+    /** Local date-time as entered, "YYYY-MM-DD HH:mm". */
+    scheduleLocal: text("schedule_local"),
+    /** UTC offset (minutes) that applied; chosen by the user for an ambiguous (DST overlap) time. */
+    scheduleOffsetMinutes: integer("schedule_offset_minutes"),
+    scheduledBy: text("scheduled_by"),
+    /** Why a scheduled campaign is held (e.g. started later than the grace period). */
+    holdReason: text("hold_reason"),
+    /** Measured delay between the scheduled time and the fenced start, in ms. */
+    startDelayMs: integer("start_delay_ms"),
+    createdBy: text("created_by").notNull(),
+    createdAt: ts("created_at").notNull().defaultNow(),
+    updatedAt: ts("updated_at").notNull().defaultNow(),
+  },
+  (t) => [index("campaigns_status_idx").on(t.status), index("campaigns_due_idx").on(t.status, t.scheduledAtUtc)],
+);
+
+/** Immutable (DB trigger): the exact content approved for sending. */
+export const campaignSnapshots = pgTable("campaign_snapshots", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  campaignId: uuid("campaign_id")
+    .notNull()
+    .references(() => campaigns.id),
+  scheduleRevision: integer("schedule_revision").notNull(),
+  templateVersionId: uuid("template_version_id")
+    .notNull()
+    .references(() => templateVersions.id),
+  subjectTemplate: text("subject_template").notNull(),
+  html: text("html").notNull(),
+  plainText: text("plain_text").notNull(),
+  fromAddress: text("from_address").notNull(),
+  contentHash: text("content_hash").notNull(),
+  /** Audience definition and counts at approval: included, excluded by reason. */
+  audience: jsonb("audience").notNull(),
+  counts: jsonb("counts").notNull(),
+  approvedBy: text("approved_by").notNull(),
+  approvedAt: ts("approved_at").notNull(),
+});
+
+/** Immutable link table of a snapshot (click redirects in M7 go only to these URLs). */
+export const campaignLinks = pgTable(
+  "campaign_links",
+  {
+    snapshotId: uuid("snapshot_id")
+      .notNull()
+      .references(() => campaignSnapshots.id),
+    idx: integer("idx").notNull(),
+    url: text("url").notNull(),
+    label: text("label"),
+  },
+  (t) => [uniqueIndex("campaign_links_pk").on(t.snapshotId, t.idx)],
+);
+
+/** Immutable: recipients frozen at approval, with their merge values (later CRM edits do not apply). */
+export const campaignRecipients = pgTable(
+  "campaign_recipients",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    snapshotId: uuid("snapshot_id")
+      .notNull()
+      .references(() => campaignSnapshots.id),
+    contactId: uuid("contact_id").references(() => contacts.id),
+    emailNormalized: text("email_normalized").notNull(),
+    mergeValues: jsonb("merge_values").notNull(),
+  },
+  (t) => [uniqueIndex("campaign_recipients_email_idx").on(t.snapshotId, t.emailNormalized)],
+);
+
+/**
+ * Per-recipient send state (DESIGN §3.4 "Message send_status"). Forward-only (DB trigger):
+ *  pending → claimed → sent | failed_permanent | unknown | pending (provider confirmed NOT accepted)
+ *  pending|claimed → skipped (suppressed / consent) | cancelled
+ *  unknown → sent (event evidence) | marked_not_sent (staff) | pending (staff "resend", attempt_no+1)
+ *  marked_not_sent → sent (event evidence)
+ * A stale claim becomes `unknown`, never `pending`; `unknown` is never retried automatically.
+ */
+export const messageSendStatus = pgEnum("message_send_status", [
+  "pending",
+  "claimed",
+  "sent",
+  "failed_permanent",
+  "skipped",
+  "cancelled",
+  "unknown",
+  "marked_not_sent",
+]);
+
+export const messageDeliveryStatus = pgEnum("message_delivery_status", ["none", "delayed", "delivered", "bounced_soft", "bounced_hard", "complained", "rejected"]);
+
+export const messages = pgTable(
+  "messages",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    campaignId: uuid("campaign_id")
+      .notNull()
+      .references(() => campaigns.id),
+    snapshotId: uuid("snapshot_id")
+      .notNull()
+      .references(() => campaignSnapshots.id),
+    recipientId: uuid("recipient_id")
+      .notNull()
+      .references(() => campaignRecipients.id),
+    emailNormalized: text("email_normalized").notNull(),
+    /** 128-bit random, base64url. Used in unsubscribe (and, in M7, tracking) URLs. Never an email. */
+    trackingToken: text("tracking_token").notNull().unique(),
+    sendStatus: messageSendStatus("send_status").notNull().default("pending"),
+    deliveryStatus: messageDeliveryStatus("delivery_status").notNull().default("none"),
+    /** suppressed | consent_withdrawn | consent_missing | … */
+    skipReason: text("skip_reason"),
+    attemptNo: integer("attempt_no").notNull().default(1),
+    claimedBy: text("claimed_by"),
+    claimedAt: ts("claimed_at"),
+    /** Required by the trigger when a claim is released back to pending (known not sent). */
+    releaseReason: text("release_reason"),
+    nextAttemptAt: ts("next_attempt_at").notNull().defaultNow(),
+    throttleCount: integer("throttle_count").notNull().default(0),
+    sendStartedAt: ts("send_started_at"),
+    sentAt: ts("sent_at"),
+    providerMessageId: text("provider_message_id"),
+    errorCode: text("error_code"),
+    lastError: text("last_error"),
+    /** Staff decision on an uncertain send (resend_approved / marked_not_sent), audited. */
+    resolution: text("resolution"),
+    resolvedBy: text("resolved_by"),
+    resolvedAt: ts("resolved_at"),
+    createdAt: ts("created_at").notNull().defaultNow(),
+    updatedAt: ts("updated_at").notNull().defaultNow(),
+  },
+  (t) => [
+    uniqueIndex("messages_snapshot_recipient_idx").on(t.snapshotId, t.recipientId),
+    index("messages_dispatch_idx").on(t.campaignId, t.sendStatus, t.nextAttemptAt),
+    index("messages_claimed_idx").on(t.sendStatus, t.claimedAt),
+    index("messages_provider_idx").on(t.providerMessageId),
+    index("messages_email_idx").on(t.emailNormalized),
+  ],
+);
+
+export const messageEventType = pgEnum("message_event_type", [
+  "send",
+  "delivery",
+  "bounce_hard",
+  "bounce_soft",
+  "complaint",
+  "reject",
+  "delay",
+  "rendering_failure",
+  "open",
+  "click",
+  "unsubscribe",
+]);
+
+/** Provider events (SES via SNS) and unsubscribes. Deduplicated on provider_event_id (SNS MessageId). */
+export const messageEvents = pgTable(
+  "message_events",
+  {
+    id: bigserial("id", { mode: "number" }).primaryKey(),
+    messageId: uuid("message_id"),
+    campaignId: uuid("campaign_id"),
+    /** Events for test sends are stored separately from campaign events and never counted. */
+    testSendId: uuid("test_send_id"),
+    type: messageEventType("type").notNull(),
+    providerEventId: text("provider_event_id").unique(),
+    providerMessageId: text("provider_message_id"),
+    occurredAt: ts("occurred_at"),
+    receivedAt: ts("received_at").notNull().defaultNow(),
+    /** Minimal, redacted detail (bounce type/subtype, masked diagnostic). No full addresses. */
+    detail: jsonb("detail"),
+  },
+  (t) => [index("message_events_message_idx").on(t.messageId), index("message_events_campaign_idx").on(t.campaignId, t.type)],
+);
+
+/** Append-only (DB trigger): every campaign status change, who made it and why. */
+export const campaignTransitions = pgTable(
+  "campaign_transitions",
+  {
+    id: bigserial("id", { mode: "number" }).primaryKey(),
+    campaignId: uuid("campaign_id")
+      .notNull()
+      .references(() => campaigns.id),
+    fromStatus: text("from_status"),
+    toStatus: text("to_status").notNull(),
+    actor: text("actor").notNull(),
+    reason: text("reason"),
+    scheduleRevision: integer("schedule_revision").notNull(),
+    detail: jsonb("detail"),
+    correlationId: text("correlation_id"),
+    at: ts("at").notNull().defaultNow(),
+  },
+  (t) => [index("campaign_transitions_campaign_idx").on(t.campaignId, t.id)],
+);
+
+// ================================================================ M6: admin alerts
+
+/**
+ * Operational alerts for administrators (DESIGN §4.2 "Visibility"): a campaign held because it
+ * started too late, or blocked at execution time. Shown in the app; emailed to active admins only
+ * when the sending guard allows it (never in SEND_MODE=disabled). Rows are kept as an audit record.
+ */
+export const adminAlerts = pgTable(
+  "admin_alerts",
+  {
+    id: bigserial("id", { mode: "number" }).primaryKey(),
+    kind: text("kind").notNull(),
+    campaignId: uuid("campaign_id").references(() => campaigns.id),
+    message: text("message").notNull(),
+    createdAt: ts("created_at").notNull().defaultNow(),
+    /** pending | sent | not_sent | failed */
+    emailStatus: text("email_status").notNull().default("pending"),
+    emailDetail: text("email_detail"),
+    emailedAt: ts("emailed_at"),
+    acknowledgedBy: text("acknowledged_by"),
+    acknowledgedAt: ts("acknowledged_at"),
+  },
+  (t) => [index("admin_alerts_open_idx").on(t.acknowledgedAt, t.createdAt), index("admin_alerts_email_idx").on(t.emailStatus)],
+);

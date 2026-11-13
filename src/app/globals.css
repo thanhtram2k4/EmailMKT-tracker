@@ -386,3 +386,17 @@ td, th, .kpi-value, .banner-body, dd { overflow-wrap: anywhere; }
 @media (max-width: 860px) { .btn.menu-toggle { display: inline-flex; } }
 /* Fix: the subject input sat in a column flex label, so flex-basis stretched it vertically. */
 .subject-card input { flex: none; }
+
+/* ---------------------------------------------------------------- M5: campaigns */
+/* Inline checkbox/radio with its text (the generic form label is a column). */
+.stack label.check, .row label.check, .filters label.check, label.check {
+  flex-direction: row; align-items: center; gap: 8px; font-size: 14px; font-weight: 400; color: var(--text);
+}
+label.check { flex-wrap: wrap; max-width: 100%; min-width: 0; }
+/* `.stack input { width: 100% }` would otherwise stretch the box and push the text off-screen (R-UI-03). */
+label.check input { flex: none; width: 16px; max-width: 16px; }
+label.check > span { min-width: 0; overflow-wrap: anywhere; }
+label.pill.check { font-size: 13px; gap: 6px; }
+fieldset.stack { border: 0; padding: 0; margin: 0; min-width: 0; }
+fieldset.stack > legend { font-size: 13px; font-weight: 600; color: var(--muted); padding: 0; margin-bottom: 4px; }
+ul.plain.review-exclusions { margin: 12px 0 16px; }

@@ -13,7 +13,7 @@
  */
 import type { ChildProcess } from "node:child_process";
 import { cleanupOwned, spawnOwned } from "./lib/owned-processes.ts";
-import { randomBytes } from "node:crypto";
+import { generateKeyPairSync, randomBytes } from "node:crypto";
 import fs from "node:fs";
 import path from "node:path";
 import { localDatabaseUrl, startLocalPostgres } from "./lib/embedded-pg.ts";
@@ -46,6 +46,16 @@ const baseUrl = `http://localhost:${appPort}`;
 const mockPort = Number(opt("--notion-mock-port", "4011"));
 const dbName = "emt_stack";
 const databaseUrl = localDatabaseUrl(pgPort, dbName);
+// M5: a throwaway RSA key pair stands in for the AWS SNS signing certificate, so the public
+// /api/ses-events endpoint can be exercised with signed messages. The web app gets only the public
+// key (SNS_TEST_PUBLIC_KEY_FILE is refused outside APP_ENV local/test); the test command gets the
+// private key path to sign with. The topic ARN uses the AWS documentation account id.
+const snsKeys = generateKeyPairSync("rsa", { modulusLength: 2048 });
+const snsPublicKeyFile = path.join(logDir, "sns-test-public.pem");
+const snsPrivateKeyFile = path.join(logDir, "sns-test-private.pem");
+fs.writeFileSync(snsPublicKeyFile, snsKeys.publicKey.export({ type: "spki", format: "pem" }));
+fs.writeFileSync(snsPrivateKeyFile, snsKeys.privateKey.export({ type: "pkcs8", format: "pem" }));
+
 const appEnv: NodeJS.ProcessEnv = {
   ...process.env,
   APP_ENV: "test",
@@ -72,6 +82,10 @@ const appEnv: NodeJS.ProcessEnv = {
   NOTION_AUTHORIZATION_REF: "",
   APP_ENCRYPTION_KEY: randomBytes(32).toString("base64url"),
   APP_ENCRYPTION_KEY_ID: "k1",
+  // M5: SES event ingestion with the test key above; every mock provider call is logged to a file.
+  SES_EVENTS_TOPIC_ARN: "arn:aws:sns:ap-southeast-1:123456789012:emt-local-stack-events",
+  SNS_TEST_PUBLIC_KEY_FILE: snsPublicKeyFile,
+  MOCK_TRANSPORT_LOG: path.join(logDir, "mock-transport-calls.jsonl"),
 };
 
 const bin = (p: string) => path.resolve("node_modules", p);
@@ -154,7 +168,7 @@ try {
   const [exe, ...rest] = cmd;
   const target = exe === "playwright" ? [bin("@playwright/test/cli.js"), ...rest] : exe === "tsx" ? [bin("tsx/dist/cli.mjs"), ...rest] : [exe, ...rest];
   const c = spawnOwned("command", process.execPath, target, {
-    env: { ...appEnv, E2E_BASE_URL: baseUrl, STACK_LOG_DIR: logDir, PLAYWRIGHT_BROWSERS_PATH: process.env.PLAYWRIGHT_BROWSERS_PATH ?? "0" },
+    env: { ...appEnv, E2E_BASE_URL: baseUrl, STACK_LOG_DIR: logDir, SNS_TEST_PRIVATE_KEY_FILE: snsPrivateKeyFile, PLAYWRIGHT_BROWSERS_PATH: process.env.PLAYWRIGHT_BROWSERS_PATH ?? "0" },
     stdio: "inherit",
   });
   exitCode = await waitExit(c);

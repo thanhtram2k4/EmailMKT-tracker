@@ -1,0 +1,24 @@
+CONTROL M1 send-time suppression check removed: exit=0       Tests  1 passed | 21 skipped (22)
+MUTATION M1 send-time suppression check removed: exit=1 -> CAUGHT       Tests  1 failed | 21 skipped (22)
+    AssertionError: expected { …(25) } to match object { sendStatus: 'skipped', …(1) }
+    - Expected
+    + Received
+CONTROL M2 SNS signature result ignored: exit=0       Tests  1 passed | 21 skipped (22)
+MUTATION M2 SNS signature result ignored: exit=1 -> CAUGHT       Tests  1 failed | 21 skipped (22)
+    AssertionError: expected { status: 200, body: 'processed' } to deeply equal { status: 403, …(1) }
+    - Expected
+    + Received
+CONTROL M3 advisory lock and SKIP LOCKED removed: exit=0       Tests  1 passed | 21 skipped (22)
+MUTATION M3 advisory lock and SKIP LOCKED removed: exit=1 -> CAUGHT       Tests  1 failed | 21 skipped (22)
+    AssertionError: expected [ 'continue', 'continue', …(19) ] to include 'locked'
+        295|     expect(results).toContain("locked"); // the advisory lock really w…
+CONTROL M4 send maintenance tied to CRM schedules again: exit=0       Tests  1 passed | 11 skipped (12)
+MUTATION M4 send maintenance tied to CRM schedules again: exit=1 -> CAUGHT       Tests  1 failed | 11 skipped (12)
+    AssertionError: expected '' to contain 'test_send_reaper'
+    - Expected
+    + Received
+        111|     expect(sendOnly).toContain("test_send_reaper");
+CONTROL M5 unknown outcome mapped back to pending (auto-retry): exit=0       Tests  1 passed | 21 skipped (22)
+MUTATION M5 unknown outcome mapped back to pending (auto-retry): exit=1 -> CAUGHT       Tests  1 failed | 21 skipped (22)
+
+MUTATION M3b (same defect, "locked" assertion temporarily removed): 3/3 runs FAILED on duplicates — 240, 250, 290 provider calls for 200 messages (expected 200). Files restored afterwards.

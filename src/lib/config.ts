@@ -80,6 +80,16 @@ const schema = z
     /** Test-send rate limits (per staff member per hour, and for the whole app per day). */
     TEST_SEND_MAX_PER_HOUR: z.coerce.number().int().min(1).max(100).default(10),
     TEST_SEND_MAX_PER_DAY: z.coerce.number().int().min(1).max(1000).default(50),
+    /** M5: public base URL for unsubscribe links (the tracking subdomain); defaults to APP_BASE_URL. */
+    TRACKING_BASE_URL: z.string().url().optional(),
+    /** M5: the only SNS topic whose SES events are accepted (unset = the event endpoint refuses everything). */
+    SES_EVENTS_TOPIC_ARN: z.string().regex(/^arn:aws(-[a-z]+)?:sns:[a-z0-9-]+:\d{12}:[A-Za-z0-9_-]{1,256}$/, "must be an SNS topic ARN").optional(),
+    /** M5, APP_ENV local/test only: PEM public key that replaces AWS certificate download in SNS tests. */
+    SNS_TEST_PUBLIC_KEY_FILE: z.string().optional(),
+    /** M5, APP_ENV local/test only: the mock transport appends one JSON line per send call to this file. */
+    MOCK_TRANSPORT_LOG: z.string().optional(),
+    /** M5, APP_ENV local/test only: artificial delay per mock send (to test a worker killed mid-batch). */
+    MOCK_SEND_DELAY_MS: z.coerce.number().int().min(0).max(60000).default(0),
     LOG_LEVEL: z.enum(["trace", "debug", "info", "warn", "error", "fatal", "silent"]).default("info"),
     BUILD_ID: z.string().default("dev"),
     WORKER_CONCURRENCY: z.coerce.number().int().min(1).max(20).default(2),
@@ -132,6 +142,14 @@ const schema = z
     }
     if (c.SES_FROM_ADDRESS && !SES_FROM_RE.test(c.SES_FROM_ADDRESS.trim())) {
       ctx.addIssue({ code: "custom", path: ["SES_FROM_ADDRESS"], message: "must be an address or \"Name <address>\"" });
+    }
+    // ---- M5 test-only hooks: never in staging/production.
+    const testOnly = c.APP_ENV === "local" || c.APP_ENV === "test";
+    for (const k of ["SNS_TEST_PUBLIC_KEY_FILE", "MOCK_TRANSPORT_LOG"] as const) {
+      if (c[k] && !testOnly) ctx.addIssue({ code: "custom", path: [k], message: `${k} is only allowed when APP_ENV is local or test` });
+    }
+    if (c.MOCK_SEND_DELAY_MS > 0 && !testOnly) {
+      ctx.addIssue({ code: "custom", path: ["MOCK_SEND_DELAY_MS"], message: "MOCK_SEND_DELAY_MS is only allowed when APP_ENV is local or test" });
     }
     if (c.DEV_LOGIN_ENABLED && (c.APP_ENV === "staging" || c.APP_ENV === "production")) {
       ctx.addIssue({
@@ -195,7 +213,7 @@ const schema = z
     }
   });
 
-export type AppConfig = z.output<typeof schema> & { googleEnabled: boolean; notionBaseUrl: string | null };
+export type AppConfig = z.output<typeof schema> & { googleEnabled: boolean; notionBaseUrl: string | null; trackingBaseUrl: string };
 
 export class ConfigError extends Error {
   constructor(public readonly issues: string[]) {
@@ -217,7 +235,8 @@ export function parseConfig(env: Record<string, string | undefined>): AppConfig 
     d.NOTION_MODE === "disabled"
       ? null
       : (d.NOTION_API_BASE_URL ?? (d.NOTION_MODE === "live" ? NOTION_LIVE_BASE_URL : NOTION_MOCK_DEFAULT_BASE_URL)).replace(/\/$/, "");
-  return { ...d, googleEnabled: Boolean(d.GOOGLE_CLIENT_ID && d.GOOGLE_CLIENT_SECRET), notionBaseUrl };
+  const trackingBaseUrl = (d.TRACKING_BASE_URL ?? d.APP_BASE_URL).replace(/\/$/, "");
+  return { ...d, googleEnabled: Boolean(d.GOOGLE_CLIENT_ID && d.GOOGLE_CLIENT_SECRET), notionBaseUrl, trackingBaseUrl };
 }
 
 let cached: AppConfig | undefined;

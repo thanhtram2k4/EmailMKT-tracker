@@ -39,6 +39,18 @@ Legend: `[ ]` todo · `[x]` done (with a link to evidence) · results are PASS /
 | 2026-11-12 | Test-send recipients are typed in by staff (1–3), but the server accepts only addresses on `TEST_RECIPIENT_ALLOWLIST`; the list itself is never shown in the UI | User |
 | 2026-11-12 | UI redesign scope: design system plus the existing screens; no placeholder screens for future milestones. Plain CSS with custom properties (no Tailwind). From the `ui-ux-pro-max` skill only the data-dense dashboard style, the Be Vietnam Pro font and the accessibility checklist were adopted; its pink palette and "waitlist" page pattern were rejected as unsuitable for an internal tool. The skill does not replace the QA process | User and implementation |
 | 2026-11-12 | Test tooling: processes are spawned as "owned" and cleanup targets only those PIDs and their descendants (`scripts/lib/owned-processes.ts`); a stack run fails if any survive | Implementation |
+| 2026-11-13 | **M5 authorized for local work only** (send-now engine and compliance) on branch `m5-send-engine` from `m4-checkpoint`. Mock transport or fake SES client only, `SEND_MODE=disabled\|mock`. No real email, no AWS call, no deployment, no push, no live Notion | User |
+| 2026-11-13 | Replies are **always in English** (standing instruction); new reports in English | User |
+| 2026-11-13 | M5 roles: members create, edit, review and pause campaigns; only admins approve ("Send now" = per-campaign approval), resume, cancel, resolve uncertain sends, add suppressions and change sending settings | Implementation (proposal); **confirmed by the user 2026-11-13** (see below) |
+| 2026-11-13 | Every campaign email must link `{{ unsubscribe_url }}` (review blocks otherwise); the `[QC]`/`[AD]` subject label is a warning only until counsel confirms | Implementation |
+| 2026-11-13 | Outside production a campaign message is an `integration_test` for the guard: mock, SES simulator or allowlisted recipients only. Real customer campaigns still need production, `SEND_MODE=live`, the admin toggle and the compliance gate | Implementation |
+| 2026-11-13 | Defect found in M5: the M4 test-send reaper cron was registered only when `NOTION_MODE` was not `disabled`. Fixed: send maintenance schedules are always registered (R-M5-13) | Implementation |
+| 2026-11-13 | **M6 authorized** ("proceed with the work for M6") after a cross-review of the M1–M5 reports. Same constraints as M5: local only, mock transport, no real email, no AWS call, no deployment, no push, no live Notion. Branch `m6-scheduling`, created on top of the **uncommitted** M5 working tree (M5 not yet committed; awaiting the user's go-ahead) | User |
+| 2026-11-13 | Luxon 3.7.2 added for time zones (planned in DESIGN §2) | Implementation |
+| 2026-11-13 | **No Claude API.** The app uses no LLM API; none may be added. If an AI feature is ever needed, only the free Gemini API, after asking | User |
+| 2026-11-13 | **Roles confirmed by the user:** only admins approve, schedule and send campaigns and resolve uncertain sends; members are restricted to creating, editing, reviewing and pausing | User |
+| 2026-11-13 | M5 and M6 committed locally in **one** commit on `m6-scheduling`, tagged `m5-checkpoint` and `m6-checkpoint` (same commit: M6 was built on the uncommitted M5 tree, so no separate M5-only snapshot exists). No remote, no push. From now on each milestone is committed before the next one starts | User and implementation |
+| 2026-11-13 | **M7 authorized** (tracking and analytics), local with the mock transport. The user is tracking M0 (AWS, Notion, staging) and the legal answers (3-email cap, `[QC]` label) and will provide them before staging | User |
 
 ## Open items (need user input)
 - [ ] Confirm assumptions A1–A7 ([DESIGN.md](DESIGN.md) "Assumptions")
@@ -65,7 +77,7 @@ Legend: `[ ]` todo · `[x]` done (with a link to evidence) · results are PASS /
 - [ ] Render account with staging and production
 - [ ] Test inboxes: personal Gmail, Outlook, iPhone with Apple Mail; 20–50 sample contacts (missing greeting names, duplicates, diacritics)
 
-**Acceptance:** DNS records verify in SES; the test Notion database is shared with the integration; both templates are received.
+**Acceptance:** DNS records verify in SES; the test Notion database is shared with the integration. (The "two real templates" item was withdrawn in M3 rev 2.)
 
 ## M1: Foundation — implemented 2026-11-12 (evidence: [reports/2026-11-12-m1/report.md](../reports/2026-11-12-m1/report.md))
 - [x] Repository scaffold (Next.js 16.4, TypeScript, ESLint), `.env.example`, CI workflow (`.github/workflows/ci.yml`; written but **not run**, since there is no remote repository)
@@ -91,8 +103,8 @@ Legend: `[ ]` todo · `[x]` done (with a link to evidence) · results are PASS /
 
 ## Pending compliance changes (proposals; not approved scope)
 Proposed in [COMPLIANCE.md](COMPLIANCE.md) §6, to be adopted only after counsel review and the user's confirmation:
-- consent-record fields (M2): **schema implemented.** The disclosed-frequency field and the data-subject lookup tool are still open
-- `[QC]`/`[AD]` subject prefix (M4/M5)
+- consent-record fields (M2): **schema implemented; consent re-checked at send time (M5).** The disclosed-frequency field and the data-subject lookup tool are still open
+- `[QC]`/`[AD]` subject prefix (M4/M5): **review warning only (M5)**, not enforced
 - sender identity and opt-out footer (M3/M5)
 - refusal-confirmation email (M5)
 - frequency cap of 3 per address per 24 hours (M5)
@@ -222,39 +234,86 @@ Branch `m4-ui-testsend` from `m3-rev2-checkpoint`. Not authorized: real email (i
 | R-TS-11 | Audit rows contain only the redacted address |
 | R-TS-12 | `SEND_MODE=disabled`: the button is disabled and the server refuses |
 
-## M5: Send-now engine and compliance
-- [ ] Snapshot freeze in one transaction (content, links, recipients with frozen merge values); exclusion counts shown at review
-- [ ] Dispatcher with an advisory lock; claims via `FOR UPDATE SKIP LOCKED`; write-ahead `claimed` state
-- [ ] Pre-send checks: campaign still sending, suppression, token bucket
-- [ ] SES send with a `msg_id` tag and a custom Message-ID; outcome mapping (sent, failed_permanent, pending on throttle, unknown)
-- [ ] Reaper (`claimed` older than 10 minutes → `unknown`); reconciliation from SES events; UI for "Resend uncertain" and "Mark not sent" (audited)
-- [ ] Rate limit setting; quota check with a reserve → `blocked: quota`
-- [ ] Pause, resume, cancel (partial report)
-- [ ] SNS endpoint with signature verification; event deduplication; automatic suppression on hard bounce and complaint
-- [ ] Unsubscribe: `List-Unsubscribe` and `List-Unsubscribe-Post`; GET shows a confirmation page, POST is one-click; footer link
-- [ ] Suppressions screen
+## M5: Send-now engine and compliance — implemented 2026-11-13 with a mock transport / fake SES client only (evidence: [reports/2026-11-13-m5/report.md](../reports/2026-11-13-m5/report.md))
+Branch `m5-send-engine` from `m4-checkpoint`. Not authorized: real email, any AWS call, deployment, push, live Notion.
 
-**Acceptance:**
-- [ ] A 500-recipient run against the simulator produces no duplicate sends (R-SEND-01)
-- [ ] Two concurrent workers produce no duplicate sends (R-SEND-02)
-- [ ] A worker killed mid-batch re-sends nothing; stale claims become `unknown` (R-SEND-03)
-- [ ] A forced timeout gives `unknown` with no automatic retry; a later event reconciles it to `sent` (R-SEND-04)
-- [ ] Throttling backs off and recovers (R-SEND-05); an exhausted quota gives `blocked` (R-SEND-06); invalid credentials give `blocked` (R-SEND-07)
-- [ ] An address unsubscribed while queued is skipped (R-SEND-08)
-- [ ] Bounces and complaints suppress automatically (R-SEND-09)
-- [ ] Pause, resume and cancel behave as specified (R-SEND-10)
-- [ ] Simulator Delivered and Bounced counts are correct (S6, LIVE)
+- [x] Snapshot freeze in one transaction (content, link table, recipients with frozen merge values, one `pending` message each); exclusion counts by reason shown at review; approval must match the reviewed revision and recipient count
+- [x] Dispatcher with a session advisory lock per campaign; claims via `FOR UPDATE SKIP LOCKED`; write-ahead `claimed` committed before the provider call; time-budgeted runs re-queue themselves
+- [x] Pre-send checks per message: campaign still sending, suppression, marketing consent (setting `crm.require_marketing_consent`), sending guard, rate limiter
+- [x] SES send with `msg_id`, `attempt`, `campaign` and `purpose` tags; outcome mapping (sent, failed_permanent, pending on throttle, `blocked` on account/credential errors, unknown). **Custom Message-ID: not set** (reconciliation uses the tags; see DESIGN delta)
+- [x] Reaper (`claimed` older than 10 minutes → `unknown`) and dispatcher sweeper, every minute (`campaign_maintenance`); reconciliation from SES events; "Resend uncertain" and "Mark not sent" (admin, after 60 minutes, audited)
+- [x] Rate-limit and quota-reserve settings (admin, audited); GetAccount check at start and every 100 sends; exhausted budget → `blocked: quota`
+- [x] Pause, resume, cancel (partial report: sent / uncertain / not sent)
+- [x] SNS endpoint `/api/ses-events`: topic, certificate host, signature (v1/v2) and timestamp verified; deduplication on the SNS MessageId; automatic suppression on hard bounce and complaint (with Notion write-back); subscription confirmations recorded, never auto-confirmed
+- [x] Unsubscribe: `List-Unsubscribe` and `List-Unsubscribe-Post` headers; GET `/u/<token>` shows a confirmation page, POST (button or one-click) suppresses, withdraws consent, queues the Notion update; footer link required by review; opt-out line added to the plain-text part
+- [x] Suppressions screen (all staff view; admin adds, never removes)
+- [x] Campaigns screens: list, create draft, review, send now (admin), live progress, controls, uncertain sends, recipients, history
+- [x] DB guards: forward-only `messages` status, append-only snapshots/recipients/links/transitions, campaigns never deleted
+- [ ] Frequency cap (3 per address per 24 h) and `[QC]` subject enforcement: **not done** (compliance proposals pending counsel; `[QC]` is a review warning only)
+- [ ] Refusal-confirmation email (COMPLIANCE §1.5): **not done** (needs real sending; pending counsel)
 
-## M6: Scheduling
-- [ ] Picker (date, time, IANA zone; default Asia/Ho_Chi_Minh) with the zone shown everywhere; confirmation summary
-- [ ] Store `scheduled_at_utc` and `schedule_tz`; reject past times and times less than 2 minutes ahead; reject nonexistent DST times and ask about ambiguous ones
-- [ ] `start_campaign` job (`job_key`, revision in the payload); fenced start; sweeper every minute
-- [ ] Reschedule (revision++), cancel (job removed), edit → draft
-- [ ] Overdue policy: within the 30-minute grace period → proceed and log the delay; beyond it → `held_overdue`
-- [ ] Execution-time checks → `blocked` with a reason
-- [ ] Scheduled list, worker-down banner, admin alert emails, audit trail
+**Acceptance (observed 2026-11-13; MOCK unless stated):**
+- [x] A 500-recipient run produces no duplicate sends (R-SEND-01). **PASS (MOCK transport).** Against the real SES simulator: **BLOCKED** (not authorized)
+- [x] Two concurrent workers produce no duplicate sends (R-SEND-02). **PASS (MOCK)**: four concurrent dispatchers, lock contention observed
+- [x] A worker killed mid-batch re-sends nothing; stale claims become `unknown` (R-SEND-03). **PASS (MOCK)**: in-process and with real worker processes hard-killed (cross-process call log)
+- [x] A forced timeout gives `unknown` with no automatic retry; a later event reconciles it to `sent` (R-SEND-04). **PASS (MOCK: real SES transport code with a fake client)**
+- [x] Throttling backs off and recovers (R-SEND-05); an exhausted quota gives `blocked` (R-SEND-06); invalid credentials give `blocked` (R-SEND-07). **PASS (MOCK)**
+- [x] An address unsubscribed while queued is skipped (R-SEND-08). **PASS (MOCK)**
+- [x] Bounces and complaints suppress automatically (R-SEND-09). **PASS (MOCK: synthetic SES event payloads)**
+- [x] Pause, resume and cancel behave as specified (R-SEND-10). **PASS (MOCK)**
+- [~] S6: Sent 3 / Delivered 2 / Bounced 1. **S6-mock PASS** (worker process + signed SNS messages over HTTP with a local test key). **S6-live BLOCKED** (no authorization, no SES setup, no deployed endpoint)
 
-**Acceptance:** R-SCH-01…R-SCH-16 PASS (MOCK, with a controlled clock). Live check S7: a campaign scheduled 5 minutes ahead runs with the browser closed and the laptop off, within 60 seconds of the target.
+### M5 operation reproduction scenarios
+Written during implementation (not before it), from DESIGN §4.1/§4.3 and this plan.
+| ID | Prerequisites | Test data | Steps | Expected (source) |
+|---|---|---|---|---|
+| OR-CMP-01 | Local stack `SEND_MODE=mock`, admin dev sign-in | 5 synthetic tagged contacts: 3 eligible, 1 without consent, 1 suppressed; pasted email with `{{ unsubscribe_url }}` link | Campaigns → New → tag audience → review → tick confirmation → Send now → wait | Review shows 3 / 2 excluded with reasons; status ends `completed`; Sent 3; exactly one provider call per message (DESIGN §4.1) |
+| OR-CMP-02 | As above, after OR-CMP-01 | A recipient's token | Open `/u/<token>` without signing in; check DB; press the button; POST one-click for another token | GET changes nothing; button and one-click suppress, withdraw consent; Suppressions lists both (DESIGN §4.3) |
+| OR-CMP-03 | As above; stack test SNS key | Signed Delivery event; a tampered copy | POST both to `/api/ses-events` | 200 processed → Delivered 1 on the campaign; tampered → 403 (DESIGN §2 "Event ingestion") |
+
+### M5 regression additions
+| ID | Scenario |
+|---|---|
+| R-M5-01 | Review blocks on no subject, no unsubscribe link, missing value without fallback, empty audience, disabled guard |
+| R-M5-02 | Suppressed / no-consent contacts excluded with counts; staging allowlist refuses other recipients |
+| R-M5-03 | An edit after review (revision) or a changed audience makes approval fail |
+| R-M5-04 | Snapshot freezes merge values; later CRM edits do not apply; snapshot, recipients and approved snapshot id are immutable |
+| R-M5-05 | Cancelling a paused campaign finishes immediately |
+| R-M5-06 | Uncertain sends: resolvable only after 60 minutes; resend is attempt 2, audited |
+| R-M5-07 | Mark-not-sent is audited; later provider evidence still reconciles to sent |
+| R-M5-08 | Unsubscribe: lookup (GET) changes nothing; POST suppresses once, withdraws consent, queues Notion, masked audit |
+| R-M5-09 | SNS: v1/v2 signatures accepted; bad signature, tampered body, other topic, non-SNS cert host (never fetched), stale timestamp refused |
+| R-M5-10 | SNS subscription confirmation recorded, never confirmed automatically |
+| R-M5-11 | DB guards: forward-only message status, no deletes, append-only transitions |
+| R-M5-12 | Live customer campaigns cannot be enabled outside production; settings validated |
+| R-M5-13 | Send maintenance schedules are registered even with `NOTION_MODE=disabled` (M4 defect regression) |
+
+## M6: Scheduling — implemented 2026-11-13 with a mock transport only (evidence: [reports/2026-11-13-m6/report.md](../reports/2026-11-13-m6/report.md))
+Branch `m6-scheduling`, on top of the uncommitted M5 work. Not authorized: real email, AWS calls, deployment, push, live Notion.
+
+- [x] Picker (date, time, IANA zone; default Asia/Ho_Chi_Minh) with the zone shown everywhere; confirmation summary (sender, recipients, subject, local + UTC time, processing-start note with the expected sending duration)
+- [x] Store `scheduled_at_utc`, `schedule_tz`, the local time as entered and the offset; reject past times and times less than 2 minutes ahead; reject nonexistent DST times (with a suggested time) and ask about ambiguous ones (offset choice)
+- [x] `start_campaign` job (`job_key` `start:<id>`, replace mode, revision in the payload); fenced start (row lock + status + revision + due time); sweeper every minute (`campaign_maintenance`)
+- [x] Reschedule (revision++), cancel (job removed; pending messages cancelled), edit → explicit "Unschedule and edit" (draft, revision++, snapshot cleared; DB trigger allows only this snapshot change)
+- [x] Overdue policy: within the grace period (setting `scheduling.grace_minutes`, default 30) → proceed with the delay logged in the transition; beyond it → `held_overdue` (not sent) with admin send-now / reschedule / cancel
+- [x] Execution-time checks → `blocked` with a reason (dispatcher, from M5) — now also raise an admin alert
+- [x] Scheduled list (local + UTC, revision, next action, actual start and delay), worker-down banner (2 minutes), admin alerts (in-app until acknowledged; emailed through the guard, never in `disabled`), audit trail (`campaign_transitions` + `audit_log`)
+
+**Acceptance (observed 2026-11-13; MOCK unless stated):**
+- [x] R-SCH-01…04 (time conversion, DST, past/too soon): **PASS** (unit, controlled "now")
+- [x] R-SCH-05…16: **PASS** (integration, real PostgreSQL, controlled clock; R-SCH-14 also with real worker restarts)
+- [x] S7-mock: scheduled at a whole minute in Asia/Ho_Chi_Minh, browser closed, started by the stack's worker 26–58 ms after the target and completed (E2E OR-SCH-01 and smoke). **PASS (MOCK)**
+- [x] S9-mock: cancelled before its time, never dispatched, start job removed. **PASS (MOCK)**
+- [ ] S7-live (deployed, laptop off): **BLOCKED** (no hosting; deployment not authorized)
+
+### M6 operation reproduction scenarios
+Written during implementation (not before it), from DESIGN §4.2.
+| ID | Prerequisites | Test data | Steps | Expected (source) |
+|---|---|---|---|---|
+| OR-SCH-01 | Mock stack, admin | 3 synthetic tagged contacts; pasted email | Schedule card: past date → DST gap (New York) → follow the suggestion → DST overlap → choose second offset → real time ~4 min ahead in Ho Chi Minh → confirm → Scheduled list → close the browser → wait | Clear refusal / suggestion / choice; summary shows zone and UTC; status scheduled; never early; worker starts within 60 s and completes (DESIGN §4.2) |
+| OR-SCH-02 | As above | Same | Schedule +30 min → reschedule +90 min → cancel | Revision 0 → 1; one start job; cancelled; no message sent; job removed (DESIGN §4.2 "Reschedule", "Cancel") |
+| OR-SCH-03 | As above | Same | Schedule → Unschedule and edit | Draft with "Schedule removed — review and confirm again" (DESIGN §5) |
+| OR-SCH-04 | As above | Same; scheduled time moved 40 min into the past in the DB (simulated outage) | Wait for the worker's sweeper → dashboard → campaign → Send now | Held, nothing sent, alert shown; admin release sends it (DESIGN §4.2 "Late-send grace period") |
 
 ## M7: Tracking and analytics
 - [ ] `/o`, `/c`, `/u` endpoints on the tracking subdomain; opaque tokens; redirects only to snapshot links
@@ -294,9 +353,9 @@ Branch `m4-ui-testsend` from `m3-rev2-checkpoint`. Not authorized: real email (i
 | S4 | Preview as recipient | No unresolved fields; fallbacks render | LIVE |
 | S5 | Test send | Simulator success → Delivery event; campaign metrics unchanged | LIVE |
 | S6 | Send now (3 simulator addresses) | Sent 3, Delivered 2, Bounced 1 | LIVE |
-| S7 | Scheduled send (+3 min, Asia/Ho_Chi_Minh) | Runs with no browser open; scheduled and actual timestamps recorded | LIVE |
+| S7 | Scheduled send (+3 min, Asia/Ho_Chi_Minh) | Runs with no browser open; scheduled and actual timestamps recorded | LIVE (S7-mock locally from M6) |
 | S8 | Open, click, unsubscribe | Events recorded; redirect goes to the snapshot URL; suppression added; Notion update queued | LIVE |
-| S9 | Cancel a scheduled campaign | Never dispatched | LIVE |
+| S9 | Cancel a scheduled campaign | Never dispatched | LIVE (S9-mock locally from M6) |
 
 Pass rule: every scenario must PASS. Any FAIL blocks the release. A BLOCKED scenario needs a stated reason and the user's acceptance. If the tech lead supplies their own checklist, it replaces this interpretation of "re-smoke".
 

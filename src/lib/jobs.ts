@@ -21,3 +21,21 @@ export async function releaseWorkerUtils() {
   holder.url = undefined;
   if (u) await (await u).release();
 }
+
+/** M5: queue the dispatcher for a campaign (the job key coalesces duplicate requests). */
+export async function enqueueDispatch(campaignId: string, databaseUrl = process.env.DATABASE_URL!): Promise<void> {
+  const u = await getWorkerUtils(databaseUrl);
+  await u.addJob("dispatch_campaign", { campaignId }, { jobKey: `dispatch:${campaignId}`, maxAttempts: 5 });
+}
+
+/** M6: (re)place the start job of a scheduled campaign. Replace mode: a reschedule moves the one job. */
+export async function scheduleStartJob(campaignId: string, revision: number, runAt: Date, databaseUrl = process.env.DATABASE_URL!): Promise<void> {
+  const u = await getWorkerUtils(databaseUrl);
+  await u.addJob("start_campaign", { campaignId, revision }, { jobKey: `start:${campaignId}`, jobKeyMode: "replace", runAt, maxAttempts: 5 });
+}
+
+/** M6: remove the start job (cancel / unschedule). The fenced start makes a leftover job harmless. */
+export async function removeStartJob(campaignId: string, databaseUrl = process.env.DATABASE_URL!): Promise<void> {
+  const u = await getWorkerUtils(databaseUrl);
+  await u.withPgClient((c) => c.query("select graphile_worker.remove_job($1)", [`start:${campaignId}`]));
+}

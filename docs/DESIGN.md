@@ -23,6 +23,23 @@ Baseline: `PROJECT_BRIEF.md` rev 2. Status: approved plan. M1 was authorized and
 >   - The preview width is 640/375 px.
 >   - Template versions are immutable.
 >   - Image re-hosting to S3 is still to do. See `reports/2026-11-12-m3/report.md`.
+> - **M5 (send-now engine, implemented locally with mocks; see `reports/2026-11-13-m5/report.md`):**
+>   - Campaign statuses in M5: `draft, queued, sending, paused, blocked, cancelling, cancelled, completed, completed_with_issues, failed`. There is no stored `in_review` status: the review is computed on demand, and approval requires the exact `schedule_revision` and recipient count that were reviewed. `scheduled` and `held_overdue` come with M6.
+>   - Message `send_status` adds `skipped` (with `skip_reason`: suppressed, consent_withdrawn/refused, consent_missing) instead of `skipped_suppressed`, and `resend_approved` is recorded as `resolution` on a message that returns to `pending` with `attempt_no + 1`. Forward-only transitions are enforced by a DB trigger.
+>   - Consent is re-checked at send time, next to suppression. The frequency cap (COMPLIANCE §6) is still a pending proposal and is not enforced.
+>   - Every campaign body must link `{{ unsubscribe_url }}` (review blocks otherwise); the plain-text part gets an opt-out line if it lacks one. The `[QC]`/`[AD]` label is a review warning, not enforced.
+>   - Outside production, campaign messages are sent with guard purpose `integration_test` (mock, simulator or allowlist only).
+>   - The rate limiter is per worker process (default 5/s, capped at 80% of the SES max rate). The quota check (GetAccount) runs at the start of each dispatcher run and every 100 sends; an exhausted budget (after the reserve) blocks the campaign until an admin resumes it.
+>   - A custom `Message-ID` header is not set; reconciliation uses the `msg_id` (and `attempt`) SES tags. Whether SES v2 keeps a custom Message-ID must be checked before relying on it.
+>   - SNS `SubscriptionConfirmation` messages are verified and recorded, never confirmed automatically (manual step after deployment).
+>   - Only admins approve ("Send now"), resume, cancel, resolve uncertain sends and add suppressions; members create, edit, review and pause.
+> - **M6 (scheduling, implemented locally with mocks; see `reports/2026-11-13-m6/report.md`):**
+>   - Statuses `scheduled` and `held_overdue` added. Scheduling performs the same snapshot freeze as Send now; "edit after scheduling" is an explicit **Unschedule and edit** action (→ draft, revision++, snapshot cleared, unsent messages cancelled). The schedule is admin-only, like Send now.
+>   - The fenced start locks the campaign row (`FOR UPDATE`) and checks status, revision and due time in one transaction; the start job and the every-minute sweeper share it. The comparison uses the worker's clock (injected in tests) rather than SQL `now()`.
+>   - Scheduling uses whole minutes (HH:mm). The local time as entered and the UTC offset used are stored next to `scheduled_at_utc` and `schedule_tz`.
+>   - Execution-time checks (credentials, sending enabled, quota) remain in the dispatcher (M5) and block with a reason; Notion is not required.
+>   - Admin alerts (`admin_alerts`) for `held_overdue` and `blocked`: shown on the Dashboard and Scheduled list until acknowledged; emailed to active admins only when the sending guard allows (test-send rules outside production; never in `disabled`).
+>   - Worker-down banner on the Scheduled list after 2 minutes without a heartbeat.
 
 ## Context
 

@@ -101,10 +101,21 @@ describe("transport factory (M1, updated in M4)", () => {
   // R-TS-01 (factory part)
   const ses = { region: "ap-southeast-1", from: "qa@example.com", timeoutMs: 1000, client: { send: async () => ({ MessageId: "x" }) } };
 
-  it("still refuses customer campaigns in M4 (no send engine until M5), even with SES configured", () => {
-    expect(() => createTransport(g({ appEnv: "production", sendMode: "live", purpose: "customer_campaign", liveCampaignsEnabled: true }), { ses })).toThrow(
-      /not implemented yet \(M5\)/,
+  // M5: the M4 refusal of customer campaigns is replaced by the guard's own rules.
+  it("builds SES for a customer campaign only in production + live + admin toggle (M5)", () => {
+    expect(createTransport(g({ appEnv: "production", sendMode: "live", purpose: "customer_campaign", liveCampaignsEnabled: true }), { ses }).name).toBe("ses");
+    expect(() => createTransport(g({ appEnv: "production", sendMode: "live", purpose: "customer_campaign", liveCampaignsEnabled: false }), { ses })).toThrow(
+      /not been enabled by an administrator/,
     );
+    for (const appEnv of ["local", "test", "staging"] as const) {
+      for (const sendMode of ["simulator", "allowlist"] as const) {
+        expect(() => createTransport(g({ appEnv, sendMode, purpose: "customer_campaign", authorizationRef: "r", liveCampaignsEnabled: true }), { ses })).toThrow(
+          /customer campaigns cannot be sent/,
+        );
+      }
+    }
+    // mock mode never leaves the process
+    expect(createTransport(g({ sendMode: "mock", purpose: "customer_campaign" }), { ses }).name).toBe("mock");
   });
 
   it("builds the SES transport only after the guard approves a test send", () => {

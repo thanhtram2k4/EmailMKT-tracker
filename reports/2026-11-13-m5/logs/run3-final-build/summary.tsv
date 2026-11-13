@@ -1,0 +1,6 @@
+lint	0	10s
+typecheck	0	5s
+smoke-disabled	0	32s
+e2e-disabled	0	158s
+e2e-mock-campaign	0	42s
+smoke-mock	0	33s

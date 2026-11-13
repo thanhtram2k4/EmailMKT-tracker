@@ -1,0 +1,15 @@
+CONTROL MS1 revision fence removed (stale job accepted) (R-SCH-07): exit=0       Tests  1 passed | 12 skipped (13)
+MUTATION MS1 revision fence removed (stale job accepted): exit=1 -> CAUGHT       Tests  1 failed | 12 skipped (13)
+    AssertionError: expected { result: 'started', delayMs: 1000 } to deeply equal { result: 'stale' }
+    - Expected
+    + Received
+CONTROL MS2 early-start check removed (R-SCH-05): exit=0       Tests  1 passed | 12 skipped (13)
+MUTATION MS2 early-start check removed: exit=1 -> CAUGHT       Tests  1 failed | 12 skipped (13)
+    AssertionError: expected { result: 'started', delayMs: -1000 } to deeply equal { result: 'early' }
+    - Expected
+    + Received
+CONTROL MS3 grace-period hold removed (always send late) (R-SCH-15): exit=0       Tests  1 passed | 12 skipped (13)
+MUTATION MS3 grace-period hold removed (always send late): exit=1 -> CAUGHT       Tests  1 failed | 12 skipped (13)
+    AssertionError: expected { result: 'started', delayMs: 1860000 } to deeply equal { result: 'held_overdue', …(1) }
+    - Expected
+    + Received

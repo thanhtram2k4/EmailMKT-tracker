@@ -12,7 +12,7 @@ import { getDb } from "../lib/db/client";
 import { workerHeartbeats } from "../lib/db/schema";
 import { getLogger } from "../lib/logger";
 import type { NotionEnv } from "../lib/crm/notion-env";
-import { SCHEDULED_CRONTAB, makeTaskList } from "./tasks";
+import { crontabFor, makeTaskList } from "./tasks";
 
 export type WorkerHandle = { workerId: string; runner: Runner; stop: () => Promise<void> };
 
@@ -26,7 +26,11 @@ export async function startWorker(opts: {
   pollIntervalMs?: number;
   /** Register the CRM cron schedules (sync every 10 min, nightly full, outbox every minute). */
   enableCrmSchedules?: boolean;
+  /** Register send maintenance (test-send reaper, campaign reaper and dispatcher sweeper). The worker process always does. */
+  enableSendSchedules?: boolean;
   notionEnv?: () => NotionEnv;
+  /** Time budget of one dispatcher run before it re-queues itself. */
+  dispatchBudgetMs?: number;
 }): Promise<WorkerHandle> {
   const clock = opts.clock ?? systemClock;
   const workerId = opts.workerId ?? `worker-${os.hostname()}-${process.pid}-${randomUUID().slice(0, 8)}`;
@@ -67,8 +71,10 @@ export async function startWorker(opts: {
     noHandleSignals: true,
     pollInterval: opts.pollIntervalMs ?? 2000,
     logger: gwLogger,
-    taskList: makeTaskList({ workerId, databaseUrl: opts.databaseUrl, notionEnv: opts.notionEnv }),
-    ...(opts.enableCrmSchedules ? { crontab: SCHEDULED_CRONTAB } : {}),
+    taskList: makeTaskList({ workerId, databaseUrl: opts.databaseUrl, notionEnv: opts.notionEnv, dispatchBudgetMs: opts.dispatchBudgetMs }),
+    ...(opts.enableCrmSchedules || opts.enableSendSchedules
+      ? { crontab: crontabFor({ crm: Boolean(opts.enableCrmSchedules), sending: Boolean(opts.enableSendSchedules) }) }
+      : {}),
   });
   log.info({ concurrency: opts.concurrency }, "worker started");
 

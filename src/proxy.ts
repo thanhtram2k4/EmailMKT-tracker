@@ -8,7 +8,8 @@ import { getSessionCookie } from "better-auth/cookies";
 import { NextResponse, type NextRequest } from "next/server";
 
 // /fixtures: SYNTHETIC demo images used by the M3 template fixtures (public, no data).
-const PUBLIC_PREFIXES = ["/sign-in", "/access-denied", "/healthz", "/api/auth", "/api/dev", "/_next", "/favicon.ico", "/fixtures"];
+// M5: /u (recipient unsubscribe, opaque token) and /api/ses-events (SNS, signature-verified) are public.
+const PUBLIC_PREFIXES = ["/sign-in", "/access-denied", "/healthz", "/api/auth", "/api/dev", "/_next", "/favicon.ico", "/fixtures", "/u", "/api/ses-events"];
 
 export function proxy(request: NextRequest) {
   const requestId = request.headers.get("x-request-id") || crypto.randomUUID();

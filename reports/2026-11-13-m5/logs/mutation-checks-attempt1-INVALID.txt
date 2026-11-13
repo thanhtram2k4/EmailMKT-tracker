@@ -1,0 +1,20 @@
+M1 send-time suppression check removed: exit=1 -> CAUGHT
+      Tests  no tests
+ FAIL  |integration| tests/integration/campaign-send.test.ts [ tests/integration/campaign-send.test.ts ]
+
+M2 SNS signature result ignored: exit=1 -> CAUGHT
+      Tests  no tests
+ FAIL  |integration| tests/integration/campaign-send.test.ts [ tests/integration/campaign-send.test.ts ]
+
+M3 advisory lock and SKIP LOCKED removed: exit=1 -> CAUGHT
+      Tests  no tests
+ FAIL  |integration| tests/integration/campaign-send.test.ts [ tests/integration/campaign-send.test.ts ]
+
+M4 send maintenance tied to CRM schedules again: exit=1 -> CAUGHT
+      Tests  no tests
+ FAIL  |unit| tests/unit/campaigns.test.ts [ tests/unit/campaigns.test.ts ]
+
+M5 unknown outcome retried (mapped to pending): exit=1 -> CAUGHT
+      Tests  no tests
+ FAIL  |integration| tests/integration/campaign-send.test.ts [ tests/integration/campaign-send.test.ts ]
+

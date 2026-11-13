@@ -233,7 +233,7 @@ if (devAvailable) {
     const r = await devLogin("admin@example.com");
     if (!r.available) return { result: "BLOCKED", notes: "dev sign-in unavailable" };
     const cookie = r.cookies.map((c) => c.split(";")[0]).join("; ");
-    const pages = ["/", "/contacts", "/contacts/issues", "/sync", "/templates", "/settings/notion", "/settings/sending", "/staff"];
+    const pages = ["/", "/contacts", "/contacts/issues", "/sync", "/suppressions", "/templates", "/campaigns", "/campaigns/scheduled", "/settings/notion", "/settings/sending", "/staff"];
     const bad: string[] = [];
     for (const p of pages) {
       const res = await fetch(`${baseUrl}${p}`, { headers: { cookie }, redirect: "manual" });
@@ -244,11 +244,197 @@ if (devAvailable) {
   });
 }
 
+// S6 (M5) — send now. MOCK variants only: the stack's real worker process dispatches through the
+// in-process mock transport; SES events are posted to /api/ses-events signed with the stack's test key.
+if (process.env.DATABASE_URL && process.env.NOTION_MODE === "mock") {
+  const mode = process.env.SEND_MODE ?? "disabled";
+  await check(
+    mode === "mock" ? "S6-mock" : "S6-disabled",
+    mode === "mock"
+      ? "Send now to 3 synthetic recipients through the worker (mock transport) → Sent 3; signed SES events over HTTP → Delivered 2 / Bounced 1 and the bounced address suppressed"
+      : "Send now in SEND_MODE=disabled: review blocks and approval is refused; no message is created",
+    "MOCK",
+    async () => {
+      const { sign } = await import("node:crypto");
+      const { getConfig } = await import("../src/lib/config.ts");
+      const { getDb, closeDb } = await import("../src/lib/db/client.ts");
+      const { sql } = await import("drizzle-orm");
+      const { importTemplate, saveSubject } = await import("../src/lib/templates/service.ts");
+      const { approveAndSendNow, createCampaign, reviewCampaign } = await import("../src/lib/campaigns/service.ts");
+      const { stringToSign } = await import("../src/lib/campaigns/sns.ts");
+      const { enqueueDispatch, releaseWorkerUtils } = await import("../src/lib/jobs.ts");
+      const { contacts, consentRecords } = await import("../src/lib/db/schema.ts");
+      const run = Date.now().toString(36);
+      const tag = `smoke-s6-${run}`;
+      const addrs = ["success", "success2", "bounce"].map((k) => `${tag}-${k}@example.com`);
+      try {
+        const db = getDb();
+        const cfg = getConfig();
+        await db.insert(contacts).values(addrs.map((e, i) => ({ notionPageId: `${tag}-${i}`, fullName: `Smoke ${i}`, email: e, emailNormalized: e, emailStatus: "valid" as const, tags: [tag] })));
+        await db.insert(consentRecords).values(addrs.map((e) => ({ emailNormalized: e, purpose: "marketing_email" as const, status: "granted" as const, source: "staff_entry" as const, recordedBy: "smoke", evidenceRef: "SMOKE" })));
+        const t = await importTemplate(db, { name: "smoke S6", html: '<p>Chào {{ greeting_name | default: "bạn" }}</p><a href="{{ unsubscribe_url }}">Hủy đăng ký</a>', sourceKind: "paste", actor: "smoke" });
+        const v = await saveSubject(db, { templateId: t.template.id, baseVersionId: t.version.id, subject: "[QC] Smoke S6", actor: "smoke" });
+        const c = await createCampaign(db, { name: `Smoke S6 ${run}`, templateId: t.template.id, templateVersionId: v.id, audience: { kind: "tags", tags: [tag] }, actor: "system:smoke" });
+        const rv = await reviewCampaign(db, cfg, c.id);
+        if (mode !== "mock") {
+          let refused = "";
+          try {
+            await approveAndSendNow(db, { cfg, enqueue: async () => {} }, { campaignId: c.id, expectedRevision: rv.campaign.scheduleRevision, expectedRecipients: rv.resolved.included.length, actor: "system:smoke" });
+          } catch (e) {
+            refused = e instanceof Error ? e.message : String(e);
+          }
+          const n = ((await db.execute(sql`select count(*)::int as n from messages where campaign_id = ${c.id}`)).rows[0] as { n: number }).n;
+          const ok = /sending is disabled/.test(rv.blocking.join()) && refused !== "" && n === 0;
+          return { result: ok ? "PASS" : "FAIL", notes: `blocking="${rv.blocking.join(" | ").slice(0, 120)}"; approval ${refused ? "refused" : "ACCEPTED"}; messages=${n}` };
+        }
+        await approveAndSendNow(db, { cfg, enqueue: (id) => enqueueDispatch(id, cfg.DATABASE_URL) }, { campaignId: c.id, expectedRevision: rv.campaign.scheduleRevision, expectedRecipients: 3, actor: "system:smoke" });
+        const t0 = Date.now();
+        let status = "";
+        while (Date.now() - t0 < 60_000) {
+          status = ((await db.execute(sql`select status::text as s from campaigns where id = ${c.id}`)).rows[0] as { s: string }).s;
+          if (status === "completed" || status === "completed_with_issues") break;
+          await new Promise((r) => setTimeout(r, 500));
+        }
+        const dispatchMs = Date.now() - t0;
+        const msgs = (await db.execute(sql`select id, email_normalized from messages where campaign_id = ${c.id}`)).rows as Array<{ id: string; email_normalized: string }>;
+        const key = fs.readFileSync(process.env.SNS_TEST_PRIVATE_KEY_FILE!, "utf8");
+        const post = async (m: { id: string; email_normalized: string }) => {
+          const bounce = m.email_normalized.includes("-bounce@");
+          const ev = bounce
+            ? { eventType: "Bounce", mail: { messageId: `smoke-${m.id}`, tags: { msg_id: [m.id], purpose: ["campaign"] } }, bounce: { bounceType: "Permanent", bounceSubType: "General", bouncedRecipients: [{ emailAddress: m.email_normalized }] } }
+            : { eventType: "Delivery", mail: { messageId: `smoke-${m.id}`, tags: { msg_id: [m.id], purpose: ["campaign"] } }, delivery: {} };
+          const msg = {
+            Type: "Notification",
+            MessageId: `smoke-${run}-${m.id}`,
+            TopicArn: process.env.SES_EVENTS_TOPIC_ARN!,
+            Message: JSON.stringify(ev),
+            Timestamp: new Date().toISOString(),
+            SignatureVersion: "2",
+            Signature: "",
+            SigningCertURL: "https://sns.ap-southeast-1.amazonaws.com/SimpleNotificationService-smoke.pem",
+          };
+          msg.Signature = sign("sha256", Buffer.from(stringToSign(msg)), key).toString("base64");
+          const res = await fetch(`${baseUrl}/api/ses-events`, { method: "POST", headers: { "content-type": "text/plain; charset=UTF-8", "x-amz-sns-message-type": "Notification" }, body: JSON.stringify(msg) });
+          return `${res.status} ${await res.text()}`;
+        };
+        const posted = await Promise.all(msgs.map(post));
+        const k = (
+          await db.execute(sql`select count(*) filter (where send_status = 'sent')::int as sent, count(*) filter (where delivery_status = 'delivered')::int as delivered,
+                                      count(*) filter (where delivery_status = 'bounced_hard')::int as bounced from messages where campaign_id = ${c.id}`)
+        ).rows[0] as { sent: number; delivered: number; bounced: number };
+        const sup = ((await db.execute(sql`select count(*)::int as n from suppressions where email_normalized = ${addrs[2]} and reason = 'hard_bounce'`)).rows[0] as { n: number }).n;
+        const ok = status === "completed" && k.sent === 3 && k.delivered === 2 && k.bounced === 1 && sup === 1 && posted.every((p) => p === "200 processed");
+        return {
+          result: ok ? "PASS" : "FAIL",
+          notes: `status before events=${status}; dispatched in ${dispatchMs} ms (worker process); Sent ${k.sent} / Delivered ${k.delivered} / Bounced ${k.bounced}; suppression added: ${sup === 1}; SNS posts: ${posted.join(", ")}`,
+        };
+      } finally {
+        await releaseWorkerUtils();
+        await closeDb();
+      }
+    },
+  );
+}
+rows.push({
+  id: "S6-live",
+  scenario: "Send now to 3 SES simulator addresses → Sent 3 / Delivered 2 / Bounced 1 (real SES events via SNS)",
+  type: "LIVE",
+  result: "BLOCKED",
+  notes: "Not authorized: needs the user's approval for real sends, SES setup and a deployed HTTPS endpoint subscribed to the SNS topic.",
+});
+
+// S7 / S9 (M6) — scheduling. MOCK variants: scheduled through the service for the next whole minute
+// (the 2-minute lead-time rule is checked with a controlled clock), started by the stack's worker.
+if (process.env.DATABASE_URL && process.env.NOTION_MODE === "mock") {
+  const mode = process.env.SEND_MODE ?? "disabled";
+  const { FixedClock } = await import("../src/lib/clock.ts");
+  const { getConfig } = await import("../src/lib/config.ts");
+  const { getDb, closeDb } = await import("../src/lib/db/client.ts");
+  const { sql } = await import("drizzle-orm");
+  const { importTemplate, saveSubject } = await import("../src/lib/templates/service.ts");
+  const { cancelCampaign, createCampaign, reviewCampaign } = await import("../src/lib/campaigns/service.ts");
+  const { scheduleCampaign } = await import("../src/lib/campaigns/schedule.ts");
+  const { localParts } = await import("../src/lib/campaigns/schedule-time.ts");
+  const { enqueueDispatch, releaseWorkerUtils, removeStartJob, scheduleStartJob } = await import("../src/lib/jobs.ts");
+  const { contacts, consentRecords } = await import("../src/lib/db/schema.ts");
+  const run = Date.now().toString(36);
+  const db = getDb();
+  const cfg = getConfig();
+  const status = async (id: string) => ((await db.execute(sql`select status::text as s from campaigns where id = ${id}`)).rows[0] as { s: string }).s;
+  async function newDraft(tag: string) {
+    const addrs = [0, 1].map((i) => `${tag}-${i}@example.com`);
+    await db.insert(contacts).values(addrs.map((e, i) => ({ notionPageId: `${tag}-${i}`, fullName: `Smoke ${i}`, email: e, emailNormalized: e, emailStatus: "valid" as const, tags: [tag] })));
+    await db.insert(consentRecords).values(addrs.map((e) => ({ emailNormalized: e, purpose: "marketing_email" as const, status: "granted" as const, source: "staff_entry" as const, recordedBy: "smoke", evidenceRef: "SMOKE" })));
+    const t = await importTemplate(db, { name: `smoke ${tag}`, html: '<p>Chào {{ greeting_name | default: "bạn" }}</p><a href="{{ unsubscribe_url }}">Hủy</a>', sourceKind: "paste", actor: "smoke" });
+    const v = await saveSubject(db, { templateId: t.template.id, baseVersionId: t.version.id, subject: `[QC] Smoke ${tag}`, actor: "smoke" });
+    const c = await createCampaign(db, { name: `Smoke ${tag}`, templateId: t.template.id, templateVersionId: v.id, audience: { kind: "tags", tags: [tag] }, actor: "system:smoke" });
+    return { c, rv: await reviewCampaign(db, cfg, c.id) };
+  }
+  const deps = (target: Date) => ({
+    cfg,
+    clock: new FixedClock(new Date(target.getTime() - 5 * 60_000)),
+    enqueue: (id: string) => enqueueDispatch(id, cfg.DATABASE_URL),
+    scheduleStart: (id: string, rev: number, at: Date) => scheduleStartJob(id, rev, at, cfg.DATABASE_URL),
+    removeStart: (id: string) => removeStartJob(id, cfg.DATABASE_URL),
+  });
+  try {
+    if (mode !== "mock") {
+      await check("S7-disabled", "Scheduling with SEND_MODE=disabled is refused at review/approval; nothing is frozen or queued", "MOCK", async () => {
+        const { c, rv } = await newDraft(`smoke-s7d-${run}`);
+        const target = new Date(Math.ceil((Date.now() + 10 * 60_000) / 60_000) * 60_000);
+        let refused = "";
+        try {
+          await scheduleCampaign(db, deps(target), { campaignId: c.id, expectedRevision: rv.campaign.scheduleRevision, expectedRecipients: rv.resolved.included.length, actor: "system:smoke", ...localParts(target, "Asia/Ho_Chi_Minh"), zone: "Asia/Ho_Chi_Minh" });
+        } catch (e) {
+          refused = e instanceof Error ? e.message : String(e);
+        }
+        const st = await status(c.id);
+        return { result: refused && st === "draft" ? "PASS" : "FAIL", notes: `approval ${refused ? `refused ("${refused.slice(0, 60)}")` : "ACCEPTED"}; status=${st}` };
+      });
+    } else {
+      // Both campaigns target the next whole minute at least 15 s away; S9's is cancelled at once.
+      const target = new Date(Math.ceil((Date.now() + 15_000) / 60_000) * 60_000);
+      const s7 = await newDraft(`smoke-s7-${run}`);
+      const s9 = await newDraft(`smoke-s9-${run}`);
+      const sched = (x: Awaited<ReturnType<typeof newDraft>>) =>
+        scheduleCampaign(db, deps(target), { campaignId: x.c.id, expectedRevision: x.rv.campaign.scheduleRevision, expectedRecipients: x.rv.resolved.included.length, actor: "system:smoke", ...localParts(target, "Asia/Ho_Chi_Minh"), zone: "Asia/Ho_Chi_Minh" });
+      await sched(s7);
+      await sched(s9);
+      await cancelCampaign(db, deps(target), { campaignId: s9.c.id, actor: "system:smoke" });
+      await check("S7-mock", "Scheduled send (Asia/Ho_Chi_Minh, next whole minute) is started by the worker process with no browser open, within 60 s, and completes; scheduled and actual times recorded", "MOCK", async () => {
+        let st = "";
+        while (Date.now() < target.getTime() + 120_000) {
+          st = await status(s7.c.id);
+          if (st === "completed" || st === "completed_with_issues") break;
+          if (Date.now() < target.getTime() - 1000 && st !== "scheduled") return { result: "FAIL", notes: `early dispatch: status ${st} before the target` };
+          await new Promise((r) => setTimeout(r, 500));
+        }
+        const r = (await db.execute(sql`select scheduled_at_utc, processing_started_at, start_delay_ms, schedule_tz, schedule_local from campaigns where id = ${s7.c.id}`)).rows[0] as Record<string, string | number>;
+        const sent = ((await db.execute(sql`select count(*)::int as n from messages where campaign_id = ${s7.c.id} and send_status = 'sent'`)).rows[0] as { n: number }).n;
+        const ok = st === "completed" && Number(r.start_delay_ms) < 60_000 && sent === 2;
+        return { result: ok ? "PASS" : "FAIL", notes: `local ${r.schedule_local} ${r.schedule_tz}; scheduled ${new Date(String(r.scheduled_at_utc)).toISOString()}; started ${r.processing_started_at ? new Date(String(r.processing_started_at)).toISOString() : "—"}; delay ${r.start_delay_ms} ms; status ${st}; sent ${sent}/2` };
+      });
+      await check("S9-mock", "A scheduled campaign cancelled before its time is never dispatched (start job removed; status stays cancelled after the time passes)", "MOCK", async () => {
+        while (Date.now() < target.getTime() + 15_000) await new Promise((r) => setTimeout(r, 500));
+        const st = await status(s9.c.id);
+        const sent = ((await db.execute(sql`select count(*)::int as n from messages where campaign_id = ${s9.c.id} and send_status not in ('cancelled')`)).rows[0] as { n: number }).n;
+        const jobs = ((await db.execute(sql`select count(*)::int as n from graphile_worker.jobs where key = ${`start:${s9.c.id}`}`)).rows[0] as { n: number }).n;
+        const ok = st === "cancelled" && sent === 0 && jobs === 0;
+        return { result: ok ? "PASS" : "FAIL", notes: `15 s after the scheduled time: status ${st}; non-cancelled messages ${sent}; start jobs ${jobs}` };
+      });
+    }
+  } finally {
+    await releaseWorkerUtils();
+    await closeDb();
+  }
+}
+rows.push(
+  { id: "S7-live", scenario: "Scheduled send (+3 min, Asia/Ho_Chi_Minh) on a deployed environment with the browser closed and the laptop off", type: "LIVE", result: "BLOCKED", notes: "Needs a deployed worker (no hosting account; deployment not authorized) and real sending approval." },
+  { id: "S9-live", scenario: "Cancelled scheduled campaign never dispatches (deployed environment)", type: "LIVE", result: "BLOCKED", notes: "Needs a deployed environment (not authorized)." },
+);
+
 for (const [id, s, ms] of [
-  ["S6", "Send now to 3 simulator addresses → Sent 3 / Delivered 2 / Bounced 1", "M5"],
-  ["S7", "Scheduled send (+3 min, Asia/Ho_Chi_Minh) executes with browser closed", "M6"],
   ["S8", "Open, click, unsubscribe recorded; redirect to snapshot URL", "M7"],
-  ["S9", "Cancelled scheduled campaign never dispatches", "M6"],
 ] as const) {
   rows.push({ id, scenario: s, type: "-", result: "NOT RUN", notes: `Feature not implemented yet (${ms}).` });
 }

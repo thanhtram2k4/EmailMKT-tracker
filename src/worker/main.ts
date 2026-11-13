@@ -18,6 +18,7 @@ const handle = await startWorker({
   heartbeatIntervalMs: cfg.HEARTBEAT_INTERVAL_MS,
   buildId: cfg.BUILD_ID,
   enableCrmSchedules: cfg.NOTION_MODE !== "disabled",
+  enableSendSchedules: true,
 });
 log.info({ notion_mode: cfg.NOTION_MODE, crm_schedules: cfg.NOTION_MODE !== "disabled" }, "worker schedules configured");
 

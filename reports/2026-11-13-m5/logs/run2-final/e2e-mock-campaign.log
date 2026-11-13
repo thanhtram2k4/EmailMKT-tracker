@@ -1,0 +1,23 @@
+
+> email-mkt-tracker@0.1.0 e2e:mock-campaign
+> tsx scripts/local-stack.ts --send-mode mock --log-dir .local/logs/e2e-mock-campaign -- playwright test tests/e2e/campaign-send.spec.ts
+
+[core] WARNING: Executable file detection not yet supported on 'win32'.
+Your pool doesn't have all of the error handlers! See: https://err.red/wpeh?v=0.18.0&method=connect
+migrations applied (app + graphile_worker)
+[stack] postgres ready on 54332; logs in D:\AI Studio\Email MKT Tracker\.local\logs\e2e-mock-campaign
+[stack] building web app (next build)…
+[stack] web + worker healthy at http://localhost:3100
+
+Running 5 tests using 1 worker
+
+  -  1 [chromium] › tests\e2e\campaign-send.spec.ts:104:1 › disabled mode: review blocks and Send now is off
+  ok 2 [chromium] › tests\e2e\campaign-send.spec.ts:122:3 › mock sending › OR-CMP-01: create → review (exclusions) → send now → completed; each recipient sent once (7.2s)
+  ok 3 [chromium] › tests\e2e\campaign-send.spec.ts:157:3 › mock sending › OR-CMP-02: unsubscribe — GET only confirms, the button and one-click POST suppress (1.3s)
+  ok 4 [chromium] › tests\e2e\campaign-send.spec.ts:190:3 › mock sending › OR-CMP-03: a signed SES Delivery event over HTTP updates the campaign; a bad signature is refused (956ms)
+  ok 5 [chromium] › tests\e2e\campaign-send.spec.ts:218:3 › mock sending › member: can create and review a draft but cannot send it (2.2s)
+
+  1 skipped
+  4 passed (14.0s)
+[stack] cleanup ok: 5 owned process(es) stopped, none left
+[stack] stopped (exit 0)

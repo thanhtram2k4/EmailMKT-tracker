@@ -1,0 +1,22 @@
+
+> email-mkt-tracker@0.1.0 test:integration
+> vitest run --project integration
+
+
+ RUN  v5.1.0 D:/AI Studio/Email MKT Tracker
+
+{"level":"info","time":"2026-11-13T10:37:17.962Z","service":"web","env":"unknown","build":"dev","request_id":"req-test","task":"test_send","test_send_id":"b46175f7-25d2-49fa-af73-9bba96d071d3","status":"accepted","transport":"mock","to":"q***@example.com","msg":"test send attempted"}
+{"level":"info","time":"2026-11-13T10:37:18.009Z","service":"web","env":"unknown","build":"dev","request_id":"req-test","task":"test_send","test_send_id":"19820a8a-54ed-468d-a103-3d29043beae8","status":"accepted","transport":"mock","to":"q***@example.com","msg":"test send attempted"}
+{"level":"info","time":"2026-11-13T10:37:18.112Z","service":"web","env":"unknown","build":"dev","request_id":"req-test","task":"test_send","test_send_id":"cc0facc0-20dd-49ea-9edf-44ea4b99e0cc","status":"accepted","transport":"mock","to":"q***@example.com","msg":"test send attempted"}
+{"level":"info","time":"2026-11-13T10:37:18.179Z","service":"web","env":"unknown","build":"dev","request_id":"req-test","task":"test_send","test_send_id":"1412a656-a580-4e33-a362-1df0edd9bc32","status":"unknown","transport":"mock","to":"q***@example.com","msg":"test send attempted"}
+{"level":"info","time":"2026-11-13T10:37:18.194Z","service":"web","env":"unknown","build":"dev","request_id":"req-test","task":"test_send","test_send_id":"da476173-30d7-44c1-915e-7f562f0e8daf","status":"unknown","transport":"mock","to":"q***@example.com","msg":"test send attempted"}
+{"level":"info","time":"2026-11-13T10:37:18.231Z","service":"web","env":"unknown","build":"dev","request_id":"req-test","task":"test_send","test_send_id":"b4646433-c7dc-4bcf-9fea-50c899df290d","status":"unknown","transport":"mock","to":"q***@example.com","msg":"test send attempted"}
+{"level":"info","time":"2026-11-13T10:37:18.263Z","service":"web","env":"unknown","build":"dev","request_id":"req-test","task":"test_send","test_send_id":"07db16a0-4a9e-4bd2-ac0e-1650f99ce92e","status":"accepted","transport":"mock","to":"q***@example.com","msg":"test send attempted"}
+{"level":"info","time":"2026-11-13T10:37:18.271Z","service":"web","env":"unknown","build":"dev","request_id":"req-test","task":"test_send","test_send_id":"1d285a86-d1db-4ba0-aa7c-240249a6ef9a","status":"accepted","transport":"mock","to":"q***@example.com","msg":"test send attempted"}
+{"level":"info","time":"2026-11-13T10:37:18.376Z","service":"web","env":"unknown","build":"dev","request_id":"req-2a56a8a9-6a71-4092-acc3-15a59571dcfe","task":"test_send","test_send_id":"57d98db3-7ef2-4892-ac94-b2ac59aead60","status":"accepted","transport":"mock","to":"q***@example.com","msg":"test send attempted"}
+
+ Test Files  8 passed (8)
+      Tests  88 passed (88)
+   Start at  17:35:44
+   Duration  96.33s (tests 91%, import 8%)
+

@@ -11,7 +11,7 @@
  *  - "accepted" means SES accepted the message for sending. It is NOT proof of inbox delivery.
  */
 import { GetAccountCommand, SendEmailCommand, SESv2Client } from "@aws-sdk/client-sesv2";
-import type { MailTransport, OutboundMessage, SendResult } from "./transport";
+import type { AccountCheck, MailTransport, OutboundMessage, SendResult } from "./transport";
 
 /** The subset of the SDK client we use; tests inject a fake (no network). */
 export type SesClientLike = {
@@ -114,6 +114,18 @@ export class SesTransport implements MailTransport {
       return classifySesError(e);
     } finally {
       clearTimeout(timer);
+    }
+  }
+
+  /** M5 execution-time check: GetAccount (quota, max rate, sending enabled). Read-only. */
+  async account(): Promise<AccountCheck> {
+    try {
+      const a = await getSesAccount(this.client, this.o.timeoutMs);
+      return { ok: true, sendingEnabled: a.sendingEnabled, max24h: a.max24h ?? null, sentLast24h: a.sentLast24h ?? 0, maxPerSecond: a.maxPerSecond ?? null };
+    } catch (e) {
+      const r = classifySesError(e);
+      if (r.kind === "rejected" && r.code === "credentials") return { ok: false, code: "credentials", message: r.message };
+      return { ok: false, code: "unavailable", message: "message" in r ? r.message : "SES account check failed" };
     }
   }
 }

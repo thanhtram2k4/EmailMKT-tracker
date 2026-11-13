@@ -50,6 +50,34 @@
       "when": 1794471118388,
       "tag": "0006_m4_subject_test_sends",
       "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "7",
+      "when": 1794559711767,
+      "tag": "0007_m5_campaigns",
+      "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "7",
+      "when": 1794559713540,
+      "tag": "0008_m5_send_guards",
+      "breakpoints": true
+    },
+    {
+      "idx": 9,
+      "version": "7",
+      "when": 1794564408298,
+      "tag": "0009_m6_scheduling",
+      "breakpoints": true
+    },
+    {
+      "idx": 10,
+      "version": "7",
+      "when": 1794564410021,
+      "tag": "0010_m6_schedule_guards",
+      "breakpoints": true
     }
   ]
 }

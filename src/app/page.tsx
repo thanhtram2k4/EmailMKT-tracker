@@ -7,6 +7,10 @@ import { getDb } from "../lib/db/client";
 import { checkHealth } from "../lib/health";
 import { contactStats, syncOverview } from "../lib/crm/queries";
 import { AppShell } from "./app-shell";
+import { AlertsBanner } from "./campaigns/alerts-banner";
+import { StatusPill } from "./campaigns/status-pill";
+import { scheduledCampaigns } from "../lib/campaigns/queries";
+import { formatInZone } from "../lib/campaigns/schedule-time";
 import { Alert, Kpi, PageHeader, Pill } from "./ui";
 
 export const dynamic = "force-dynamic";
@@ -22,7 +26,8 @@ const SEND_MODE_TEXT: Record<string, string> = {
 export default async function Dashboard() {
   const staff = await requireStaff();
   const cfg = getConfig();
-  const [stats, sync] = await Promise.all([contactStats(getDb()), syncOverview(getDb())]);
+  const [stats, sync, sched] = await Promise.all([contactStats(getDb()), syncOverview(getDb()), scheduledCampaigns(getDb())]);
+  const upcoming = sched.filter((r) => r.status === "scheduled" || r.status === "held_overdue").slice(0, 5);
   const health = await checkHealth(getDb(), {
     clock: systemClock,
     build: cfg.BUILD_ID,
@@ -37,7 +42,7 @@ export default async function Dashboard() {
     <AppShell staff={staff}>
       <PageHeader
         title="Dashboard"
-        sub={<>Welcome, {staff.name || staff.email}. Contacts are synchronized from the Notion CRM; emails are pasted and edited here. Campaigns, scheduling and analytics arrive in later milestones.</>}
+        sub={<>Welcome, {staff.name || staff.email}. Contacts are synchronized from the Notion CRM; emails are pasted and edited here, and sent as campaigns, now or at a scheduled time. Analytics arrive in a later milestone.</>}
         actions={
           <>
             <Link className="btn primary" href="/templates">
@@ -58,6 +63,23 @@ export default async function Dashboard() {
         <Alert tone="bad" testId="worker-banner" title="Background worker not running.">
           Scheduled and queued work will not run until it is back. <span className="muted">({worker.error})</span>
         </Alert>
+      )}
+
+      <AlertsBanner isAdmin={staff.role === "admin"} back="/" />
+
+      {upcoming.length > 0 && (
+        <section className="card" data-testid="upcoming-card">
+          <h2>
+            Upcoming scheduled campaigns · <Link href="/campaigns/scheduled">all</Link>
+          </h2>
+          <ul className="plain">
+            {upcoming.map((r) => (
+              <li key={r.id}>
+                <Link href={`/campaigns/${r.id}`}>{r.name}</Link> — {formatInZone(new Date(r.scheduled_at_utc), r.schedule_tz)} · {r.recipients} recipient(s) <StatusPill status={r.status} />
+              </li>
+            ))}
+          </ul>
+        </section>
       )}
 
       <div className="kpis" data-testid="crm-card">

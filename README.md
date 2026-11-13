@@ -1,6 +1,6 @@
 # Email MKT Tracker
 
-This is an internal email-marketing tool. **Current state: M3** (paste-and-edit email editor). Contacts are synchronized from a Notion CRM, and the foundation from M1 is in place.
+This is an internal email-marketing tool. **Current state: M6** (scheduled sends on top of the M5 send-now engine), verified locally with a mock transport only. Contacts are synchronized from a Notion CRM; emails are pasted, edited, personalized and test-sent (M3–M4).
 
 M1 foundation:
 - staff sign-in limited to the company domain and a staff allowlist
@@ -17,7 +17,7 @@ M2 CRM:
 - suppression and consent records
 - the Contacts, Data issues and Sync screens
 
-Local development uses a **mock Notion server with synthetic contacts**. No real Notion workspace is contacted unless `NOTION_MODE=live` is set with a recorded authorization (see `docs/NOTION_SETUP.md`). No email can be sent: there is no real transport, and `SEND_MODE` defaults to `disabled`.
+Local development uses a **mock Notion server with synthetic contacts**. No real Notion workspace is contacted unless `NOTION_MODE=live` is set with a recorded authorization (see `docs/NOTION_SETUP.md`). `SEND_MODE` defaults to `disabled`, so no email can be sent. With `SEND_MODE=mock` messages stay inside the process. No real SES send has been made from this project yet.
 
 ## Prerequisites
 - Node.js 22.18 or later (developed on Node 24).
@@ -96,11 +96,29 @@ npm run dev:crm              # web at http://localhost:3000, the worker, and the
    - With `SEND_MODE=disabled` (default) the button is off.
    - With `SEND_MODE=mock`, the message stays in-process (nothing leaves the machine).
    - Real SES test sends need `SEND_MODE=allowlist` or `simulator`, `SEND_AUTHORIZATION_REF`, `SES_FROM_ADDRESS` and an AWS profile, plus the user's explicit approval. "Accepted" means SES accepted the message, not that it reached the inbox; an uncertain result is shown as such and never retried automatically.
-5. **Sending** (admin) shows the read-only sending configuration.
+5. **Sending** (admin) shows the sending configuration, and lets an admin set the campaign rate and the daily-quota reserve.
+
+### Walkthrough: campaigns (M5)
+1. **Campaigns → New campaign:** a name, an email (its latest version) and an audience (all eligible contacts, or contacts with some tags). Nothing is sent.
+2. The campaign page shows the **review**: matched / will receive / excluded, with the reason for every exclusion (archived, invalid, duplicate, suppressed, no recorded consent), the From address, the subject for the first recipient, and anything that blocks sending (no subject, no `{{ unsubscribe_url }}` link, a missing value without fallback, a sending-guard refusal).
+3. An **admin** ticks the confirmation and clicks **Send now**. This freezes an immutable snapshot (content, links, recipients and their merge values) and queues the worker. Suppression and consent are checked again immediately before each message.
+4. While sending: live progress, **Pause** (any staff), **Resume** and **Cancel** (admin). A blocked campaign (quota, credentials, account) shows why and waits for an admin to resume it.
+5. **Uncertain** messages (no answer from the provider) are never retried automatically. After 60 minutes an admin may resend them (accepting the duplicate risk) or mark them as not sent; both are audited.
+6. Every message carries a footer link and `List-Unsubscribe` / one-click headers to `/u/<token>`. Opening the link only shows a confirmation; the button (or a mail client's one-click POST) suppresses the address, records consent as withdrawn and queues the Notion update.
+7. **Suppressions** lists every suppressed address; an admin can add one manually (never remove).
+8. SES Delivery / Bounce / Complaint events arrive at `/api/ses-events` (SNS, signature-verified). Hard bounces and complaints suppress automatically. This needs a deployed HTTPS endpoint, so locally it is exercised only with signed test messages.
 
 Internal test tooling (labelled fixtures, GrapesJS comparison) is at `/internal/editor-lab` for admins when APP_ENV is local or test; it is not part of the user workflow.
 
 **Stopping:** press Ctrl+C in both terminals. On Windows, check that no `node`/`postgres` processes from this folder remain if a terminal was closed abruptly (see `CLAUDE.md` → "Windows process hygiene").
+
+### Walkthrough: scheduling (M6)
+1. On a draft that passes review, an **admin** uses **Schedule for later**: date, time and time zone (default Asia/Ho_Chi_Minh) → **Review schedule**.
+2. Invalid times are explained: in the past, less than 2 minutes ahead, a time skipped by daylight saving (with a suggested alternative), or a time that happens twice (choose the offset).
+3. The confirmation shows the sender, recipient count, subject, local time with zone, UTC, and how long sending will take. Confirming freezes the campaign exactly like Send now.
+4. **Scheduled** lists every scheduled campaign with local and UTC time, revision and next action; it warns when the worker has not reported for 2 minutes.
+5. On a scheduled campaign an admin can **reschedule** (the revision increases), **Unschedule and edit** (back to draft) or **cancel**.
+6. The background worker starts the campaign at the scheduled time (no browser needed). If it starts more than the grace period late (default 30 minutes, Settings → Sending), the campaign is **held** and admins are alerted; nothing is sent until an admin chooses send now, reschedule or cancel.
 
 ## Checks
 ```bash
@@ -110,7 +128,8 @@ npm run test:integration     # starts a throwaway PostgreSQL automatically
 npm run e2e                  # throwaway DB + production build + worker + mock Notion + Playwright, then tears down
 npm run smoke:local          # same isolated stack, runs the smoke suite (results in .local/logs/smoke/)
 npm run e2e:mock-send        # stack with SEND_MODE=mock: test-send UI flow (nothing leaves the machine)
-npm run smoke:mock-send      # smoke suite with SEND_MODE=mock (S5-mock)
+npm run smoke:mock-send      # smoke suite with SEND_MODE=mock (S5-mock, S6-mock)
+npm run e2e:mock-campaign    # stack with SEND_MODE=mock: campaign UI flow, unsubscribe, signed SES event
 ```
 The local stack only accepts `--send-mode disabled|mock`; it never starts a real send mode.
 

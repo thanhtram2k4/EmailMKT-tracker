@@ -17,7 +17,12 @@ This is an internal email-marketing app for a single company. Campaigns go out t
   - The primary workflow is **Paste HTML → Import → Preview → Edit → Save → Reopen**. Real templates are **not** a requirement; never search the user's folders for templates.
   - Browser (Chromium) validation only. Gmail, Outlook and mobile rendering are NOT RUN.
 - **M4 (UI redesign, personalization, test sends) is authorized for local work with mock/fake SES only.** Branch `m4-ui-testsend`. See `reports/2026-11-12-m4/report.md` (Vietnamese). A real SES test send needs separate approval.
-- **M5 and later are not authorized yet.**
+- **M5 (send-now engine and compliance) is authorized for local work with a mock transport or fake SES client only.** Branch `m5-send-engine` from `m4-checkpoint`. See `reports/2026-11-13-m5/report.md`. Real sends, AWS calls, deployment and push still need separate approval.
+- **M5 and M6 are committed** together on branch `m6-scheduling`; tags `m5-checkpoint` and `m6-checkpoint` point to the same commit. See `reports/2026-11-13-m5/report.md` and `reports/2026-11-13-m6/report.md`.
+- **M7 (tracking and analytics) is authorized for local work with the mock transport** (2026-11-13). Branch `m7-tracking` from `m6-checkpoint`.
+- **M8 and later are not authorized yet.** Commit each milestone before starting the next.
+- **Roles (confirmed by the user):** only admins approve, schedule and send campaigns and resolve uncertain sends; members create, edit, review and pause.
+- **No Claude API.** The app uses no LLM API. Never add one; if an AI feature is ever needed, only the free Gemini API, after asking the user (keys never in Git).
 - **Verified only locally:** Google OAuth, staging, CI and live Notion are unverified.
 
 Ask the user explicitly before any of these:
@@ -31,8 +36,8 @@ Ask the user explicitly before any of these:
 Approving a plan or a document does not count as permission for any of them.
 
 ## Language
-- **Replies:** in **Vietnamese**. That is the user's latest instruction (M3, 2026-11-12); M1–M2 replies were in English at their request. Follow the most recent explicit instruction.
-- **Repository docs:** stay in English. Test reports follow the reply language.
+- **Replies:** **always English** (standing instruction, 2026-11-13). M3–M4 replies and reports were in Vietnamese; that no longer applies.
+- **Repository docs and new test reports:** English. Do not rewrite the earlier Vietnamese reports.
 - **App:** UI and email content may be in Vietnamese.
 
 ## Stack
@@ -45,8 +50,8 @@ TypeScript on Node 22.18+ (developed on Node 24).
 - Tests: Vitest and Playwright.
 - Local Postgres: `embedded-postgres` (real PostgreSQL 17 binaries; no Docker needed). Its exit hooks are partly removed in `scripts/lib/embedded-pg.ts`, because they forced exit code 0.
 - Notion: API version pinned to `2026-03-11` (`src/lib/notion/`). The CRM sync, outbox, consent and eligibility code is in `src/lib/crm/`. The mock server is in `scripts/notion-mock/`.
-- SES v2 (`@aws-sdk/client-sesv2`, ap-southeast-1), used for test sends only from M4. UI: lucide-react, Be Vietnam Pro (`@fontsource`), axe via `@axe-core/playwright` in E2E.
-- Planned: Luxon, and hosting on Render in Singapore.
+- SES v2 (`@aws-sdk/client-sesv2`, ap-southeast-1): test sends (M4) and campaign messages (M5), always behind the guard. UI: lucide-react, Be Vietnam Pro (`@fontsource`), axe via `@axe-core/playwright` in E2E.
+- Luxon (time zones, M6). Planned: hosting on Render in Singapore.
 
 ## Commands
 | Task | Command |
@@ -60,6 +65,7 @@ TypeScript on Node 22.18+ (developed on Node 24).
 | Paste workflow / editor trial | `npm run e2e -- tests/e2e/paste-workflow.spec.ts` · `npm run e2e -- tests/e2e/editor-trial.spec.ts` (results in `test-results/editor-trial/`; extra local inputs only via `EDITOR_TRIAL_EXTRA_DIR`) |
 | E2E / smoke | `npm run e2e` · `npm run smoke:local` (each starts an isolated stack, runs, then tears it down) |
 | Mock test sends | `npm run e2e:mock-send` · `npm run smoke:mock-send` (stack with `SEND_MODE=mock`) |
+| Mock campaigns (M5–M6) | `npm run e2e:mock-campaign` (campaign UI, unsubscribe, signed SES event, scheduling incl. a real ~4-minute wait) |
 | New migration | edit `src/lib/db/schema.ts`, then `npm run db:generate` |
 
 ## Sending rules (do not break)
@@ -79,8 +85,9 @@ TypeScript on Node 22.18+ (developed on Node 24).
   - `src/lib/config.ts` (startup validation);
   - `src/lib/sending/guard.ts` (per-send decision);
   - `src/lib/sending/transport.ts` (factory).
-- **M4 adds an SES transport for test sends only.** The factory builds it only after the guard approves and `SES_FROM_ADDRESS` is set, and it still refuses customer campaigns (M5).
-- **Not permitted under the M1–M4 authorizations:** any real email sending (including test sends), any AWS call, or deployment.
+- **The SES transport** is built only by the factory, after the guard approves and `SES_FROM_ADDRESS` is set (test sends from M4, campaign messages from M5).
+- **Campaign messages outside production are integration tests** (`campaignPurpose`): the guard then allows only mock, SES simulator addresses (`simulator`) or allowlisted addresses (`allowlist`), and review blocks approval otherwise.
+- **Not permitted under the M1–M5 authorizations:** any real email sending (including test sends), any AWS call, or deployment.
 
 ## CRM rules (M2; do not break)
 - **Identity is the Notion page id.** An email change keeps the same contact. Suppressions and consent follow the **address**.
@@ -127,12 +134,34 @@ TypeScript on Node 22.18+ (developed on Node 24).
 - The local stack accepts only `--send-mode disabled|mock`.
 - Unresolved personalization (unknown field or filter, syntax, no subject, a missing value without `default:`, a line break in the subject) blocks a test send.
 
+## Campaign rules (M5; do not break)
+- Code: `src/lib/campaigns/` (service, dispatcher, events, sns, unsubscribe, suppression). Design: DESIGN §3.4 and §4.1.
+- **Approval** freezes the snapshot, links, recipients (with merge values) and one `pending` message each, in ONE transaction. The approver confirms the exact `schedule_revision` and recipient count they reviewed. Only admins approve, resume, cancel and resolve uncertain sends.
+- **Review blocks** on: no subject, unresolved personalization, no `{{ unsubscribe_url }}` link in the body, no recipients, or a guard refusal. The `[QC]`/`[AD]` subject label is a warning only (pending counsel).
+- **Dispatcher:** session advisory lock per campaign; claims with `FOR UPDATE SKIP LOCKED` are committed before the provider call; per message it re-checks campaign status, suppression, consent and the guard. Throttling → back to `pending` with backoff; account/credential problems → `pending` + campaign `blocked`; anything uncertain → `unknown`. SES SDK retries stay off.
+- **DB guards:** `messages` status is forward-only (trigger `messages_guard`); snapshots, recipients, links and `campaign_transitions` are append-only; campaigns are never deleted.
+- **Uncertain sends** may be resent or marked not sent only by an admin, after 60 minutes, audited; a resend is `attempt_no + 1`.
+- **Events:** `/api/ses-events` accepts only verified SNS messages for `SES_EVENTS_TOPIC_ARN` (cert host `sns.<region>.amazonaws.com`, signature v1/v2, 24 h window). It never calls `SubscribeURL`. Events dedupe on the SNS MessageId. Hard bounce and complaint suppress automatically.
+- **Unsubscribe:** `GET /u/<token>` only confirms; `POST` (button or RFC 8058 one-click) suppresses. The token is opaque; the page shows a masked address.
+- **Test-only hooks** (`SNS_TEST_PUBLIC_KEY_FILE`, `MOCK_TRANSPORT_LOG`, `MOCK_SEND_DELAY_MS`) are refused outside APP_ENV local/test.
+- Send maintenance cron (`campaign_maintenance`, `test_send_reaper`) is registered whatever `NOTION_MODE` is.
+
+## Scheduling rules (M6; do not break)
+- Code: `src/lib/campaigns/schedule.ts` (schedule, reschedule, unschedule, fenced start), `schedule-time.ts` (zone/DST logic), `alerts.ts`.
+- Store `scheduled_at_utc` + `schedule_tz` (+ the local time as entered and the offset). Default zone Asia/Ho_Chi_Minh. Show the zone and UTC everywhere a schedule appears.
+- Reject past times, times less than 2 minutes ahead, nonexistent DST times (suggest the next valid time); an ambiguous DST time needs an explicit offset.
+- Scheduling uses the same snapshot freeze as Send now (`approveCampaign`). Admin only.
+- **Fenced start:** `startScheduled` locks the row and moves `scheduled → queued` only if still scheduled, at the payload's revision, and due. The start job (`start:<id>`, replace mode) and the every-minute sweeper both use it; never rely on the queue.
+- Reschedule increments `schedule_revision`; unschedule returns to draft (revision++, snapshot cleared, unsent messages cancelled — the only snapshot change the DB trigger allows).
+- Late start beyond `scheduling.grace_minutes` (default 30) → `held_overdue`, not sent, admin alert. Default is NOT to send.
+- Admin alerts are emailed only through the guard (never in `disabled`).
+
 ## UI rules (M4)
 - Plain CSS tokens in `src/app/globals.css` (light/dark, cookie theme). No Tailwind. lucide icons, no emoji icons.
 - Staff pages render inside `AppShell` (`src/app/app-shell.tsx`). Never link `/internal` from the chrome.
 - Keep every existing `data-testid` and the copy that tests assert. Never add a test id starting with `region-` (the editor tests prefix-match it). Test ids must stay unique per page (`getByTestId` is strict).
 - Do not change the editor's logic for styling purposes (`template-editor.tsx`, `preview/route.ts`).
-- E2E screenshots go to the folder named by `PASTE_WORKFLOW_SHOTS`, `UI_SHOTS` or `TEST_SEND_SHOTS`. Never overwrite committed evidence from an earlier cycle.
+- E2E screenshots go to the folder named by `PASTE_WORKFLOW_SHOTS`, `UI_SHOTS`, `TEST_SEND_SHOTS` or `CAMPAIGN_SHOTS`. Never overwrite committed evidence from an earlier cycle.
 - Some checked-out files use CRLF. When scripting edits, normalize line endings first, and prefer the Edit/Write tools for code that contains backslashes.
 
 ## Test tooling rules

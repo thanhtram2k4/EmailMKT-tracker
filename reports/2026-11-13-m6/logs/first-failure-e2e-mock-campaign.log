@@ -1,0 +1,66 @@
+
+> email-mkt-tracker@0.1.0 e2e:mock-campaign
+> tsx scripts/local-stack.ts --send-mode mock --log-dir .local/logs/e2e-mock-campaign -- playwright test tests/e2e/campaign-send.spec.ts tests/e2e/campaign-schedule.spec.ts
+
+[core] WARNING: Executable file detection not yet supported on 'win32'.
+Your pool doesn't have all of the error handlers! See: https://err.red/wpeh?v=0.18.0&method=connect
+migrations applied (app + graphile_worker)
+[stack] postgres ready on 54332; logs in D:\AI Studio\Email MKT Tracker\.local\logs\e2e-mock-campaign
+[stack] building web app (next build)…
+[stack] web + worker healthy at http://localhost:3100
+
+Running 10 tests using 1 worker
+
+  x   1 [chromium] › tests\e2e\campaign-schedule.spec.ts:85:1 › each campaign page shows the schedule card for admins only; disabled mode blocks it (30.3s)
+  -   2 [chromium] › tests\e2e\campaign-schedule.spec.ts:108:3 › mock sending › OR-SCH-01: validation in the UI, then a schedule that the worker runs with the browser closed (S7, MOCK)
+  -   3 [chromium] › tests\e2e\campaign-schedule.spec.ts:176:3 › mock sending › OR-SCH-02: reschedule increments the revision; cancel means never dispatched and the start job is removed
+  -   4 [chromium] › tests\e2e\campaign-schedule.spec.ts:200:3 › mock sending › OR-SCH-03: unschedule returns the campaign to draft with a clear banner
+  -   5 [chromium] › tests\e2e\campaign-schedule.spec.ts:212:3 › mock sending › OR-SCH-04: after a (simulated) outage beyond the grace period the worker holds the campaign and alerts; an admin sends it now
+  -   6 [chromium] › tests\e2e\campaign-send.spec.ts:104:1 › disabled mode: review blocks and Send now is off
+  ok  7 [chromium] › tests\e2e\campaign-send.spec.ts:122:3 › mock sending › OR-CMP-01: create → review (exclusions) → send now → completed; each recipient sent once (6.1s)
+  ok  8 [chromium] › tests\e2e\campaign-send.spec.ts:157:3 › mock sending › OR-CMP-02: unsubscribe — GET only confirms, the button and one-click POST suppress (1.2s)
+  ok  9 [chromium] › tests\e2e\campaign-send.spec.ts:190:3 › mock sending › OR-CMP-03: a signed SES Delivery event over HTTP updates the campaign; a bad signature is refused (831ms)
+  ok 10 [chromium] › tests\e2e\campaign-send.spec.ts:218:3 › mock sending › member: can create and review a draft but cannot send it (1.8s)
+
+
+  1) [chromium] › tests\e2e\campaign-schedule.spec.ts:85:1 › each campaign page shows the schedule card for admins only; disabled mode blocks it 
+
+    Test timeout of 30000ms exceeded.
+
+    Error: locator.fill: Test timeout of 30000ms exceeded.
+    Call log:
+      - waiting for getByTestId('dev-email')
+
+
+      44 | async function signIn(page: Page, who = "admin@example.com") {
+      45 |   await page.goto("/sign-in");
+    > 46 |   await page.getByTestId("dev-email").fill(who);
+         |                                       ^
+      47 |   await page.getByTestId("dev-sign-in").click();
+      48 |   await expect(page.getByTestId("current-user")).toContainText(who);
+      49 | }
+        at signIn (D:\AI Studio\Email MKT Tracker\tests\e2e\campaign-schedule.spec.ts:46:39)
+        at D:\AI Studio\Email MKT Tracker\tests\e2e\campaign-schedule.spec.ts:100:3
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results\campaign-schedule-each-cam-1ce7b-nly-disabled-mode-blocks-it-chromium\test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results\campaign-schedule-each-cam-1ce7b-nly-disabled-mode-blocks-it-chromium\error-context.md
+
+    attachment #3: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results\campaign-schedule-each-cam-1ce7b-nly-disabled-mode-blocks-it-chromium\trace.zip
+    Usage:
+
+        npx playwright show-trace test-results\campaign-schedule-each-cam-1ce7b-nly-disabled-mode-blocks-it-chromium\trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  1 failed
+    [chromium] › tests\e2e\campaign-schedule.spec.ts:85:1 › each campaign page shows the schedule card for admins only; disabled mode blocks it 
+  1 skipped
+  4 did not run
+  4 passed (43.9s)
+[stack] cleanup ok: 5 owned process(es) stopped, none left
+[stack] stopped (exit 1)
+exit=1

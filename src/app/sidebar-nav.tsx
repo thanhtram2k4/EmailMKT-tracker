@@ -1,7 +1,7 @@
 "use client";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Database, LayoutDashboard, Mail, Menu, RefreshCw, Send, ShieldCheck, TriangleExclamationPoint, Users, X } from "lucide-react";
+import { Ban, CalendarClock, Database, LayoutDashboard, Mail, Megaphone, Menu, RefreshCw, Send, ShieldCheck, TriangleExclamationPoint, Users, X } from "lucide-react";
 import { useEffect, useState, type ReactNode } from "react";
 
 type Item = { href: string; label: string; icon: ReactNode; adminOnly?: boolean; exact?: boolean };
@@ -18,9 +18,17 @@ const GROUPS: Group[] = [
       { href: "/contacts", label: "Contacts", icon: I(Users), exact: true },
       { href: "/contacts/issues", label: "Data issues", icon: I(TriangleExclamationPoint) },
       { href: "/sync", label: "Sync", icon: I(RefreshCw) },
+      { href: "/suppressions", label: "Suppressions", icon: I(Ban) },
     ],
   },
-  { title: "Nội dung", items: [{ href: "/templates", label: "Emails", icon: I(Mail) }] },
+  {
+    title: "Nội dung",
+    items: [
+      { href: "/templates", label: "Emails", icon: I(Mail) },
+      { href: "/campaigns", label: "Campaigns", icon: I(Megaphone) },
+      { href: "/campaigns/scheduled", label: "Scheduled", icon: I(CalendarClock) },
+    ],
+  },
   {
     title: "Quản trị",
     items: [
@@ -31,9 +39,16 @@ const GROUPS: Group[] = [
   },
 ];
 
+const ALL_ITEMS = GROUPS.flatMap((g) => g.items);
+
+/**
+ * The current item is the one whose href is the LONGEST match of the path ("/" only exactly), so
+ * /campaigns/scheduled marks "Scheduled", not "Campaigns", and /contacts/<id> marks "Contacts".
+ */
 function isCurrent(path: string, it: Item): boolean {
-  if (it.exact) return path === it.href || (it.href === "/contacts" && /^\/contacts\/(?!issues)[^/]+$/.test(path));
-  return path === it.href || path.startsWith(`${it.href}/`);
+  const matches = (x: Item) => (x.href === "/" ? path === "/" : path === x.href || path.startsWith(`${x.href}/`));
+  if (!matches(it)) return false;
+  return !ALL_ITEMS.some((o) => o !== it && matches(o) && o.href.length > it.href.length);
 }
 
 export function SidebarNav({ isAdmin, children }: { isAdmin: boolean; children: ReactNode }) {
