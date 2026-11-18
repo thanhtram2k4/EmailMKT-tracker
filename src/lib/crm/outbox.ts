@@ -1,6 +1,6 @@
 /**
- * Notion outbox: app → Notion writes of APP-OWNED fields only (subscription status now; last
- * emailed / last engagement from M5/M7). Processed by the worker, rate limited by the shared
+ * Notion outbox: app → Notion writes of APP-OWNED fields only: subscription status (M2) and, from
+ * M8, last emailed / last engagement (`set_engagement`). Processed by the worker, rate limited by the shared
  * Notion client, retried with backoff, and visible on the Sync screen when it fails.
  *
  * Coalescing: one pending row per (page, kind); a newer value replaces the older payload.
@@ -49,7 +49,7 @@ export async function flushOutbox(
         where status = 'pending' and next_attempt_at <= ${now().toISOString()}::timestamptz
         order by id for update skip locked limit ${opts.limit ?? 50})
       returning id, notion_page_id, kind, payload, attempts`)
-  ).rows as Array<{ id: number; notion_page_id: string; kind: string; payload: { label: string }; attempts: number }>;
+  ).rows as Array<{ id: number; notion_page_id: string; kind: string; payload: { label?: string; lastEmailed?: string | null; lastEngagement?: string | null }; attempts: number }>;
 
   const r: FlushResult = { claimed: claimed.length, done: 0, retrying: 0, failed: 0 };
   for (const row of claimed) {
@@ -63,6 +63,23 @@ export async function flushOutbox(
         where id = ${row.id} and payload = ${JSON.stringify(row.payload)}::jsonb and attempts = ${row.attempts}`);
     };
     try {
+      if (row.kind === "set_engagement") {
+        // M8: app-owned dates (absolute values: safe to retry).
+        const props: Record<string, unknown> = {};
+        const f = c.mapping.fields;
+        const t = c.mapping.types as Record<string, string | undefined>;
+        if (f.lastEmailed && t.lastEmailed === "date") props[f.lastEmailed] = { date: row.payload.lastEmailed ? { start: row.payload.lastEmailed } : null };
+        if (f.lastEngagement && t.lastEngagement === "date") props[f.lastEngagement] = { date: row.payload.lastEngagement ? { start: row.payload.lastEngagement } : null };
+        if (!Object.keys(props).length) {
+          await finish("failed", "Last emailed / Last engagement are not mapped to date properties");
+          r.failed++;
+          continue;
+        }
+        await c.client.updatePageProperties(row.notion_page_id, props);
+        await finish("done", null);
+        r.done++;
+        continue;
+      }
       if (row.kind !== "set_subscription") {
         await finish("failed", `unknown outbox kind ${row.kind}`);
         r.failed++;
@@ -75,7 +92,7 @@ export async function flushOutbox(
         r.failed++;
         continue;
       }
-      await c.client.updatePageProperties(row.notion_page_id, subscriptionWrite(c.mapping.fields, type, row.payload.label));
+      await c.client.updatePageProperties(row.notion_page_id, subscriptionWrite(c.mapping.fields, type, row.payload.label ?? ""));
       await finish("done", null);
       r.done++;
     } catch (e) {

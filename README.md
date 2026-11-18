@@ -1,6 +1,6 @@
 # Email MKT Tracker
 
-This is an internal email-marketing tool. **Current state: M7** (open/click tracking and analytics on top of the M5–M6 send engine and scheduling), verified locally with a mock transport only. Contacts are synchronized from a Notion CRM; emails are pasted, edited, personalized and test-sent (M3–M4).
+This is an internal email-marketing tool. **Current state: M8** (Notion campaign summaries, security hardening, backups and the release regression on top of M1–M7), verified locally with mocks only. The live controlled campaign is still blocked on account setup and legal answers. Operations: [docs/RUNBOOK.md](docs/RUNBOOK.md). Contacts are synchronized from a Notion CRM; emails are pasted, edited, personalized and test-sent (M3–M4).
 
 M1 foundation:
 - staff sign-in limited to the company domain and a staff allowlist
@@ -127,6 +127,11 @@ Internal test tooling (labelled fixtures, GrapesJS comparison) is at `/internal/
 4. Click a recipient's name for their **timeline** (sent, delivery events, opens, clicks, unsubscribe, with flags).
 5. Test sends are never tracked or counted.
 
+### Walkthrough: Notion summaries and backups (M8)
+1. **Settings → Notion → Email Campaigns database:** an admin gives a parent page (shared with the integration) and creates the database. After each campaign finishes, the worker writes one summary page (on completion, +24 h, +72 h, +7 days). Contacts' "Last emailed" and "Last engagement" are written back when those properties are mapped.
+2. The campaign page shows whether its Notion summary was written and the last error, if any. Notion problems never stop sending.
+3. Backups: `npm run backup -- export --out <dir>`, `restore --from <dir> --database-url <empty migrated db>`, `verify …`, and `drill --out <dir>` (local only). See the runbook.
+
 ## Checks
 ```bash
 npm run lint && npm run typecheck
@@ -136,7 +141,8 @@ npm run e2e                  # throwaway DB + production build + worker + mock N
 npm run smoke:local          # same isolated stack, runs the smoke suite (results in .local/logs/smoke/)
 npm run e2e:mock-send        # stack with SEND_MODE=mock: test-send UI flow (nothing leaves the machine)
 npm run smoke:mock-send      # smoke suite with SEND_MODE=mock (S5-mock, S6-mock)
-npm run e2e:mock-campaign    # stack with SEND_MODE=mock: campaign UI flow, unsubscribe, signed SES event
+npm run e2e:mock-campaign    # stack with SEND_MODE=mock: campaigns, unsubscribe, SES events, scheduling, tracking
+tsx scripts/log-audit.ts .local/logs/e2e .local/logs/smoke   # no unmasked email addresses in stack logs
 ```
 The local stack only accepts `--send-mode disabled|mock`; it never starts a real send mode.
 

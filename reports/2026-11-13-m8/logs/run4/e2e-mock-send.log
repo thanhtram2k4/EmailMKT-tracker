@@ -1,0 +1,25 @@
+
+> email-mkt-tracker@0.1.0 e2e:mock-send
+> tsx scripts/local-stack.ts --send-mode mock --log-dir .local/logs/e2e-mock-send -- playwright test tests/e2e/test-send.spec.ts
+
+[core] WARNING: Executable file detection not yet supported on 'win32'.
+Your pool doesn't have all of the error handlers! See: https://err.red/wpeh?v=0.18.0&method=connect
+migrations applied (app + graphile_worker)
+[stack] postgres ready on 54332; logs in D:\AI Studio\Email MKT Tracker\.local\logs\e2e-mock-send
+[stack] building web app (next build)…
+[stack] web + worker healthy at http://localhost:3100
+
+Running 5 tests using 1 worker
+
+(node:22828) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ok 1 [chromium] › tests\e2e\test-send.spec.ts:44:1 › subject preview: fallbacks for each sample; unknown field reported (3.5s)
+  -  2 [chromium] › tests\e2e\test-send.spec.ts:74:3 › SEND_MODE=disabled › R-TS-12: the button is disabled and the panel explains why
+  ok 3 [chromium] › tests\e2e\test-send.spec.ts:86:3 › SEND_MODE=mock › OR-TS-01: subject with fallback → preview → send test to the allowlisted inbox → history (2.4s)
+  ok 4 [chromium] › tests\e2e\test-send.spec.ts:105:3 › SEND_MODE=mock › R-TS-02 (UI): a typed address that is not allowlisted is refused and not sent (2.0s)
+  ok 5 [chromium] › tests\e2e\test-send.spec.ts:117:3 › SEND_MODE=mock › a missing value without fallback blocks the send and lists the problem (1.8s)
+
+  1 skipped
+  4 passed (11.4s)
+[stack] cleanup ok: 5 owned process(es) stopped, none left
+[stack] stopped (exit 0)

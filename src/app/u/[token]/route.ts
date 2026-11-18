@@ -8,6 +8,7 @@
 import { getDb } from "../../../lib/db/client";
 import { getLogger } from "../../../lib/logger";
 import { lookupToken, unsubscribeByToken } from "../../../lib/campaigns/unsubscribe";
+import { limited } from "../../../lib/campaigns/tracking-http";
 
 export const dynamic = "force-dynamic";
 
@@ -38,7 +39,9 @@ button:focus-visible{outline:3px solid #93c5fd;outline-offset:2px}
 const notFound = () =>
   page(404, "Liên kết không hợp lệ", `<h1>Liên kết không hợp lệ</h1><p>Liên kết hủy đăng ký này không tồn tại hoặc đã bị thay đổi.</p><p class="muted">This unsubscribe link is not valid.</p>`);
 
-export async function GET(_req: Request, ctx: { params: Promise<{ token: string }> }) {
+export async function GET(req: Request, ctx: { params: Promise<{ token: string }> }) {
+  const tooMany = limited(req, "unsubscribe");
+  if (tooMany) return tooMany;
   const { token } = await ctx.params;
   const found = await lookupToken(getDb(), token);
   if (!found) return notFound();
@@ -56,6 +59,8 @@ export async function GET(_req: Request, ctx: { params: Promise<{ token: string 
 }
 
 export async function POST(req: Request, ctx: { params: Promise<{ token: string }> }) {
+  const tooMany = limited(req, "unsubscribe");
+  if (tooMany) return tooMany;
   const { token } = await ctx.params;
   const body = (await req.text()).slice(0, 2000);
   const oneClick = /(^|&)List-Unsubscribe=One-Click(&|$)/.test(body);

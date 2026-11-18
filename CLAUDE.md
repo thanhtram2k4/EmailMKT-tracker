@@ -65,7 +65,9 @@ TypeScript on Node 22.18+ (developed on Node 24).
 | Paste workflow / editor trial | `npm run e2e -- tests/e2e/paste-workflow.spec.ts` · `npm run e2e -- tests/e2e/editor-trial.spec.ts` (results in `test-results/editor-trial/`; extra local inputs only via `EDITOR_TRIAL_EXTRA_DIR`) |
 | E2E / smoke | `npm run e2e` · `npm run smoke:local` (each starts an isolated stack, runs, then tears it down) |
 | Mock test sends | `npm run e2e:mock-send` · `npm run smoke:mock-send` (stack with `SEND_MODE=mock`) |
-| Mock campaigns (M5–M6) | `npm run e2e:mock-campaign` (campaign UI, unsubscribe, signed SES event, scheduling incl. a real ~4-minute wait) |
+| Mock campaigns (M5–M7) | `npm run e2e:mock-campaign` (campaign UI, unsubscribe, signed SES event, scheduling incl. a real ~4-minute wait, tracking) |
+| Backups (M8) | `npm run backup -- export --out <dir>` · `restore --from <dir> --database-url <url>` · `verify …` · `drill --out <dir>` (local only) |
+| Log PII audit (M8) | `tsx scripts/log-audit.ts <stack log dir>…` |
 | New migration | edit `src/lib/db/schema.ts`, then `npm run db:generate` |
 
 ## Sending rules (do not break)
@@ -106,7 +108,7 @@ TypeScript on Node 22.18+ (developed on Node 24).
 - **Notion retries:**
   - 429 and 529 are always retried, using `Retry-After`.
   - Other 5xx are retried only for reads and idempotent property writes.
-  - Creates are never retried.
+  - Creates are never retried. M8 summary pages: the same create request is never retried; a later run may create a page only after a fresh query by Campaign ID finds none (`src/lib/crm/campaign-summaries.ts`).
 - **Tests use `scripts/notion-mock/` only.** All synthetic addresses are on reserved domains (`example.com/org/net`, `*.example`).
 
 ## Template rules (M3; do not break)
@@ -163,6 +165,13 @@ TypeScript on Node 22.18+ (developed on Node 24).
 - Link rewriting runs on the frozen template before merge rendering with the same selection as `extractLinks()`.
 - Raw events are kept; automation flags are additive. Store IPs only as an HMAC; truncate user agents.
 - Metrics count only the current snapshot; unique openers include implied opens from clicks.
+
+## Notion summaries, security and backups (M8; do not break)
+- Summaries (`src/lib/crm/campaign-summaries.ts`): one page per finished campaign in the "Email Campaigns" database, rewritten on completion, +24 h, +72 h, +7 days; failures never affect sending. "Last emailed" / "Last engagement" go through `notion_outbox` (`set_engagement`, absolute values).
+- Every page, route and Server Function checks the signed-in staff member, except the public endpoints declared in `tests/unit/security-static.test.ts`; admin-only actions are pinned there too. A new action or route must be classified in that test.
+- Public endpoints (`/u`, `/o`, `/c`, `/api/ses-events`) are rate limited per client. The client IP comes from `X-Forwarded-For` counted from the right by `TRUSTED_PROXY_HOPS`; never use the left-most entry.
+- Logs must not contain unmasked email addresses (`scripts/log-audit.ts` runs after the stack suites).
+- Backups (`npm run backup`): restore only into an empty database migrated to the same version; the drill only against a local server. Backups contain personal data: never commit them.
 
 ## UI rules (M4)
 - Plain CSS tokens in `src/app/globals.css` (light/dark, cookie theme). No Tailwind. lucide icons, no emoji icons.

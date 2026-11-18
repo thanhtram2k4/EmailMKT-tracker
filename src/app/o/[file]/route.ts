@@ -6,11 +6,13 @@
 import { getConfig } from "../../../lib/config";
 import { getDb } from "../../../lib/db/client";
 import { recordOpen } from "../../../lib/campaigns/tracking";
-import { NO_STORE, notFound, PIXEL, requestInfo } from "../../../lib/campaigns/tracking-http";
+import { limited, NO_STORE, notFound, PIXEL, requestInfo } from "../../../lib/campaigns/tracking-http";
 
 export const dynamic = "force-dynamic";
 
 async function handle(req: Request, ctx: { params: Promise<{ file: string }> }) {
+  const tooMany = limited(req, "open");
+  if (tooMany) return tooMany;
   const { file } = await ctx.params;
   const m = /^([A-Za-z0-9_-]{16,64})\.gif$/.exec(file);
   if (!m) return notFound();

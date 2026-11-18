@@ -192,6 +192,8 @@ export const contacts = pgTable(
     // App-owned engagement fields (written from M5/M7, mirrored to Notion).
     lastEmailedAt: ts("last_emailed_at"),
     lastEngagementAt: ts("last_engagement_at"),
+    /** M8: when last emailed / last engagement were last queued for the Notion write-back. */
+    engagementQueuedAt: ts("engagement_queued_at"),
     createdAt: ts("created_at").notNull().defaultNow(),
     updatedAt: ts("updated_at").notNull().defaultNow(),
   },
@@ -292,6 +294,9 @@ export const notionConnection = pgTable("notion_connection", {
   updatedAt: ts("updated_at").notNull().defaultNow(),
   lastVerifiedAt: ts("last_verified_at"),
   lastError: text("last_error"),
+  /** M8: the "Email Campaigns" summary database (created by the app under a parent page). */
+  campaignsDatabaseId: text("campaigns_database_id"),
+  campaignsDataSourceId: text("campaigns_data_source_id"),
 });
 
 export const syncMode = pgEnum("sync_mode", ["full", "incremental"]);
@@ -759,3 +764,23 @@ export const adminAlerts = pgTable(
   },
   (t) => [index("admin_alerts_open_idx").on(t.acknowledgedAt, t.createdAt), index("admin_alerts_email_idx").on(t.emailStatus)],
 );
+
+// ================================================================ M8: Notion campaign summaries
+
+/**
+ * One Notion summary page per finished campaign, rewritten at fixed stages after it finished
+ * (on completion, +24 h, +72 h, +7 d). The page is created only after a fresh query by Campaign ID
+ * finds none; updates are idempotent property writes.
+ */
+export const campaignNotionSummaries = pgTable("campaign_notion_summaries", {
+  campaignId: uuid("campaign_id")
+    .primaryKey()
+    .references(() => campaigns.id),
+  notionPageId: text("notion_page_id"),
+  stagesDone: text("stages_done").array().notNull().default(emptyTextArray),
+  lastStage: text("last_stage"),
+  lastWrittenAt: ts("last_written_at"),
+  lastError: text("last_error"),
+  attempts: integer("attempts").notNull().default(0),
+  updatedAt: ts("updated_at").notNull().defaultNow(),
+});

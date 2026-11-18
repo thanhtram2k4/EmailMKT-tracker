@@ -1,0 +1,11 @@
+lint	0	46s
+typecheck	0	24s
+unit	0	17s
+integration	0	346s
+tooling	0	71s
+smoke-disabled	0	122s
+e2e-disabled	1	541s
+e2e-mock-send	0	142s
+e2e-mock-campaign	1	555s
+smoke-mock	0	184s
+log-audit	0	7s

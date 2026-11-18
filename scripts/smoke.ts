@@ -500,6 +500,84 @@ rows.push({
   notes: "Needs real sending approval, SES setup, a deployed tracking domain and a live Notion connection.",
 });
 
+// S11 (M8) — Notion summaries against the MOCK Notion server over HTTP: create the Email Campaigns
+// database; send a campaign to a contact that was really synced from the mock Notion; write the
+// summaries and the Last emailed / Last engagement write-back; check the contact's page in the mock.
+if (process.env.DATABASE_URL && process.env.NOTION_MODE === "mock" && (process.env.SEND_MODE ?? "disabled") === "mock") {
+  await check("S11-mock", "Notion summaries (mock Notion over HTTP): Email Campaigns database created; one summary page per finished campaign; Last emailed written back to a synced contact's page", "MOCK", async () => {
+    const { getConfig } = await import("../src/lib/config.ts");
+    const { getDb, closeDb } = await import("../src/lib/db/client.ts");
+    const { sql } = await import("drizzle-orm");
+    const { notionEnvFromConfig } = await import("../src/lib/crm/notion-env.ts");
+    const { createCampaignsDatabase, queueEngagementWrites, writeCampaignSummaries } = await import("../src/lib/crm/campaign-summaries.ts");
+    const { flushOutbox } = await import("../src/lib/crm/outbox.ts");
+    const { importTemplate, saveSubject } = await import("../src/lib/templates/service.ts");
+    const { approveAndSendNow, createCampaign, reviewCampaign } = await import("../src/lib/campaigns/service.ts");
+    const { enqueueDispatch, releaseWorkerUtils } = await import("../src/lib/jobs.ts");
+    const { MOCK_PARENT_PAGE_ID } = await import("./notion-mock/seed.ts");
+    const run = Date.now().toString(36);
+    try {
+      const db = getDb();
+      const cfg = getConfig();
+      const env = notionEnvFromConfig(getConfig());
+      // A contact synced from the mock Notion (S3-mock), eligible apart from consent: record consent and tag it.
+      const c0 = (await db.execute(sql`select c.id, c.email_normalized, c.notion_page_id from contacts c where c.state = 'active' and c.email_status = 'valid' and not c.is_duplicate
+                                       and not exists (select 1 from suppressions s where s.email_normalized = c.email_normalized)
+                                       and c.notion_page_id not like 'smoke-%' and c.notion_page_id not like 'e2e-%' order by c.email_normalized limit 1`)).rows[0] as { id: string; email_normalized: string; notion_page_id: string };
+      await db.execute(sql`insert into consent_records (email_normalized, purpose, status, source, recorded_by, evidence_ref) values (${c0.email_normalized}, 'marketing_email', 'granted', 'staff_entry', 'smoke', 'SMOKE-S11')`);
+      await db.execute(sql`update contacts set tags = array_append(tags, ${`smoke-s11-${run}`}) where id = ${c0.id}`);
+      const t = await importTemplate(db, { name: "smoke S11", html: '<p>Xin chào</p><a href="{{ unsubscribe_url }}">Hủy</a>', sourceKind: "paste", actor: "smoke" });
+      const v = await saveSubject(db, { templateId: t.template.id, baseVersionId: t.version.id, subject: "[QC] Smoke S11", actor: "smoke" });
+      const camp = await createCampaign(db, { name: `Smoke S11 ${run}`, templateId: t.template.id, templateVersionId: v.id, audience: { kind: "tags", tags: [`smoke-s11-${run}`] }, actor: "system:smoke" });
+      const rv = await reviewCampaign(db, cfg, camp.id);
+      await approveAndSendNow(db, { cfg, enqueue: (id) => enqueueDispatch(id, cfg.DATABASE_URL) }, { campaignId: camp.id, expectedRevision: rv.campaign.scheduleRevision, expectedRecipients: 1, actor: "system:smoke" });
+      for (let k = 0; k < 120; k++) {
+        const st = ((await db.execute(sql`select status::text as s from campaigns where id = ${camp.id}`)).rows[0] as { s: string }).s;
+        if (st === "completed") break;
+        await new Promise((r) => setTimeout(r, 500));
+      }
+      const created = await createCampaignsDatabase(db, env, { parentPageIdOrUrl: MOCK_PARENT_PAGE_ID, actor: "system:smoke" });
+      const w = await writeCampaignSummaries(db, env);
+      const queued = await queueEngagementWrites(db, env);
+      const f = await flushOutbox(db, env);
+      const pages = ((await db.execute(sql`select count(*)::int as n from campaign_notion_summaries where notion_page_id is not null`)).rows[0] as { n: number }).n;
+      const finished = ((await db.execute(sql`select count(*)::int as n from campaigns where status in ('completed','completed_with_issues','cancelled','failed') and finished_at is not null and snapshot_id is not null`)).rows[0] as { n: number }).n;
+      const mockPages = (await (await fetch(`${cfg.notionBaseUrl}/__mock/pages`)).json()) as Array<{ id: string; lastEmailed: string | null }>;
+      const written = mockPages.find((p) => p.id === c0.notion_page_id)?.lastEmailed ?? null;
+      const outbox = (await db.execute(sql`select status::text as s, notion_page_id like 'smoke-%' as fake, count(*)::int as n from notion_outbox group by 1, 2`)).rows as Array<{ s: string; fake: boolean; n: number }>;
+      const realFailed = outbox.filter((o) => o.s === "failed" && !o.fake).reduce((a, o) => a + o.n, 0);
+      const fakeFailed = outbox.filter((o) => o.s === "failed" && o.fake).reduce((a, o) => a + o.n, 0);
+      const ok = created.ok && w.failed === 0 && pages === finished && pages > 0 && queued > 0 && written !== null && realFailed === 0;
+      return {
+        result: ok ? "PASS" : "FAIL",
+        notes: `database created: ${created.ok}; summaries written ${w.written} (pages ${pages} for ${finished} finished campaigns, failed ${w.failed}); engagement queued ${queued}; flush done ${f.done}; synced contact's Last emailed in mock Notion: ${written ? "set" : "MISSING"}; failed writes for real Notion pages ${realFailed}; expected 404s for smoke-inserted contacts that are not in Notion ${fakeFailed}`,
+      };
+    } finally {
+      await releaseWorkerUtils();
+      await closeDb();
+    }
+  });
+}
+
+// OPS-1 (M8) — restore drill on the local stack only: export the database the smoke run just filled
+// (synced contacts, sent / scheduled / tracked campaigns, events), restore into a fresh migrated
+// database on the same server, verify every table, drop it. Never against a remote database.
+if (process.env.DATABASE_URL && envLabel === "local-stack") {
+  await check("OPS-1", "Restore drill: export the populated stack database, restore into a fresh migrated database, every table verified (row count + checksum)", "MOCK", async () => {
+    const pgMod = (await import("pg")).default;
+    const { restoreDrill } = await import("../src/lib/ops/backup.ts");
+    const { migrateDatabase } = await import("./migrate.ts");
+    const out = path.join(outDir, "restore-drill");
+    const r = await restoreDrill(process.env.DATABASE_URL!, out, (u) => migrateDatabase(u, { quiet: true }), async (u) => {
+      const c = new pgMod.Client({ connectionString: u });
+      await c.connect();
+      return { client: c, end: () => c.end() };
+    });
+    fs.rmSync(out, { recursive: true, force: true }); // the export contains (synthetic) personal data; not kept as evidence
+    return { result: r.mismatches === 0 && r.rows > 0 ? "PASS" : "FAIL", notes: `${r.tables} tables, ${r.rows} rows restored; mismatches ${r.mismatches}; ${r.ms} ms` };
+  });
+}
+
 const finished = new Date();
 const summary = {
   baseUrl,

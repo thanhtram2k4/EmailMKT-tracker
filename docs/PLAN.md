@@ -55,6 +55,10 @@ Legend: `[ ]` todo · `[x]` done (with a link to evidence) · results are PASS /
 | 2026-11-13 | Unique openers include implied opens (a click without a recorded open), so CTOR never exceeds 100%; found in the M7 visual review | Implementation |
 | 2026-11-13 | M7 committed locally, tag `m7-checkpoint` (no push) | User |
 | 2026-11-13 | **M8 authorized** (Notion summaries, security hardening, backups, release) in the mock environment. The final live campaign stays BLOCKED until the user provides the M0 accounts and the legal answers (tracking consent, 3-email cap, `[QC]`) | User |
+| 2026-11-13 | Summary pages: the same create request is never retried; a later run creates a page only after a fresh query by Campaign ID finds none (refines the M2 "creates are never retried" rule) | Implementation |
+| 2026-11-13 | Client IP for rate limits and IP hashes: `X-Forwarded-For` counted from the right by `TRUSTED_PROXY_HOPS` (Render: 1). Fixes M7, which used the forgeable left-most entry | Implementation |
+| 2026-11-13 | Backups: provider-managed backups are primary in production; a provider-independent logical export/restore (`npm run backup`) exists for drills and migration | Implementation |
+| 2026-11-13 | Open for the user before production: how AWS credentials are supplied on the host (CLAUDE.md allows only an AWS profile today) | Implementation (question) |
 
 ## Open items (need user input)
 - [ ] Confirm assumptions A1–A7 ([DESIGN.md](DESIGN.md) "Assumptions")
@@ -356,14 +360,41 @@ Written during implementation (not before it), from DESIGN §4.3.
 | R-TRK-09 | `last_engagement_at` only from non-automated activity; recipient timeline order and first/latest activity |
 | R-TRK-10 | IP stored only as a keyed hash |
 
-## M8: Notion summaries, hardening and release
-- [ ] Notion "Email Campaigns" database with summaries (on completion, +24 h, +72 h, +7 d); last-emailed and last-engagement written back
-- [ ] Security review: auth, CSRF, secrets, token encryption, PII redaction, public-endpoint abuse limits
-- [ ] Backups and a restore drill; runbook
-- [ ] Full release regression; re-smoke on the final build
-- [ ] Live controlled campaign (4 simulator addresses and 3 allowlisted inboxes; one send-now, one scheduled) — **needs separate approval from the user**
+## M8: Notion summaries, hardening and release — implemented 2026-11-13 in the mock environment (evidence: [reports/2026-11-13-m8/report.md](../reports/2026-11-13-m8/report.md))
+Branch `m8-release` from `m7-checkpoint`. Not authorized: real email, AWS calls, deployment, push, live Notion.
 
-**Acceptance:** the release suite passes; the restore drill succeeds; the live campaign shows correct per-recipient results, analytics and Notion summaries; the release report is in `reports/`.
+- [x] Notion "Email Campaigns" database (created by an admin under a parent page) with one summary page per finished campaign, rewritten on completion, +24 h, +72 h and +7 days; the page is created only after a fresh query by Campaign ID finds none; failures are recorded and never affect sending
+- [x] "Last emailed" and "Last engagement" written back to the contacts' Notion pages through the outbox (`set_engagement`, absolute values, coalesced, rate limited)
+- [x] Security review, as regression tests:
+  - authentication on every page, route and Server Function except the declared public endpoints; the confirmed role rule pinned per action;
+  - CSRF: a foreign-origin Server Function post is refused (Next.js origin check), verified end to end;
+  - session cookie HttpOnly + SameSite=Lax; security headers (nosniff, SAMEORIGIN, Referrer-Policy, Permissions-Policy, COOP; HSTS in production builds);
+  - public-endpoint abuse limits (`/u` 60, `/c` 300, `/o` 600 per minute per client; SNS 3000/min); client IP from `X-Forwarded-For` counted from the right (`TRUSTED_PROXY_HOPS`) — fixes the forgeable left-most entry used in M7;
+  - secrets: no env files or keys tracked (test); token encryption unchanged (AES-256-GCM, M2);
+  - PII: no unmasked email in stack logs (`scripts/log-audit.ts`, run after the stack suites);
+  - dependencies: `npm audit` — no high/critical; 11 moderate, all development tooling (esbuild dev-server advisory via drizzle-kit; minimatch ReDoS via typescript-eslint), none loaded at runtime; documented in the M8 report
+- [x] Backups: provider-independent logical export / restore / verify (`npm run backup`), restore drill (integration test + smoke OPS-1 on the populated stack); runbook [RUNBOOK.md](RUNBOOK.md)
+- [x] Full release regression and re-smoke on the final build (MOCK)
+- [ ] Provider (Render) backups and a restore of them: **BLOCKED** (no hosting account)
+- [ ] Live controlled campaign (4 simulator addresses and 3 allowlisted inboxes; one send-now, one scheduled): **BLOCKED** — needs the M0 accounts, the legal answers (tracking consent, 3-email cap, `[QC]`) and separate approval
+
+**Acceptance:**
+- [x] The release suite passes on the final build (MOCK). See the M8 report for counts
+- [x] A restore drill succeeds (local logical backup; MOCK data). Provider restore drill: **BLOCKED**
+- [ ] The live campaign shows correct per-recipient results, analytics and Notion summaries: **BLOCKED** (live)
+- [x] The release report is in `reports/` (`reports/2026-11-13-m8/report.md`)
+
+### M8 regression additions
+| ID | Scenario |
+|---|---|
+| R-NOT-01 | Summary stages: latest due stage written; missed stages covered; nothing after +7 days |
+| R-NOT-02 | One summary page per campaign across stages (same page rewritten) |
+| R-NOT-03 | An uncertain create (applied then failed) is adopted by the next run, not duplicated |
+| R-NOT-04 | Engagement write-back: only changed contacts queued; absolute dates written; re-queued after new engagement |
+| R-SEC-01…04 | Headers; CSRF; cookie flags; per-client rate limits that a forged X-Forwarded-For cannot bypass |
+| R-SEC-05 | Static: auth on every entry point; admin-only actions; no tracked secrets |
+| R-OPS-01 | Restore drill (export → fresh DB → restore → verify), tamper detection, non-empty target refused |
+| R-OPS-02 | No unmasked email addresses in stack logs |
 
 ## Phase 2: Gmail transport (not scheduled yet)
 - [ ] OAuth connect and disconnect (`gmail.send`); encrypted refresh token with a versioned key; quota with a reserve for company email; `invalid_grant` → `blocked: reconnect`; transport chosen per campaign

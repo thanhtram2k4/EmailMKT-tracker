@@ -5,7 +5,7 @@ import { APP_FIELDS, type AppField } from "../../../lib/crm/mapping";
 import { NotionDisabledError, loadConnection, notionEnvFromConfig } from "../../../lib/crm/notion-env";
 import { getDb } from "../../../lib/db/client";
 import { NOTION_API_VERSION } from "../../../lib/notion/types";
-import { connectNotionAction, createDatabaseAction, disconnectNotionAction, saveMappingAction } from "../../crm-actions";
+import { connectNotionAction, createCampaignsDatabaseAction, createDatabaseAction, disconnectNotionAction, saveMappingAction } from "../../crm-actions";
 import { AppShell } from "../../app-shell";
 import { Flash, Pill, fmtTime } from "../../ui";
 
@@ -69,6 +69,32 @@ export default async function NotionSettings({ searchParams }: { searchParams: P
             </>
           ) : (
             <p className="muted">Not connected.</p>
+          )}
+        </section>
+      )}
+
+      {conn?.status === "connected" && (
+        <section className="card" data-testid="campaigns-database">
+          <h2>Email Campaigns database (summaries)</h2>
+          {conn.campaignsDataSourceId ? (
+            <p className="small m0" data-testid="campaigns-database-connected">
+              Connected · data source <code>{conn.campaignsDataSourceId}</code>. Each finished campaign gets one summary page, updated on completion, +24 h, +72 h and +7 days. Contacts&apos;
+              “Last emailed” and “Last engagement” are written back when those properties are mapped.
+            </p>
+          ) : (
+            <form action={createCampaignsDatabaseAction} className="row">
+              <label>
+                Parent page (ID or URL, shared with the integration)
+                <input name="parent" required data-testid="campaigns-parent" />
+              </label>
+              <label>
+                Title
+                <input name="title" placeholder="Email Campaigns" />
+              </label>
+              <button className="btn" type="submit" data-testid="create-campaigns-database">
+                Create Email Campaigns database
+              </button>
+            </form>
           )}
         </section>
       )}

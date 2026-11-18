@@ -1,0 +1,51 @@
+
+> email-mkt-tracker@0.1.0 test:integration
+> vitest run --project integration
+
+
+ RUN  v5.1.0 D:/AI Studio/Email MKT Tracker
+
+stderr | tests/integration/worker.test.ts
+[core] WARNING: Executable file detection not yet supported on 'win32'.
+Your pool doesn't have all of the error handlers! See: https://err.red/wpeh?v=0.18.0&method=connect
+
+ ❯ |integration| tests/integration/worker.test.ts (5 tests | 1 failed) 8338ms
+   ❯ background worker (5)
+     × executes each queued job once even with two workers running 1880ms
+{"level":"info","time":"2026-11-13T13:16:28.546Z","service":"web","env":"unknown","build":"dev","request_id":"req-test","task":"test_send","test_send_id":"dd44947b-34b3-460b-b9b2-86c946bec136","status":"accepted","transport":"mock","to":"q***@example.com","msg":"test send attempted"}
+{"level":"info","time":"2026-11-13T13:16:28.733Z","service":"web","env":"unknown","build":"dev","request_id":"req-test","task":"test_send","test_send_id":"579101ed-886c-48c3-bd6c-a3978c59f57a","status":"accepted","transport":"mock","to":"q***@example.com","msg":"test send attempted"}
+{"level":"info","time":"2026-11-13T13:16:29.265Z","service":"web","env":"unknown","build":"dev","request_id":"req-test","task":"test_send","test_send_id":"1c0c5dde-226d-40ec-bb28-ccd90ce39f46","status":"accepted","transport":"mock","to":"q***@example.com","msg":"test send attempted"}
+{"level":"info","time":"2026-11-13T13:16:29.480Z","service":"web","env":"unknown","build":"dev","request_id":"req-test","task":"test_send","test_send_id":"17695f5b-6c7e-42df-b6b7-6053a2e8cc2f","status":"unknown","transport":"mock","to":"q***@example.com","msg":"test send attempted"}
+{"level":"info","time":"2026-11-13T13:16:29.529Z","service":"web","env":"unknown","build":"dev","request_id":"req-test","task":"test_send","test_send_id":"c29f58e7-72e8-427c-b84f-6a4813910f65","status":"unknown","transport":"mock","to":"q***@example.com","msg":"test send attempted"}
+{"level":"info","time":"2026-11-13T13:16:29.678Z","service":"web","env":"unknown","build":"dev","request_id":"req-test","task":"test_send","test_send_id":"fc8bdabe-25fc-4c00-9cc5-95ada63b8a30","status":"unknown","transport":"mock","to":"q***@example.com","msg":"test send attempted"}
+{"level":"info","time":"2026-11-13T13:16:29.840Z","service":"web","env":"unknown","build":"dev","request_id":"req-test","task":"test_send","test_send_id":"e31b49f6-6782-47c7-a3c3-b39fff749441","status":"accepted","transport":"mock","to":"q***@example.com","msg":"test send attempted"}
+{"level":"info","time":"2026-11-13T13:16:29.874Z","service":"web","env":"unknown","build":"dev","request_id":"req-test","task":"test_send","test_send_id":"4c3ef9f5-1e08-4233-b379-7bf0dd3698d4","status":"accepted","transport":"mock","to":"q***@example.com","msg":"test send attempted"}
+{"level":"info","time":"2026-11-13T13:16:30.423Z","service":"web","env":"unknown","build":"dev","request_id":"req-c86899ea-f33c-4d59-9990-5e17e2dd27cd","task":"test_send","test_send_id":"9e24ae42-92bd-4820-8a08-f0c291d46c45","status":"accepted","transport":"mock","to":"q***@example.com","msg":"test send attempted"}
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  |integration| tests/integration/worker.test.ts > background worker > executes each queued job once even with two workers running
+AssertionError: expected 1 to be +0 // Object.is equality
+
+- Expected
++ Received
+
+- 0
++ 1
+
+ ❯ tests/integration/worker.test.ts:97:28
+     95|     const pool = (await import("../../src/lib/db/client")).getPool(tdb…
+     96|     const left = await pool.query("select count(*)::int as n from grap…
+     97|     expect(left.rows[0].n).toBe(0);
+       |                            ^
+     98|   });
+     99|
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed | 10 passed (11)
+      Tests  1 failed | 103 passed (104)
+   Start at  20:10:48
+   Duration  357.73s (tests 85%, import 15%)
+

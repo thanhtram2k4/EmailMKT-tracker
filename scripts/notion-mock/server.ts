@@ -37,7 +37,8 @@ function summary() {
       const v = p.properties[n] as { title?: Array<{ plain_text: string }>; rich_text?: Array<{ plain_text: string }>; email?: string; select?: { name: string } | null } | undefined;
       return v?.title?.map((t) => t.plain_text).join("") ?? v?.rich_text?.map((t) => t.plain_text).join("") ?? v?.email ?? v?.select?.name ?? null;
     };
-    return { key: keyOf(p.id), id: p.id, name: text("Name"), email: text("Email"), subscription: text("Subscription status"), inTrash: p.inTrash, lastEdited: new Date(p.editedMs).toISOString() };
+    const lastEmailed = (p.properties["Last emailed"] as { date?: { start: string } | null } | undefined)?.date?.start ?? null;
+    return { key: keyOf(p.id), id: p.id, name: text("Name"), email: text("Email"), subscription: text("Subscription status"), lastEmailed, inTrash: p.inTrash, lastEdited: new Date(p.editedMs).toISOString() };
   });
 }
 

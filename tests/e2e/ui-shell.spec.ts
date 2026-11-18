@@ -106,10 +106,20 @@ for (const width of [375, 768, 1024, 1440]) {
         const over = document.documentElement.scrollWidth - document.documentElement.clientWidth;
         if (over <= 0) return null;
         const vw = document.documentElement.clientWidth;
-        const wide = [...document.querySelectorAll("main *")]
-          .filter((el) => el.getBoundingClientRect().right > vw + 1 && !el.closest(".table-wrap, .frame-wrap"))
-          .slice(0, 3)
-          .map((el) => `${el.tagName.toLowerCase()}.${(el as HTMLElement).className || ""}`);
+        // Diagnostics only (the assertion is on scrollWidth): anything whose right edge passes the viewport.
+        const wide = [...document.querySelectorAll("body *")]
+          .filter((el) => el.getBoundingClientRect().right > vw && !el.parentElement?.closest(".table-wrap, .frame-wrap"))
+          .slice(-3)
+          .map((el) => `${el.tagName.toLowerCase()}.${(el as HTMLElement).className || ""}[${el.getBoundingClientRect().right.toFixed(1)}] "${(el.textContent ?? "").trim().slice(0, 40)}"`);
+        // Text can overflow a box that itself fits (a long unbreakable string): check text nodes too.
+        const walker = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT);
+        const range = document.createRange();
+        for (let n = walker.nextNode(); n; n = walker.nextNode()) {
+          if (!n.textContent?.trim() || n.parentElement?.closest(".table-wrap, .frame-wrap")) continue;
+          range.selectNodeContents(n);
+          const right = range.getBoundingClientRect().right;
+          if (right > vw) wide.push(`text in ${n.parentElement?.tagName.toLowerCase()}.${n.parentElement?.className ?? ""}[${right.toFixed(1)}] "${n.textContent.trim().slice(0, 60)}"`);
+        }
         return { over, wide };
       });
       if (r) overflow.push(`${p.path}: +${r.over}px (${r.wide.join(", ")})`);
@@ -131,6 +141,8 @@ for (const width of [375, 768, 1024, 1440]) {
 }
 
 test("R-UI-04: axe finds no serious or critical violations, light and dark", async ({ page }) => {
+  // 12 pages × 2 colour schemes with axe: the budget grew with M5–M7's pages (timed out at 30 s on a slow run in M8).
+  test.setTimeout(180_000);
   await signIn(page, "admin@example.com");
   const report: Record<string, unknown> = {};
   const serious: string[] = [];

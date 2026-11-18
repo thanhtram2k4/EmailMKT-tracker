@@ -32,6 +32,7 @@
     "smoke:local": "tsx scripts/local-stack.ts --log-dir .local/logs/smoke -- tsx scripts/smoke.ts --env local-stack",
     "dev:all": "concurrently -n web,worker -c blue,magenta \"npm:dev\" \"npm:worker\"",
     "seed:fixtures": "tsx scripts/seed-fixtures.ts",
+    "backup": "tsx scripts/backup.ts",
     "playwright:install": "tsx scripts/playwright-install.ts",
     "notion:mock": "tsx scripts/notion-mock/server.ts",
     "notion:mock:ctl": "tsx scripts/notion-mock/ctl.ts",

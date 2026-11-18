@@ -9,6 +9,7 @@ import { campaignsNeedingDispatch, dispatchCampaign, makeRuntimeMock, reapStaleM
 import type { MockTransport } from "../lib/sending/transport";
 import { dueScheduledCampaigns, startScheduled } from "../lib/campaigns/schedule";
 import { emailPendingAlerts } from "../lib/campaigns/alerts";
+import { queueEngagementWrites, writeCampaignSummaries } from "../lib/crm/campaign-summaries";
 import { systemProbes } from "../lib/db/schema";
 import { withCorrelation } from "../lib/logger";
 
@@ -26,6 +27,8 @@ export const CRM_CRONTAB = [
   `*/10 * * * * crm_sync ?id=crm_sync_incremental&max=1&jobKey=crm_sync_scheduled {"mode":"incremental","trigger":"schedule"}`,
   `0 19 * * * crm_sync ?id=crm_sync_nightly&max=1&jobKey=crm_sync_nightly {"mode":"full","trigger":"nightly"}`,
   `* * * * * notion_outbox_flush ?id=notion_outbox_flush&max=1&jobKey=notion_outbox_flush`,
+  // M8: campaign summaries (staged after completion) and the contacts' engagement write-back.
+  `*/5 * * * * notion_summaries ?id=notion_summaries&max=1&jobKey=notion_summaries`,
 ].join("\n");
 
 /** M4: stale test-send claims become `unknown` (never retried). Every 5 minutes. */
@@ -134,7 +137,18 @@ export function makeTaskList(ctx: { workerId: string; databaseUrl: string; notio
     await emailPendingAlerts(db, { cfg, mock: runtimeMock });
   };
 
+  /** M8: Notion campaign summaries and the contacts' "Last emailed" / "Last engagement" write-back. */
+  const notionSummaries: Task = async (_payload, helpers) => {
+    const log = withCorrelation({ job_id: String(helpers.job.id), task: "notion_summaries" });
+    const db = getDb(ctx.databaseUrl);
+    const queued = await queueEngagementWrites(db, env());
+    const s = await writeCampaignSummaries(db, env());
+    if (queued || s.written || s.failed) log.info({ queued, ...s }, "notion summaries and engagement write-back");
+    if (queued > 0) await helpers.addJob("notion_outbox_flush", {}, { jobKey: "notion_outbox_flush", maxAttempts: 1 });
+  };
+
   return {
+    notion_summaries: notionSummaries,
     system_probe: systemProbe,
     crm_sync: crmSync,
     notion_outbox_flush: outboxFlush,

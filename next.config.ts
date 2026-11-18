@@ -13,6 +13,11 @@ const nextConfig: NextConfig = {
           { key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },
           // SAMEORIGIN (not DENY): the template preview is shown in a same-origin sandboxed iframe.
           { key: "X-Frame-Options", value: "SAMEORIGIN" },
+          // M8 hardening
+          { key: "Permissions-Policy", value: "camera=(), microphone=(), geolocation=(), payment=(), usb=()" },
+          { key: "Cross-Origin-Opener-Policy", value: "same-origin" },
+          // HSTS only for production builds served over HTTPS (APP_ENV is set at build time on the host).
+          ...(process.env.APP_ENV === "production" ? [{ key: "Strict-Transport-Security", value: "max-age=31536000; includeSubDomains" }] : []),
         ],
       },
     ];

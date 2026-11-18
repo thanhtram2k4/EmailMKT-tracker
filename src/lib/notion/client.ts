@@ -111,6 +111,11 @@ export class NotionClient {
     return this.request("POST", "/v1/databases", body, "non_idempotent");
   }
 
+  /** M8: create a page in a data source. Non-idempotent: never retried automatically (a retry could duplicate it). */
+  createPage(body: { parent: { type: "data_source_id"; data_source_id: string }; properties: Record<string, unknown> }): Promise<Page> {
+    return this.request("POST", "/v1/pages", body, "non_idempotent");
+  }
+
   private backoffMs(attempt: number) {
     return Math.min(30_000, 1000 * 2 ** (attempt - 1)) + Math.floor(this.random() * 250);
   }

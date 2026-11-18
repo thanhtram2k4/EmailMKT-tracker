@@ -92,9 +92,12 @@ describe("background worker", () => {
     });
     // system_probes.probe_id is the primary key and the task uses ON CONFLICT DO NOTHING,
     // so count job executions through graphile_worker instead: no job left, none failed.
+    // M8 fix (race found on a slow run): a task writes its probe row BEFORE Graphile Worker deletes the
+    // finished job, so wait for the queue to drain — but fail on any retried or failed job.
     const pool = (await import("../../src/lib/db/client")).getPool(tdb.url);
-    const left = await pool.query("select count(*)::int as n from graphile_worker.jobs");
-    expect(left.rows[0].n).toBe(0);
+    const failed = await pool.query("select count(*)::int as n from graphile_worker.jobs where attempts > 1 or last_error is not null");
+    expect(failed.rows[0].n).toBe(0);
+    await waitFor(async () => (await pool.query("select count(*)::int as n from graphile_worker.jobs")).rows[0].n === 0, 10_000);
   });
 
   it("flags a stale heartbeat as degraded (controlled clock)", async () => {

@@ -1,0 +1,161 @@
+
+> email-mkt-tracker@0.1.0 e2e
+> tsx scripts/local-stack.ts --log-dir .local/logs/e2e -- playwright test
+
+[core] WARNING: Executable file detection not yet supported on 'win32'.
+Your pool doesn't have all of the error handlers! See: https://err.red/wpeh?v=0.18.0&method=connect
+migrations applied (app + graphile_worker)
+[stack] postgres ready on 54332; logs in D:\AI Studio\Email MKT Tracker\.local\logs\e2e
+[stack] building web app (next build)…
+[stack] web + worker healthy at http://localhost:3100
+
+Running 67 tests using 1 worker
+
+  ok  1 [chromium] › tests\e2e\auth.spec.ts:20:1 › unauthenticated visitors are redirected to sign-in (2.5s)
+  ok  2 [chromium] › tests\e2e\auth.spec.ts:26:1 › allowlisted admin signs in, sees role and admin page, signs out (7.0s)
+  ok  3 [chromium] › tests\e2e\auth.spec.ts:46:1 › allowlisted member signs in but cannot open the admin page (3.3s)
+  ok  4 [chromium] › tests\e2e\auth.spec.ts:60:3 › stranger@example.com is rejected (ACCESS_DENIED_NOT_ALLOWLISTED) (2.4s)
+  ok  5 [chromium] › tests\e2e\auth.spec.ts:60:3 › outsider@example.net is rejected (ACCESS_DENIED_WRONG_DOMAIN) (2.3s)
+  ok  6 [chromium] › tests\e2e\auth.spec.ts:60:3 › revoked@example.com is rejected (ACCESS_DENIED_DISABLED) (2.3s)
+  ok  7 [chromium] › tests\e2e\auth.spec.ts:70:1 › revoking a signed-in member ends the session and blocks the next sign-in (8.1s)
+  ok  8 [chromium] › tests\e2e\auth.spec.ts:90:1 › healthz reports database and worker (154ms)
+  ok  9 [chromium] › tests\e2e\campaign-schedule.spec.ts:86:1 › each campaign page shows the schedule card for admins only; disabled mode blocks it (9.5s)
+  -  10 [chromium] › tests\e2e\campaign-schedule.spec.ts:109:3 › mock sending › OR-SCH-01: validation in the UI, then a schedule that the worker runs with the browser closed (S7, MOCK)
+  -  11 [chromium] › tests\e2e\campaign-schedule.spec.ts:177:3 › mock sending › OR-SCH-02: reschedule increments the revision; cancel means never dispatched and the start job is removed
+  -  12 [chromium] › tests\e2e\campaign-schedule.spec.ts:201:3 › mock sending › OR-SCH-03: unschedule returns the campaign to draft with a clear banner
+  -  13 [chromium] › tests\e2e\campaign-schedule.spec.ts:213:3 › mock sending › OR-SCH-04: after a (simulated) outage beyond the grace period the worker holds the campaign and alerts; an admin sends it now
+  ok 14 [chromium] › tests\e2e\campaign-send.spec.ts:104:1 › disabled mode: review blocks and Send now is off (8.2s)
+  -  15 [chromium] › tests\e2e\campaign-send.spec.ts:122:3 › mock sending › OR-CMP-01: create → review (exclusions) → send now → completed; each recipient sent once
+  -  16 [chromium] › tests\e2e\campaign-send.spec.ts:157:3 › mock sending › OR-CMP-02: unsubscribe — GET only confirms, the button and one-click POST suppress
+  -  17 [chromium] › tests\e2e\campaign-send.spec.ts:190:3 › mock sending › OR-CMP-03: a signed SES Delivery event over HTTP updates the campaign; a bad signature is refused
+  -  18 [chromium] › tests\e2e\campaign-send.spec.ts:218:3 › mock sending › member: can create and review a draft but cannot send it
+  ok 19 [chromium] › tests\e2e\campaign-tracking.spec.ts:46:1 › public tracking endpoints: unknown tokens are 404, never a redirect or a sign-in page (179ms)
+  -  20 [chromium] › tests\e2e\campaign-tracking.spec.ts:59:3 › mock sending › OR-TRK-01: opens and clicks over HTTP; redirect only to the snapshot URL; recorded vs filtered; timeline
+  -  21 [chromium] › tests\e2e\campaign-tracking.spec.ts:150:3 › mock sending › OR-ROLE-01: a member can create and review, but cannot schedule or send (confirmed role rule)
+  ok 22 [chromium] › tests\e2e\crm.spec.ts:44:3 › CRM with mock Notion (synthetic data) › admin connects the mock Notion database and reviews the mapping (7.2s)
+  ok 23 [chromium] › tests\e2e\crm.spec.ts:63:3 › CRM with mock Notion (synthetic data) › first sync imports the synthetic contacts with issues flagged (10.4s)
+  ok 24 [chromium] › tests\e2e\crm.spec.ts:85:3 › CRM with mock Notion (synthetic data) › data issues: duplicates can be resolved by choosing a primary (5.2s)
+  ok 25 [chromium] › tests\e2e\crm.spec.ts:99:3 › CRM with mock Notion (synthetic data) › consent: imported contacts are unknown; a grant needs evidence and is recorded by staff (5.3s)
+  ok 26 [chromium] › tests\e2e\crm.spec.ts:121:3 › CRM with mock Notion (synthetic data) › a 'resubscribe' in Notion never removes the suppression and is corrected in Notion (6.4s)
+  ok 27 [chromium] › tests\e2e\crm.spec.ts:138:3 › CRM with mock Notion (synthetic data) › a repeated full sync creates nothing new (6.6s)
+  ok 28 [chromium] › tests\e2e\crm.spec.ts:149:3 › CRM with mock Notion (synthetic data) › members can read contacts but cannot change settings or consent (4.3s)
+  ok 29 [chromium] › tests\e2e\editor-trial.spec.ts:86:5 › SYNTHETIC A › import, sanitize report, regions, checks (5.8s)
+  ok 30 [chromium] › tests\e2e\editor-trial.spec.ts:115:5 › SYNTHETIC A › edit text, image, button and link; save; reopen; export (9.1s)
+  ok 31 [chromium] › tests\e2e\editor-trial.spec.ts:199:5 › SYNTHETIC A › recipient previews and missing-name fallbacks (6.3s)
+  ok 32 [chromium] › tests\e2e\editor-trial.spec.ts:218:5 › SYNTHETIC A › responsive browser renderings and import fidelity (Chromium only) (12.4s)
+  ok 33 [chromium] › tests\e2e\editor-trial.spec.ts:242:5 › SYNTHETIC A › GrapesJS (candidate b): no-edit export fidelity, then an edit + save (12.1s)
+  ok 34 [chromium] › tests\e2e\editor-trial.spec.ts:86:5 › SYNTHETIC B › import, sanitize report, regions, checks (6.9s)
+  ok 35 [chromium] › tests\e2e\editor-trial.spec.ts:115:5 › SYNTHETIC B › edit text, image, button and link; save; reopen; export (9.2s)
+  ok 36 [chromium] › tests\e2e\editor-trial.spec.ts:199:5 › SYNTHETIC B › recipient previews and missing-name fallbacks (5.5s)
+  ok 37 [chromium] › tests\e2e\editor-trial.spec.ts:218:5 › SYNTHETIC B › responsive browser renderings and import fidelity (Chromium only) (15.1s)
+  ok 38 [chromium] › tests\e2e\editor-trial.spec.ts:242:5 › SYNTHETIC B › GrapesJS (candidate b): no-edit export fidelity, then an edit + save (13.3s)
+  ok 39 [chromium] › tests\e2e\editor-trial.spec.ts:290:1 › TipTap paste (candidate c): formatted text from a Google-Docs-like clipboard keeps bold/italic/links, drops styles (6.4s)
+  ok 40 [chromium] › tests\e2e\paste-workflow.spec.ts:55:1 › main UI: Paste HTML is the entry point; no fixture gallery or GrapesJS controls (3.4s)
+  ok 41 [chromium] › tests\e2e\paste-workflow.spec.ts:68:1 › paste → import → preview → edit text, image and link → save → reopen → export (13.2s)
+  ok 42 [chromium] › tests\e2e\paste-workflow.spec.ts:161:1 › formatting loss needs a choice: undo, keep, or HTML source (sanitized on save) (11.0s)
+  ok 43 [chromium] › tests\e2e\paste-workflow.spec.ts:214:1 › formatting toolbar is an explicit conversion with a preview of what it removes, and undo (9.0s)
+  ok 44 [chromium] › tests\e2e\paste-workflow.spec.ts:242:1 › a pasted fragment (no <html>/<body>) and a typed-markup attempt (5.9s)
+  ok 45 [chromium] › tests\e2e\paste-workflow.spec.ts:258:1 › internal tools are separate: members cannot open the lab (2.9s)
+  ok 46 [chromium] › tests\e2e\paste-workflow.spec.ts:264:1 › internal tools are separate: admin-only lab, not linked from the product UI (2.8s)
+  ok 47 [chromium] › tests\e2e\security.spec.ts:33:1 › SEC-01: security headers on app pages and public endpoints (173ms)
+  ok 48 [chromium] › tests\e2e\security.spec.ts:46:1 › SEC-02: a Server Function form posted from a foreign origin is refused (CSRF) (6.3s)
+  ok 49 [chromium] › tests\e2e\security.spec.ts:75:1 › SEC-03: the session cookie is HttpOnly and SameSite=Lax (2.3s)
+  ok 50 [chromium] › tests\e2e\security.spec.ts:83:1 › SEC-04: public endpoints are rate limited per client; a forged X-Forwarded-For entry does not bypass it (1.3s)
+  ok 51 [chromium] › tests\e2e\test-send.spec.ts:44:1 › subject preview: fallbacks for each sample; unknown field reported (8.7s)
+  ok 52 [chromium] › tests\e2e\test-send.spec.ts:74:3 › SEND_MODE=disabled › R-TS-12: the button is disabled and the panel explains why (6.6s)
+  -  53 [chromium] › tests\e2e\test-send.spec.ts:86:3 › SEND_MODE=mock › OR-TS-01: subject with fallback → preview → send test to the allowlisted inbox → history
+  -  54 [chromium] › tests\e2e\test-send.spec.ts:105:3 › SEND_MODE=mock › R-TS-02 (UI): a typed address that is not allowlisted is refused and not sent
+  -  55 [chromium] › tests\e2e\test-send.spec.ts:117:3 › SEND_MODE=mock › a missing value without fallback blocks the send and lists the problem
+  ok 56 [chromium] › tests\e2e\ui-shell.spec.ts:50:3 › R-UI-01 / R-UI-06: every page renders; navigation by role › admin: all pages render without console errors; nav marks the current page (9.7s)
+  ok 57 [chromium] › tests\e2e\ui-shell.spec.ts:66:3 › R-UI-01 / R-UI-06: every page renders; navigation by role › member: admin items are hidden and admin pages are refused (3.1s)
+  ok 58 [chromium] › tests\e2e\ui-shell.spec.ts:76:1 › R-UI-02: keyboard — skip link first, visible focus, nav reachable (4.7s)
+  x  59 [chromium] › tests\e2e\ui-shell.spec.ts:98:3 › R-UI-03: no horizontal page scroll at 375px (7.8s)
+  ok 60 [chromium] › tests\e2e\ui-shell.spec.ts:98:3 › R-UI-03: no horizontal page scroll at 768px (9.6s)
+  ok 61 [chromium] › tests\e2e\ui-shell.spec.ts:98:3 › R-UI-03: no horizontal page scroll at 1024px (8.5s)
+  ok 62 [chromium] › tests\e2e\ui-shell.spec.ts:98:3 › R-UI-03: no horizontal page scroll at 1440px (8.0s)
+  x  63 [chromium] › tests\e2e\ui-shell.spec.ts:133:1 › R-UI-04: axe finds no serious or critical violations, light and dark (37.3s)
+  ok 64 [chromium] › tests\e2e\ui-shell.spec.ts:155:1 › R-UI-03/04 (detail pages): email editor and contact detail — axe light/dark and no page scroll at 375px (23.8s)
+  ok 65 [chromium] › tests\e2e\ui-shell.spec.ts:204:1 › R-UI-04b: the signed-out sign-in page passes axe (3.8s)
+  ok 66 [chromium] › tests\e2e\ui-shell.spec.ts:211:1 › R-UI-05: prefers-reduced-motion disables transitions (3.4s)
+  ok 67 [chromium] › tests\e2e\ui-shell.spec.ts:222:1 › theme toggle persists across reloads (cookie, server-rendered) (3.9s)
+
+
+  1) [chromium] › tests\e2e\ui-shell.spec.ts:98:3 › R-UI-03: no horizontal page scroll at 375px ────
+
+    Error: pages wider than 375px
+
+    expect(received).toEqual(expected) // deep equality
+
+    - Expected  - 1
+    + Received  + 3
+
+    - Array []
+    + Array [
+    +   "/settings/notion: +11px ()",
+    + ]
+
+      115 |       if (r) overflow.push(`${p.path}: +${r.over}px (${r.wide.join(", ")})`);
+      116 |     }
+    > 117 |     expect(overflow, `pages wider than ${width}px`).toEqual([]);
+          |                                                     ^
+      118 |     if (width === 375) {
+      119 |       // Phone: the sidebar is a drawer behind the menu button.
+      120 |       await page.goto("/");
+        at D:\AI Studio\Email MKT Tracker\tests\e2e\ui-shell.spec.ts:117:53
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results\ui-shell-R-UI-03-no-horizontal-page-scroll-at-375px-chromium\test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results\ui-shell-R-UI-03-no-horizontal-page-scroll-at-375px-chromium\error-context.md
+
+    attachment #3: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results\ui-shell-R-UI-03-no-horizontal-page-scroll-at-375px-chromium\trace.zip
+    Usage:
+
+        npx playwright show-trace test-results\ui-shell-R-UI-03-no-horizontal-page-scroll-at-375px-chromium\trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  2) [chromium] › tests\e2e\ui-shell.spec.ts:133:1 › R-UI-04: axe finds no serious or critical violations, light and dark 
+
+    Test timeout of 30000ms exceeded.
+
+    Error: page.evaluate: Test timeout of 30000ms exceeded.
+     Please check out https://github.com/dequelabs/axe-core-npm/blob/develop/packages/playwright/error-handling.md
+
+      139 |     for (const p of [...MEMBER_PAGES, ...ADMIN_PAGES]) {
+      140 |       await page.goto(p.path);
+    > 141 |       const r = await new AxeBuilder({ page }).withTags(["wcag2a", "wcag2aa", "wcag21aa"]).analyze();
+          |                 ^
+      142 |       const bad = r.violations.filter((v) => v.impact === "serious" || v.impact === "critical");
+      143 |       report[`${scheme} ${p.path}`] = r.violations.map((v) => ({ id: v.id, impact: v.impact, nodes: v.nodes.length }));
+      144 |       for (const v of bad) serious.push(`${scheme} ${p.path} — ${v.id}: ${v.nodes.map((n) => n.target.join(" ")).slice(0, 3).join(" | ")}`);
+        at AxeBuilder.analyze (D:\AI Studio\Email MKT Tracker\node_modules\@axe-core\playwright\dist\index.mjs:219:13)
+        at D:\AI Studio\Email MKT Tracker\tests\e2e\ui-shell.spec.ts:141:17
+    [cause]: Error: page.evaluate: Test timeout of 30000ms exceeded.
+        at AxeBuilder.finishRun (D:\AI Studio\Email MKT Tracker\node_modules\@axe-core\playwright\dist\index.mjs:320:21)
+        at AxeBuilder.analyze (D:\AI Studio\Email MKT Tracker\node_modules\@axe-core\playwright\dist\index.mjs:217:14)
+        at D:\AI Studio\Email MKT Tracker\tests\e2e\ui-shell.spec.ts:141:17
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results\ui-shell-R-UI-04-axe-finds-f7e2d-l-violations-light-and-dark-chromium\test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results\ui-shell-R-UI-04-axe-finds-f7e2d-l-violations-light-and-dark-chromium\error-context.md
+
+    attachment #3: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results\ui-shell-R-UI-04-axe-finds-f7e2d-l-violations-light-and-dark-chromium\trace.zip
+    Usage:
+
+        npx playwright show-trace test-results\ui-shell-R-UI-04-axe-finds-f7e2d-l-violations-light-and-dark-chromium\trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  2 failed
+    [chromium] › tests\e2e\ui-shell.spec.ts:98:3 › R-UI-03: no horizontal page scroll at 375px ─────
+    [chromium] › tests\e2e\ui-shell.spec.ts:133:1 › R-UI-04: axe finds no serious or critical violations, light and dark 
+  13 skipped
+  52 passed (7.4m)
+[stack] cleanup ok: 5 owned process(es) stopped, none left
+[stack] stopped (exit 1)

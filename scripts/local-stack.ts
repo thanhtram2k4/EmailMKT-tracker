@@ -86,6 +86,8 @@ const appEnv: NodeJS.ProcessEnv = {
   SES_EVENTS_TOPIC_ARN: "arn:aws:sns:ap-southeast-1:123456789012:emt-local-stack-events",
   SNS_TEST_PUBLIC_KEY_FILE: snsPublicKeyFile,
   MOCK_TRANSPORT_LOG: path.join(logDir, "mock-transport-calls.jsonl"),
+  // M8: behave as behind one proxy, so tests can present distinct clients via X-Forwarded-For.
+  TRUSTED_PROXY_HOPS: "1",
 };
 
 const bin = (p: string) => path.resolve("node_modules", p);

@@ -1,0 +1,24 @@
+﻿node.exe : [core] WARNING: Executable file detection not yet supported on 'win32'.
+At line:1 char:1
++ & "C:\Program Files\nodejs/node.exe" "C:\Program Files\nodejs/node_mo ...
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: ([core] WARNING:...ted on 'win32'.:String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+Your pool doesn't have all of the error handlers! See: https://err.red/wpeh?v=0.18.0&method=connect
+migrations applied (app + graphile_worker)
+[stack] postgres ready on 54332; logs in D:\AI Studio\Email MKT Tracker\.local\logs\repro-ui
+[stack] building web app (next build)…
+[stack] web + worker healthy at http://localhost:3100
+
+Running 2 tests using 1 worker
+
+(node:28056) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ok 1 [chromium] › tests\e2e\crm.spec.ts:44:3 › CRM with mock Notion (synthetic data) › admin connects the mock Notion database and reviews the mapping (4.3s)
+tmp-wrap-check {"over":0,"tableScrolls":true}
+  ok 2 [chromium] › tests\e2e\zz-tmp-wrap-check.spec.ts:4:1 › tmp: a long unbreakable string in card text and a banner does not widen /settings/notion at 375px (785ms)
+
+  2 passed (5.9s)
+[stack] cleanup ok: 5 owned process(es) stopped, none left
+[stack] stopped (exit 0)

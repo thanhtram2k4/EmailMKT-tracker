@@ -1,0 +1,35 @@
+
+> email-mkt-tracker@0.1.0 e2e:mock-campaign
+> tsx scripts/local-stack.ts --send-mode mock --log-dir .local/logs/e2e-mock-campaign -- playwright test tests/e2e/campaign-send.spec.ts tests/e2e/campaign-schedule.spec.ts tests/e2e/campaign-tracking.spec.ts
+
+[core] WARNING: Executable file detection not yet supported on 'win32'.
+Your pool doesn't have all of the error handlers! See: https://err.red/wpeh?v=0.18.0&method=connect
+migrations applied (app + graphile_worker)
+[stack] postgres ready on 54332; logs in D:\AI Studio\Email MKT Tracker\.local\logs\e2e-mock-campaign
+[stack] building web app (next build)…
+[stack] web + worker healthy at http://localhost:3100
+
+Running 13 tests using 1 worker
+
+(node:34548) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ok  1 [chromium] › tests\e2e\campaign-schedule.spec.ts:86:1 › each campaign page shows the schedule card for admins only; disabled mode blocks it (3.8s)
+  ok  2 [chromium] › tests\e2e\campaign-schedule.spec.ts:109:3 › mock sending › OR-SCH-01: validation in the UI, then a schedule that the worker runs with the browser closed (S7, MOCK) (4.4m)
+  ok  3 [chromium] › tests\e2e\campaign-schedule.spec.ts:177:3 › mock sending › OR-SCH-02: reschedule increments the revision; cancel means never dispatched and the start job is removed (2.8s)
+  ok  4 [chromium] › tests\e2e\campaign-schedule.spec.ts:201:3 › mock sending › OR-SCH-03: unschedule returns the campaign to draft with a clear banner (1.7s)
+  ok  5 [chromium] › tests\e2e\campaign-schedule.spec.ts:213:3 › mock sending › OR-SCH-04: after a (simulated) outage beyond the grace period the worker holds the campaign and alerts; an admin sends it now (56.9s)
+  -   6 [chromium] › tests\e2e\campaign-send.spec.ts:104:1 › disabled mode: review blocks and Send now is off
+  ok  7 [chromium] › tests\e2e\campaign-send.spec.ts:122:3 › mock sending › OR-CMP-01: create → review (exclusions) → send now → completed; each recipient sent once (5.9s)
+  ok  8 [chromium] › tests\e2e\campaign-send.spec.ts:157:3 › mock sending › OR-CMP-02: unsubscribe — GET only confirms, the button and one-click POST suppress (1.1s)
+  ok  9 [chromium] › tests\e2e\campaign-send.spec.ts:190:3 › mock sending › OR-CMP-03: a signed SES Delivery event over HTTP updates the campaign; a bad signature is refused (953ms)
+  ok 10 [chromium] › tests\e2e\campaign-send.spec.ts:218:3 › mock sending › member: can create and review a draft but cannot send it (1.6s)
+  ok 11 [chromium] › tests\e2e\campaign-tracking.spec.ts:46:1 › public tracking endpoints: unknown tokens are 404, never a redirect or a sign-in page (75ms)
+  ok 12 [chromium] › tests\e2e\campaign-tracking.spec.ts:59:3 › mock sending › OR-TRK-01: opens and clicks over HTTP; redirect only to the snapshot URL; recorded vs filtered; timeline (24.3s)
+  ok 13 [chromium] › tests\e2e\campaign-tracking.spec.ts:152:3 › mock sending › OR-ROLE-01: a member can create and review, but cannot schedule or send (confirmed role rule) (1.3s)
+
+  Slow test file: [chromium] › tests\e2e\campaign-schedule.spec.ts (5.5m)
+  Consider running tests from slow files in parallel. See: https://playwright.dev/docs/test-parallel
+  1 skipped
+  12 passed (6.2m)
+[stack] cleanup ok: 5 owned process(es) stopped, none left
+[stack] stopped (exit 0)

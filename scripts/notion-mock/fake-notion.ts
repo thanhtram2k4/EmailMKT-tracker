@@ -9,6 +9,8 @@
  *    cursor pagination, and the 10,000-result cap (has_more=false + request_status "incomplete");
  *  - PATCH /v1/pages/{id} property updates (bumps last_edited_time; new select options auto-added);
  *  - POST /v1/databases with initial_data_source.properties;
+ *  - POST /v1/pages in a data source (M8 campaign summaries); title / rich_text / number / select / date values;
+ *  - query filter { property, rich_text: { equals } } (M8: find a summary page by Campaign ID);
  *  - error bodies { object:"error", status, code, message, request_id }, Retry-After on 429/529.
  * Configurable (behaviour the docs leave UNVERIFIED): whether trashed pages appear in queries,
  * and rounding of last_edited_time to the minute (default on, the conservative assumption).
@@ -254,6 +256,7 @@ export class FakeNotion {
     if (method === "POST" && (m = path.match(/^\/v1\/data_sources\/([^/]+)\/query$/))) return this.query(m[1], (body ?? {}) as Record<string, unknown>);
     if (method === "PATCH" && (m = path.match(/^\/v1\/pages\/([^/]+)$/))) return this.patchPage(m[1], (body ?? {}) as Record<string, unknown>);
     if (method === "POST" && path === "/v1/databases") return this.createDatabase((body ?? {}) as Record<string, unknown>);
+    if (method === "POST" && path === "/v1/pages") return this.createPage((body ?? {}) as Record<string, unknown>);
     return err(400, "invalid_request_url", `Invalid request URL: ${method} ${path}`);
   }
 
@@ -267,8 +270,14 @@ export class FakeNotion {
     if (!Number.isInteger(pageSize) || pageSize < 1 || pageSize > 100) return err(400, "validation_error", "page_size should be ≤ 100");
 
     let list = [...this.pages.values()].filter((p) => p.dataSourceId === dsId && (this.queryIncludesTrashed || !p.inTrash));
-    const f = body.filter as { timestamp?: string; last_edited_time?: Record<string, string>; property?: string } | undefined;
-    if (f) {
+    const f = body.filter as { timestamp?: string; last_edited_time?: Record<string, string>; property?: string; rich_text?: { equals?: string } } | undefined;
+    if (f?.property && f.rich_text?.equals !== undefined) {
+      const want = f.rich_text.equals;
+      list = list.filter((p) => {
+        const v = p.properties[f.property!] as { rich_text?: Array<{ plain_text: string }> } | undefined;
+        return (v?.rich_text ?? []).map((x) => x.plain_text).join("") === want;
+      });
+    } else if (f) {
       if (f.property) return err(400, "validation_error", "timestamp filters must not include property");
       if (f.timestamp !== "last_edited_time" || !f.last_edited_time) return err(400, "validation_error", "unsupported filter in fake");
       const cond = f.last_edited_time;
@@ -318,9 +327,11 @@ export class FakeNotion {
         p.properties[name] = { id: schema.id, type, [type]: v ? { name: v.name } : null } as PropertyValue;
       } else if (type === "date") {
         p.properties[name] = { id: schema.id, type: "date", date: (val.date as { start: string } | null) ?? null };
-      } else if (type === "rich_text") {
-        const items = (val.rich_text as Array<{ text: { content: string } }>) ?? [];
-        p.properties[name] = { id: schema.id, type: "rich_text", rich_text: items.map((i) => ({ type: "text", plain_text: i.text.content, text: i.text })) };
+      } else if (type === "rich_text" || type === "title") {
+        const items = (val[type] as Array<{ text: { content: string } }>) ?? [];
+        p.properties[name] = { id: schema.id, type, [type]: items.map((i) => ({ type: "text", plain_text: i.text.content, text: i.text })) } as PropertyValue;
+      } else if (type === "number") {
+        p.properties[name] = { id: schema.id, type: "number", number: (val.number as number | null) ?? null } as PropertyValue;
       } else {
         return err(400, "validation_error", `fake does not support writing ${type}`);
       }
@@ -328,6 +339,18 @@ export class FakeNotion {
     if (typeof body.in_trash === "boolean") p.inTrash = body.in_trash;
     p.editedMs = this.t();
     return json(200, this.pageJson(p));
+  }
+
+  private createPage(body: Record<string, unknown>): Response {
+    const parent = body.parent as { type?: string; data_source_id?: string } | undefined;
+    const ds = parent?.data_source_id ? this.dataSources.get(parent.data_source_id) : undefined;
+    if (!ds) return err(404, "object_not_found", `Could not find data source with ID: ${parent?.data_source_id ?? "?"}.`);
+    const now = this.t();
+    const p: StoredPage = { id: nid(), dataSourceId: parent!.data_source_id!, createdMs: now, editedMs: now, inTrash: false, properties: {} };
+    this.pages.set(p.id, p);
+    const r = this.patchPage(p.id, { properties: body.properties ?? {} });
+    if (r.status !== 200) this.pages.delete(p.id);
+    return r;
   }
 
   private createDatabase(body: Record<string, unknown>): Response {

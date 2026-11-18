@@ -1,0 +1,28 @@
+﻿node.exe : [core] WARNING: Executable file detection not yet supported on 'win32'.
+At line:1 char:1
++ & "C:\Program Files\nodejs/node.exe" "C:\Program Files\nodejs/node_mo ...
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: ([core] WARNING:...ted on 'win32'.:String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+Your pool doesn't have all of the error handlers! See: https://err.red/wpeh?v=0.18.0&method=connect
+migrations applied (app + graphile_worker)
+[stack] postgres ready on 54332; logs in D:\AI Studio\Email MKT Tracker\.local\logs\repro-ui
+[stack] web + worker healthy at http://localhost:3100
+
+Running 8 tests using 1 worker
+
+(node:35336) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ok 1 [chromium] › tests\e2e\crm.spec.ts:44:3 › CRM with mock Notion (synthetic data) › admin connects the mock Notion database and reviews the mapping (4.8s)
+  ok 2 [chromium] › tests\e2e\crm.spec.ts:63:3 › CRM with mock Notion (synthetic data) › first sync imports the synthetic contacts with issues flagged (3.8s)
+  ok 3 [chromium] › tests\e2e\crm.spec.ts:85:3 › CRM with mock Notion (synthetic data) › data issues: duplicates can be resolved by choosing a primary (1.8s)
+  ok 4 [chromium] › tests\e2e\crm.spec.ts:99:3 › CRM with mock Notion (synthetic data) › consent: imported contacts are unknown; a grant needs evidence and is recorded by staff (2.0s)
+  ok 5 [chromium] › tests\e2e\crm.spec.ts:121:3 › CRM with mock Notion (synthetic data) › a 'resubscribe' in Notion never removes the suppression and is corrected in Notion (2.5s)
+  ok 6 [chromium] › tests\e2e\crm.spec.ts:138:3 › CRM with mock Notion (synthetic data) › a repeated full sync creates nothing new (2.2s)
+  ok 7 [chromium] › tests\e2e\crm.spec.ts:149:3 › CRM with mock Notion (synthetic data) › members can read contacts but cannot change settings or consent (1.5s)
+  ok 8 [chromium] › tests\e2e\ui-shell.spec.ts:98:3 › R-UI-03: no horizontal page scroll at 375px (3.3s)
+
+  8 passed (24.9s)
+[stack] cleanup ok: 5 owned process(es) stopped, none left
+[stack] stopped (exit 0)

@@ -1,0 +1,88 @@
+﻿node.exe : [core] WARNING: Executable file detection not yet supported on 'win32'.
+At line:1 char:1
++ & "C:\Program Files\nodejs/node.exe" "C:\Program Files\nodejs/node_mo ...
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: ([core] WARNING:...ted on 'win32'.:String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+Your pool doesn't have all of the error handlers! See: https://err.red/wpeh?v=0.18.0&method=connect
+migrations applied (app + graphile_worker)
+[stack] postgres ready on 54332; logs in D:\AI Studio\Email MKT Tracker\.local\logs\repro-ui
+[stack] web + worker healthy at http://localhost:3100
+
+Running 67 tests using 1 worker
+
+(node:40668) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ok  1 [chromium] › tests\e2e\auth.spec.ts:20:1 › unauthenticated visitors are redirected to sign-in (505ms)
+  ok  2 [chromium] › tests\e2e\auth.spec.ts:26:1 › allowlisted admin signs in, sees role and admin page, signs out (1.7s)
+  ok  3 [chromium] › tests\e2e\auth.spec.ts:46:1 › allowlisted member signs in but cannot open the admin page (927ms)
+  ok  4 [chromium] › tests\e2e\auth.spec.ts:60:3 › stranger@example.com is rejected (ACCESS_DENIED_NOT_ALLOWLISTED) (707ms)
+  ok  5 [chromium] › tests\e2e\auth.spec.ts:60:3 › outsider@example.net is rejected (ACCESS_DENIED_WRONG_DOMAIN) (674ms)
+  ok  6 [chromium] › tests\e2e\auth.spec.ts:60:3 › revoked@example.com is rejected (ACCESS_DENIED_DISABLED) (665ms)
+  ok  7 [chromium] › tests\e2e\auth.spec.ts:70:1 › revoking a signed-in member ends the session and blocks the next sign-in (2.0s)
+  ok  8 [chromium] › tests\e2e\auth.spec.ts:90:1 › healthz reports database and worker (54ms)
+  ok  9 [chromium] › tests\e2e\campaign-schedule.spec.ts:86:1 › each campaign page shows the schedule card for admins only; disabled mode blocks it (2.7s)
+  -  10 [chromium] › tests\e2e\campaign-schedule.spec.ts:109:3 › mock sending › OR-SCH-01: validation in the UI, then a schedule that the worker runs with the browser closed (S7, MOCK)
+  -  11 [chromium] › tests\e2e\campaign-schedule.spec.ts:177:3 › mock sending › OR-SCH-02: reschedule increments the revision; cancel means never dispatched and the start job is removed
+  -  12 [chromium] › tests\e2e\campaign-schedule.spec.ts:201:3 › mock sending › OR-SCH-03: unschedule returns the campaign to draft with a clear banner
+  -  13 [chromium] › tests\e2e\campaign-schedule.spec.ts:213:3 › mock sending › OR-SCH-04: after a (simulated) outage beyond the grace period the worker holds the campaign and alerts; an admin sends it now
+  ok 14 [chromium] › tests\e2e\campaign-send.spec.ts:104:1 › disabled mode: review blocks and Send now is off (2.3s)
+  -  15 [chromium] › tests\e2e\campaign-send.spec.ts:122:3 › mock sending › OR-CMP-01: create → review (exclusions) → send now → completed; each recipient sent once
+  -  16 [chromium] › tests\e2e\campaign-send.spec.ts:157:3 › mock sending › OR-CMP-02: unsubscribe — GET only confirms, the button and one-click POST suppress
+  -  17 [chromium] › tests\e2e\campaign-send.spec.ts:190:3 › mock sending › OR-CMP-03: a signed SES Delivery event over HTTP updates the campaign; a bad signature is refused
+  -  18 [chromium] › tests\e2e\campaign-send.spec.ts:218:3 › mock sending › member: can create and review a draft but cannot send it
+  ok 19 [chromium] › tests\e2e\campaign-tracking.spec.ts:46:1 › public tracking endpoints: unknown tokens are 404, never a redirect or a sign-in page (40ms)
+  -  20 [chromium] › tests\e2e\campaign-tracking.spec.ts:59:3 › mock sending › OR-TRK-01: opens and clicks over HTTP; redirect only to the snapshot URL; recorded vs filtered; timeline
+  -  21 [chromium] › tests\e2e\campaign-tracking.spec.ts:152:3 › mock sending › OR-ROLE-01: a member can create and review, but cannot schedule or send (confirmed role rule)
+  ok 22 [chromium] › tests\e2e\crm.spec.ts:44:3 › CRM with mock Notion (synthetic data) › admin connects the mock Notion database and reviews the mapping (3.2s)
+  ok 23 [chromium] › tests\e2e\crm.spec.ts:63:3 › CRM with mock Notion (synthetic data) › first sync imports the synthetic contacts with issues flagged (3.0s)
+  ok 24 [chromium] › tests\e2e\crm.spec.ts:85:3 › CRM with mock Notion (synthetic data) › data issues: duplicates can be resolved by choosing a primary (1.3s)
+  ok 25 [chromium] › tests\e2e\crm.spec.ts:99:3 › CRM with mock Notion (synthetic data) › consent: imported contacts are unknown; a grant needs evidence and is recorded by staff (1.6s)
+  ok 26 [chromium] › tests\e2e\crm.spec.ts:121:3 › CRM with mock Notion (synthetic data) › a 'resubscribe' in Notion never removes the suppression and is corrected in Notion (2.2s)
+  ok 27 [chromium] › tests\e2e\crm.spec.ts:138:3 › CRM with mock Notion (synthetic data) › a repeated full sync creates nothing new (2.0s)
+  ok 28 [chromium] › tests\e2e\crm.spec.ts:149:3 › CRM with mock Notion (synthetic data) › members can read contacts but cannot change settings or consent (1.2s)
+  ok 29 [chromium] › tests\e2e\editor-trial.spec.ts:86:5 › SYNTHETIC A › import, sanitize report, regions, checks (1.7s)
+  ok 30 [chromium] › tests\e2e\editor-trial.spec.ts:115:5 › SYNTHETIC A › edit text, image, button and link; save; reopen; export (2.4s)
+  ok 31 [chromium] › tests\e2e\editor-trial.spec.ts:199:5 › SYNTHETIC A › recipient previews and missing-name fallbacks (1.6s)
+  ok 32 [chromium] › tests\e2e\editor-trial.spec.ts:218:5 › SYNTHETIC A › responsive browser renderings and import fidelity (Chromium only) (4.0s)
+  ok 33 [chromium] › tests\e2e\editor-trial.spec.ts:242:5 › SYNTHETIC A › GrapesJS (candidate b): no-edit export fidelity, then an edit + save (3.6s)
+  ok 34 [chromium] › tests\e2e\editor-trial.spec.ts:86:5 › SYNTHETIC B › import, sanitize report, regions, checks (1.8s)
+  ok 35 [chromium] › tests\e2e\editor-trial.spec.ts:115:5 › SYNTHETIC B › edit text, image, button and link; save; reopen; export (3.1s)
+  ok 36 [chromium] › tests\e2e\editor-trial.spec.ts:199:5 › SYNTHETIC B › recipient previews and missing-name fallbacks (1.5s)
+  ok 37 [chromium] › tests\e2e\editor-trial.spec.ts:218:5 › SYNTHETIC B › responsive browser renderings and import fidelity (Chromium only) (15.8s)
+  ok 38 [chromium] › tests\e2e\editor-trial.spec.ts:242:5 › SYNTHETIC B › GrapesJS (candidate b): no-edit export fidelity, then an edit + save (9.0s)
+  ok 39 [chromium] › tests\e2e\editor-trial.spec.ts:290:1 › TipTap paste (candidate c): formatted text from a Google-Docs-like clipboard keeps bold/italic/links, drops styles (1.4s)
+  ok 40 [chromium] › tests\e2e\paste-workflow.spec.ts:55:1 › main UI: Paste HTML is the entry point; no fixture gallery or GrapesJS controls (758ms)
+  ok 41 [chromium] › tests\e2e\paste-workflow.spec.ts:68:1 › paste → import → preview → edit text, image and link → save → reopen → export (3.7s)
+  ok 42 [chromium] › tests\e2e\paste-workflow.spec.ts:161:1 › formatting loss needs a choice: undo, keep, or HTML source (sanitized on save) (3.2s)
+  ok 43 [chromium] › tests\e2e\paste-workflow.spec.ts:214:1 › formatting toolbar is an explicit conversion with a preview of what it removes, and undo (2.3s)
+  ok 44 [chromium] › tests\e2e\paste-workflow.spec.ts:242:1 › a pasted fragment (no <html>/<body>) and a typed-markup attempt (2.0s)
+  ok 45 [chromium] › tests\e2e\paste-workflow.spec.ts:258:1 › internal tools are separate: members cannot open the lab (935ms)
+  ok 46 [chromium] › tests\e2e\paste-workflow.spec.ts:264:1 › internal tools are separate: admin-only lab, not linked from the product UI (846ms)
+  ok 47 [chromium] › tests\e2e\security.spec.ts:33:1 › SEC-01: security headers on app pages and public endpoints (36ms)
+  ok 48 [chromium] › tests\e2e\security.spec.ts:46:1 › SEC-02: a Server Function form posted from a foreign origin is refused (CSRF) (1.8s)
+  ok 49 [chromium] › tests\e2e\security.spec.ts:75:1 › SEC-03: the session cookie is HttpOnly and SameSite=Lax (677ms)
+  ok 50 [chromium] › tests\e2e\security.spec.ts:83:1 › SEC-04: public endpoints are rate limited per client; a forged X-Forwarded-For entry does not bypass it (387ms)
+  ok 51 [chromium] › tests\e2e\test-send.spec.ts:44:1 › subject preview: fallbacks for each sample; unknown field reported (2.4s)
+  ok 52 [chromium] › tests\e2e\test-send.spec.ts:74:3 › SEND_MODE=disabled › R-TS-12: the button is disabled and the panel explains why (1.8s)
+  -  53 [chromium] › tests\e2e\test-send.spec.ts:86:3 › SEND_MODE=mock › OR-TS-01: subject with fallback → preview → send test to the allowlisted inbox → history
+  -  54 [chromium] › tests\e2e\test-send.spec.ts:105:3 › SEND_MODE=mock › R-TS-02 (UI): a typed address that is not allowlisted is refused and not sent
+  -  55 [chromium] › tests\e2e\test-send.spec.ts:117:3 › SEND_MODE=mock › a missing value without fallback blocks the send and lists the problem
+  ok 56 [chromium] › tests\e2e\ui-shell.spec.ts:50:3 › R-UI-01 / R-UI-06: every page renders; navigation by role › admin: all pages render without console errors; nav marks the current page (2.8s)
+  ok 57 [chromium] › tests\e2e\ui-shell.spec.ts:66:3 › R-UI-01 / R-UI-06: every page renders; navigation by role › member: admin items are hidden and admin pages are refused (911ms)
+  ok 58 [chromium] › tests\e2e\ui-shell.spec.ts:76:1 › R-UI-02: keyboard — skip link first, visible focus, nav reachable (1.3s)
+  ok 59 [chromium] › tests\e2e\ui-shell.spec.ts:98:3 › R-UI-03: no horizontal page scroll at 375px (3.1s)
+  ok 60 [chromium] › tests\e2e\ui-shell.spec.ts:98:3 › R-UI-03: no horizontal page scroll at 768px (2.1s)
+  ok 61 [chromium] › tests\e2e\ui-shell.spec.ts:98:3 › R-UI-03: no horizontal page scroll at 1024px (2.4s)
+  ok 62 [chromium] › tests\e2e\ui-shell.spec.ts:98:3 › R-UI-03: no horizontal page scroll at 1440px (2.3s)
+  ok 63 [chromium] › tests\e2e\ui-shell.spec.ts:143:1 › R-UI-04: axe finds no serious or critical violations, light and dark (19.1s)
+  ok 64 [chromium] › tests\e2e\ui-shell.spec.ts:167:1 › R-UI-03/04 (detail pages): email editor and contact detail — axe light/dark and no page scroll at 375px (6.5s)
+  ok 65 [chromium] › tests\e2e\ui-shell.spec.ts:216:1 › R-UI-04b: the signed-out sign-in page passes axe (898ms)
+  ok 66 [chromium] › tests\e2e\ui-shell.spec.ts:223:1 › R-UI-05: prefers-reduced-motion disables transitions (844ms)
+  ok 67 [chromium] › tests\e2e\ui-shell.spec.ts:234:1 › theme toggle persists across reloads (cookie, server-rendered) (1.2s)
+
+  13 skipped
+  54 passed (2.5m)
+[stack] cleanup ok: 5 owned process(es) stopped, none left
+[stack] stopped (exit 0)

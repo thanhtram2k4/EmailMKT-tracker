@@ -20,6 +20,7 @@ import { StatusPill } from "../status-pill";
 import { AutoRefresh } from "./auto-refresh";
 import { ScheduleTimeForm, SchedulePreview, type SchedParams } from "./schedule-ui";
 import { AnalyticsSection } from "./analytics-section";
+import { summaryStatus } from "../../../lib/crm/campaign-summaries";
 
 export const dynamic = "force-dynamic";
 
@@ -52,6 +53,7 @@ export default async function CampaignPage({ params, searchParams }: { params: P
   const isAdmin = staff.role === "admin";
   const isDraft = c.status === "draft";
   const settings = await getSendSettings(db);
+  const notionSummary = await summaryStatus(db, id);
 
   return (
     <AppShell staff={staff} wide>
@@ -66,7 +68,15 @@ export default async function CampaignPage({ params, searchParams }: { params: P
         }
       />
       <Flash ok={sp.ok} error={sp.error} />
-      {isDraft ? <DraftView id={id} isAdmin={isAdmin} sendMode={cfg.SEND_MODE} sp={sp} /> : <SendingView d={d} isAdmin={isAdmin} filter={filter} sp={sp} ratePerSecond={settings.ratePerSecond} activity={sp.activity === "recorded" ? "recorded" : "filtered"} />}
+      {isDraft ? <DraftView id={id} isAdmin={isAdmin} sendMode={cfg.SEND_MODE} sp={sp} /> : <SendingView
+          d={d}
+          isAdmin={isAdmin}
+          filter={filter}
+          sp={sp}
+          ratePerSecond={settings.ratePerSecond}
+          activity={sp.activity === "recorded" ? "recorded" : "filtered"}
+          notionSummary={notionSummary}
+        />}
     </AppShell>
   );
 }
@@ -257,6 +267,7 @@ function SendingView({
   sp,
   ratePerSecond,
   activity,
+  notionSummary,
 }: {
   d: NonNullable<Awaited<ReturnType<typeof campaignDetail>>>;
   isAdmin: boolean;
@@ -264,6 +275,7 @@ function SendingView({
   sp: SchedParams;
   ratePerSecond: number;
   activity: "filtered" | "recorded";
+  notionSummary: Awaited<ReturnType<typeof summaryStatus>>;
 }) {
   const c = d.campaign;
   const m = d.counts;
@@ -454,6 +466,17 @@ function SendingView({
             <dt>Started / finished</dt>
             <dd>
               {fmtTime(c.processingStartedAt)} / {fmtTime(c.finishedAt)}
+            </dd>
+            <dt>Notion summary</dt>
+            <dd data-testid="notion-summary">
+              {notionSummary?.lastWrittenAt ? (
+                <>
+                  written ({notionSummary.stagesDone.join(", ")}) · {fmtTime(notionSummary.lastWrittenAt)}
+                </>
+              ) : (
+                <span className="muted">not written yet</span>
+              )}
+              {notionSummary?.lastError && <span className="muted small"> · last error: {notionSummary.lastError}</span>}
             </dd>
           </dl>
         </section>

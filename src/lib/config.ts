@@ -90,6 +90,8 @@ const schema = z
     MOCK_TRANSPORT_LOG: z.string().optional(),
     /** M5, APP_ENV local/test only: artificial delay per mock send (to test a worker killed mid-batch). */
     MOCK_SEND_DELAY_MS: z.coerce.number().int().min(0).max(60000).default(0),
+    /** M8: number of trusted proxies that append to X-Forwarded-For (Render: 1). 0 = no proxy; client IP unknown. */
+    TRUSTED_PROXY_HOPS: z.coerce.number().int().min(0).max(5).default(0),
     LOG_LEVEL: z.enum(["trace", "debug", "info", "warn", "error", "fatal", "silent"]).default("info"),
     BUILD_ID: z.string().default("dev"),
     WORKER_CONCURRENCY: z.coerce.number().int().min(1).max(20).default(2),

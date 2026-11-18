@@ -1,0 +1,31 @@
+CONTROL MT1 summary page created without the Campaign ID lookup: exit=0       Tests  5 passed (5)
+MUTATION MT1 summary page created without the Campaign ID lookup: exit=1 -> CAUGHT       Tests  1 failed | 4 passed (5)
+         × an uncertain create (applied, then failed) does not produce a second page: the next run finds it 62ms
+     FAIL  |integration| tests/integration/campaign-summaries.test.ts > Notion campaign summaries (FAKE Notion) > an uncertain create (applied, then failed) does not produce a second page: the next run finds it
+    AssertionError: expected [ { …(6) }, { …(6) }, { …(6) } ] to have a length of 2 but got 3
+    - Expected
+CONTROL MT2 client IP from the left-most X-Forwarded-For entry: exit=0       Tests  3 passed (3)
+MUTATION MT2 client IP from the left-most X-Forwarded-For entry: exit=1 -> CAUGHT       Tests  2 failed | 1 passed (3)
+         × uses the entry appended by the trusted proxy (from the right), never the forgeable left-most one 29ms
+         × no proxy configured or no header → unknown 1ms
+     FAIL  |unit| tests/unit/rate-limit.test.ts > client IP from X-Forwarded-For > uses the entry appended by the trusted proxy (from the right), never the forgeable left-most one
+    AssertionError: expected '6.6.6.6' to be '203.0.113.7' // Object.is equality
+CONTROL MT3 resumeAction opened to members: exit=0       Tests  66 passed (66)
+MUTATION MT3 resumeAction opened to members: exit=1 -> CAUGHT       Tests  1 failed | 65 passed (66)
+         × confirmed role rule (2026-11-13): admin-only campaign operations; members create, edit and pause 9ms
+     FAIL  |unit| tests/unit/security-static.test.ts > Server Functions > confirmed role rule (2026-11-13): admin-only campaign operations; members create, edit and pause
+    AssertionError: resumeAction: expected 'resumeAction(form: FormData) {\n  con…' to match /requireRole\("admin"\)/
+    - Expected:
+CONTROL MT4 restore into a non-empty database allowed: exit=0       Tests  3 passed (3)
+MUTATION MT4 restore into a non-empty database allowed: exit=1 -> CAUGHT       Tests  1 failed | 2 passed (3)
+         × refuses a non-empty target; a corrupted backup file is detected after restore 22ms
+     FAIL  |integration| tests/integration/backup-restore.test.ts > restore drill > refuses a non-empty target; a corrupted backup file is detected after restore
+    AssertionError: expected error to be instance of RestoreRefused
+    - Expected:
+CONTROL MT5 verify compares row counts only (no checksums): exit=0       Tests  3 passed (3)
+MUTATION MT5 verify compares row counts only (no checksums): exit=1 -> CAUGHT       Tests  1 failed | 2 passed (3)
+         × refuses a non-empty target; a corrupted backup file is detected after restore 3039ms
+     FAIL  |integration| tests/integration/backup-restore.test.ts > restore drill > refuses a non-empty target; a corrupted backup file is detected after restore
+    AssertionError: expected [] to deeply equal [ 'suppressions' ]
+    - Expected
+done

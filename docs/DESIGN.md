@@ -47,6 +47,11 @@ Baseline: `PROJECT_BRIEF.md` rev 2. Status: approved plan. M1 was authorized and
 >   - Automated-activity flags: scanner user agents / no user agent, HEAD requests, clicks < 10 s after delivery (or sending), different links within 2 s (all flagged). Google/Yahoo image-proxy opens are labelled `proxy_open` but not treated as automated. Scanner IP lists and Apple MPP detection are not implemented (no reliable signal without IP ranges).
 >   - The IP is stored only as an HMAC (keyed with `BETTER_AUTH_SECRET`); the user agent is truncated to 300 characters.
 >   - Both views (all recorded / automated filtered out) are shown side by side; a toggle selects the headline tiles and the link table.
+> - **M8 (Notion summaries, hardening, backups; mock environment; see `reports/2026-11-13-m8/report.md`):**
+>   - "Email Campaigns" Notion database with a fixed schema (Name, Campaign ID, Status, Summary stage, Scheduled/Started/Finished, Recipients, Sent, Delivered, Bounced, Complaints, Unsubscribes, Uncertain, Unique openers/clickers, open/click rate of Delivered, Last updated). Engagement figures are the filtered ones (automated activity removed).
+>   - Summary stages are tracked per campaign (`campaign_notion_summaries`); a run writes the latest due stage (covering missed ones). Contacts' "Last emailed" / "Last engagement" go through the outbox (`set_engagement`).
+>   - Public endpoints are rate limited in process memory (single instance assumed); client IP from `X-Forwarded-For` counted from the right (`TRUSTED_PROXY_HOPS`).
+>   - Backups: provider-managed backups are primary; a logical JSON-lines export with checksums supports drills and restores into an empty migrated database. The job queue is not backed up (rebuilt by the sweepers).
 
 ## Context
 

@@ -6,10 +6,13 @@
 import { getConfig } from "../../../lib/config";
 import { getDb } from "../../../lib/db/client";
 import { handleSnsPost } from "../../../lib/campaigns/sns-handler";
+import { limited } from "../../../lib/campaigns/tracking-http";
 
 export const dynamic = "force-dynamic";
 
 export async function POST(req: Request) {
+  const tooMany = limited(req, "ses_events");
+  if (tooMany) return tooMany;
   const body = await req.text();
   const r = await handleSnsPost(getDb(), getConfig(), body, {
     messageTypeHeader: req.headers.get("x-amz-sns-message-type"),

@@ -57,6 +57,8 @@ test.describe("mock sending", () => {
   let campaignId = "";
 
   test("OR-TRK-01: opens and clicks over HTTP; redirect only to the snapshot URL; recorded vs filtered; timeline", async ({ page, request }) => {
+    // The test waits ~17 s on purpose (fast-click and burst windows) on top of a send: 30 s was too tight (M8 slow run).
+    test.setTimeout(120_000);
     for (let i = 0; i < 2; i++) {
       const e = `${TAG}-${i}@example.com`;
       await q(`insert into contacts (notion_page_id, full_name, greeting_name, email, email_normalized, email_status, tags) values ($1, $2, $3, $4, $4, 'valid', $5)`, [`e2e-${TAG}-${i}`, `Người nhận ${i}`, `Anh ${i}`, e, [TAG]]);

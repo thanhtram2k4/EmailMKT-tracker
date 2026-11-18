@@ -15,6 +15,7 @@ import { recordConsentByStaff, ConsentRuleError, type ConsentPurpose, type Conse
 import { choosePrimary, clearPrimary } from "../lib/crm/duplicates";
 import { APP_FIELDS, type AppField, type FieldMapping } from "../lib/crm/mapping";
 import { NotionDisabledError, notionEnvFromConfig } from "../lib/crm/notion-env";
+import { createCampaignsDatabase } from "../lib/crm/campaign-summaries";
 import { getDb } from "../lib/db/client";
 import { getWorkerUtils } from "../lib/jobs";
 
@@ -29,6 +30,20 @@ function env() {
     if (e instanceof NotionDisabledError) back("/settings/notion", { error: e.message });
     throw e;
   }
+}
+
+/** M8: create the "Email Campaigns" summary database under a parent page (stored connection token). */
+export async function createCampaignsDatabaseAction(form: FormData) {
+  const s = await requireRole("admin");
+  const r = await createCampaignsDatabase(getDb(), env(), {
+    parentPageIdOrUrl: String(form.get("parent") ?? ""),
+    title: String(form.get("title") ?? ""),
+    actor: actorOf(s),
+    correlationId: await rid(),
+  });
+  revalidatePath("/settings/notion");
+  if (!r.ok) back("/settings/notion", { error: r.error });
+  back("/settings/notion", { ok: "Email Campaigns database created. Summaries are written after each campaign finishes (on completion, +24 h, +72 h, +7 days)." });
 }
 
 export async function connectNotionAction(form: FormData) {
