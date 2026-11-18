@@ -19,3 +19,6 @@ coverage/
 # Python bytecode
 __pycache__/
 *.pyc
+
+# Local Claude Code agents, skills and settings (local only, never committed)
+.claude/
