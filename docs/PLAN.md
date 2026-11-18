@@ -87,7 +87,7 @@ Legend: `[ ]` todo · `[x]` done (with a link to evidence) · results are PASS /
 
 **Acceptance:** DNS records verify in SES; the test Notion database is shared with the integration. (The "two real templates" item was withdrawn in M3 rev 2.)
 
-## M1: Foundation — implemented 2026-11-12 (evidence: [reports/2026-11-12-m1/report.md](../reports/2026-11-12-m1/report.md))
+## M1: Foundation — implemented 2026-11-12 (evidence: [reports/2026-11-12-m1/report_m1.md](../reports/2026-11-12-m1/report_m1.md))
 - [x] Repository scaffold (Next.js 16.4, TypeScript, ESLint), `.env.example`, CI workflow (`.github/workflows/ci.yml`; written but **not run**, since there is no remote repository)
 - [x] Postgres with Drizzle migrations: Better Auth tables, `staff_allowlist`, `audit_log` (append-only via DB trigger), `app_settings`, `worker_heartbeats`, `system_probes`
 - [x] Better Auth with Google; company domain enforced (`hd` plus our own server-side check); allowlist; roles (admin, member); access re-checked on every request; revoking access ends sessions
@@ -119,7 +119,7 @@ Proposed in [COMPLIANCE.md](COMPLIANCE.md) §6, to be adopted only after counsel
 - per-contact tracking consent (M7)
 - data-subject request workflow (M8)
 
-## M2: Notion CRM — implemented 2026-11-12 with mocks and synthetic data (evidence: [reports/2026-11-12-m2/report.md](../reports/2026-11-12-m2/report.md))
+## M2: Notion CRM — implemented 2026-11-12 with mocks and synthetic data (evidence: [reports/2026-11-12-m2/report_m2.md](../reports/2026-11-12-m2/report_m2.md))
 - [x] Connect the integration; token encrypted at rest (AES-256-GCM with associated data, versioned key, rotation support; only the last 4 characters are shown)
 - [x] Create the CRM database (fixed schema) **or** map an existing database (property types validated; mapping suggested in English or Vietnamese; admin reviews and saves)
 - [x] Full sync, incremental sync (`last_edited_time` with a 5-minute overlap, every 10 minutes), "Sync now", nightly full reconcile (19:00 UTC = 02:00 Asia/Ho_Chi_Minh): trashed or missing pages are archived, never deleted
@@ -154,7 +154,7 @@ Primary workflow, tested through the UI in Chromium with a labelled INTERNAL fix
 - [ ] Gmail, Outlook and mobile mail-app rendering. **NOT RUN** (sending not authorized). Browser validation is Chromium only
 - [ ] Image hosting (relative or local images are flagged, not re-hosted). **NOT DONE** (planned with S3)
 
-## M3: Editor trial — run 2026-11-12 (evidence: [reports/2026-11-12-m3/report.md](../reports/2026-11-12-m3/report.md), in Vietnamese)
+## M3: Editor trial — run 2026-11-12 (evidence: [reports/2026-11-12-m3/report_m3.md](../reports/2026-11-12-m3/report_m3.md), in Vietnamese)
 > Superseded in part by **M3 rev 2** above: the real-template inputs below are no longer required, and the TipTap span loss is fixed by formatting-preserving editing.
 - [~] Trial on templates × (a) structure-preserving, (b) GrapesJS, (c) TipTap paste:
   - edited headline/paragraph, image, link and button; saved; reopened; exported;
@@ -179,7 +179,7 @@ Primary workflow, tested through the UI in Chromium with a labelled INTERNAL fix
 - [x] R-TPL-03: an image-heavy template triggers a warning (unit). **PASS**
 - [x] Regression coverage for the M1/M2 tooling defects: exit code (a failing test exits non-zero) and owned-process cleanup. **PASS**, each proven by a mutation check
 
-## M4: UI redesign, personalization and test sends — implemented 2026-11-12 with mock/fake SES only (evidence: [reports/2026-11-12-m4/report.md](../reports/2026-11-12-m4/report.md), in Vietnamese)
+## M4: UI redesign, personalization and test sends — implemented 2026-11-12 with mock/fake SES only (evidence: [reports/2026-11-12-m4/report_m4.md](../reports/2026-11-12-m4/report_m4.md), in Vietnamese)
 Branch `m4-ui-testsend` from `m3-rev2-checkpoint`. Not authorized: real email (including test sends), any AWS call, deployment, push, live Notion.
 
 **UI system and screens**
@@ -242,7 +242,7 @@ Branch `m4-ui-testsend` from `m3-rev2-checkpoint`. Not authorized: real email (i
 | R-TS-11 | Audit rows contain only the redacted address |
 | R-TS-12 | `SEND_MODE=disabled`: the button is disabled and the server refuses |
 
-## M5: Send-now engine and compliance — implemented 2026-11-13 with a mock transport / fake SES client only (evidence: [reports/2026-11-13-m5/report.md](../reports/2026-11-13-m5/report.md))
+## M5: Send-now engine and compliance — implemented 2026-11-13 with a mock transport / fake SES client only (evidence: [reports/2026-11-13-m5/report_m5.md](../reports/2026-11-13-m5/report_m5.md))
 Branch `m5-send-engine` from `m4-checkpoint`. Not authorized: real email, any AWS call, deployment, push, live Notion.
 
 - [x] Snapshot freeze in one transaction (content, link table, recipients with frozen merge values, one `pending` message each); exclusion counts by reason shown at review; approval must match the reviewed revision and recipient count
@@ -296,7 +296,7 @@ Written during implementation (not before it), from DESIGN §4.1/§4.3 and this 
 | R-M5-12 | Live customer campaigns cannot be enabled outside production; settings validated |
 | R-M5-13 | Send maintenance schedules are registered even with `NOTION_MODE=disabled` (M4 defect regression) |
 
-## M6: Scheduling — implemented 2026-11-13 with a mock transport only (evidence: [reports/2026-11-13-m6/report.md](../reports/2026-11-13-m6/report.md))
+## M6: Scheduling — implemented 2026-11-13 with a mock transport only (evidence: [reports/2026-11-13-m6/report_m6.md](../reports/2026-11-13-m6/report_m6.md))
 Branch `m6-scheduling`, on top of the uncommitted M5 work. Not authorized: real email, AWS calls, deployment, push, live Notion.
 
 - [x] Picker (date, time, IANA zone; default Asia/Ho_Chi_Minh) with the zone shown everywhere; confirmation summary (sender, recipients, subject, local + UTC time, processing-start note with the expected sending duration)
@@ -323,7 +323,7 @@ Written during implementation (not before it), from DESIGN §4.2.
 | OR-SCH-03 | As above | Same | Schedule → Unschedule and edit | Draft with "Schedule removed — review and confirm again" (DESIGN §5) |
 | OR-SCH-04 | As above | Same; scheduled time moved 40 min into the past in the DB (simulated outage) | Wait for the worker's sweeper → dashboard → campaign → Send now | Held, nothing sent, alert shown; admin release sends it (DESIGN §4.2 "Late-send grace period") |
 
-## M7: Tracking and analytics — implemented 2026-11-13 with the mock transport only (evidence: [reports/2026-11-13-m7/report.md](../reports/2026-11-13-m7/report.md))
+## M7: Tracking and analytics — implemented 2026-11-13 with the mock transport only (evidence: [reports/2026-11-13-m7/report_m7.md](../reports/2026-11-13-m7/report_m7.md))
 Branch `m7-tracking` from `m6-checkpoint`. Not authorized: real email, AWS calls, deployment, push, live Notion.
 
 - [x] `/o/<token>.gif`, `/c/<token>/<idx>` (GET and HEAD), `/u/<token>` (M5) on `TRACKING_BASE_URL`; opaque tokens; redirects only to the snapshot link table; unknown token / index / untracked message → 404, never a redirect; the query string is never a destination
@@ -360,7 +360,7 @@ Written during implementation (not before it), from DESIGN §4.3.
 | R-TRK-09 | `last_engagement_at` only from non-automated activity; recipient timeline order and first/latest activity |
 | R-TRK-10 | IP stored only as a keyed hash |
 
-## M8: Notion summaries, hardening and release — implemented 2026-11-13 in the mock environment (evidence: [reports/2026-11-13-m8/report.md](../reports/2026-11-13-m8/report.md))
+## M8: Notion summaries, hardening and release — implemented 2026-11-13 in the mock environment (evidence: [reports/2026-11-13-m8/report_m8.md](../reports/2026-11-13-m8/report_m8.md))
 Branch `m8-release` from `m7-checkpoint`. Not authorized: real email, AWS calls, deployment, push, live Notion.
 
 - [x] Notion "Email Campaigns" database (created by an admin under a parent page) with one summary page per finished campaign, rewritten on completion, +24 h, +72 h and +7 days; the page is created only after a fresh query by Campaign ID finds none; failures are recorded and never affect sending
@@ -382,7 +382,7 @@ Branch `m8-release` from `m7-checkpoint`. Not authorized: real email, AWS calls,
 - [x] The release suite passes on the final build (MOCK). See the M8 report for counts
 - [x] A restore drill succeeds (local logical backup; MOCK data). Provider restore drill: **BLOCKED**
 - [ ] The live campaign shows correct per-recipient results, analytics and Notion summaries: **BLOCKED** (live)
-- [x] The release report is in `reports/` (`reports/2026-11-13-m8/report.md`)
+- [x] The release report is in `reports/` (`reports/2026-11-13-m8/report_m8.md`)
 
 ### M8 regression additions
 | ID | Scenario |

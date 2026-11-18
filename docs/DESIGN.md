@@ -22,8 +22,8 @@ Baseline: `PROJECT_BRIEF.md` rev 2. Status: approved plan. M1 was authorized and
 >   - Merge fields use Liquid output syntax only; tags are never executed.
 >   - The preview width is 640/375 px.
 >   - Template versions are immutable.
->   - Image re-hosting to S3 is still to do. See `reports/2026-11-12-m3/report.md`.
-> - **M5 (send-now engine, implemented locally with mocks; see `reports/2026-11-13-m5/report.md`):**
+>   - Image re-hosting to S3 is still to do. See `reports/2026-11-12-m3/report_m3.md`.
+> - **M5 (send-now engine, implemented locally with mocks; see `reports/2026-11-13-m5/report_m5.md`):**
 >   - Campaign statuses in M5: `draft, queued, sending, paused, blocked, cancelling, cancelled, completed, completed_with_issues, failed`. There is no stored `in_review` status: the review is computed on demand, and approval requires the exact `schedule_revision` and recipient count that were reviewed. `scheduled` and `held_overdue` come with M6.
 >   - Message `send_status` adds `skipped` (with `skip_reason`: suppressed, consent_withdrawn/refused, consent_missing) instead of `skipped_suppressed`, and `resend_approved` is recorded as `resolution` on a message that returns to `pending` with `attempt_no + 1`. Forward-only transitions are enforced by a DB trigger.
 >   - Consent is re-checked at send time, next to suppression. The frequency cap (COMPLIANCE §6) is still a pending proposal and is not enforced.
@@ -33,21 +33,21 @@ Baseline: `PROJECT_BRIEF.md` rev 2. Status: approved plan. M1 was authorized and
 >   - A custom `Message-ID` header is not set; reconciliation uses the `msg_id` (and `attempt`) SES tags. Whether SES v2 keeps a custom Message-ID must be checked before relying on it.
 >   - SNS `SubscriptionConfirmation` messages are verified and recorded, never confirmed automatically (manual step after deployment).
 >   - Only admins approve ("Send now"), resume, cancel, resolve uncertain sends and add suppressions; members create, edit, review and pause.
-> - **M6 (scheduling, implemented locally with mocks; see `reports/2026-11-13-m6/report.md`):**
+> - **M6 (scheduling, implemented locally with mocks; see `reports/2026-11-13-m6/report_m6.md`):**
 >   - Statuses `scheduled` and `held_overdue` added. Scheduling performs the same snapshot freeze as Send now; "edit after scheduling" is an explicit **Unschedule and edit** action (→ draft, revision++, snapshot cleared, unsent messages cancelled). The schedule is admin-only, like Send now.
 >   - The fenced start locks the campaign row (`FOR UPDATE`) and checks status, revision and due time in one transaction; the start job and the every-minute sweeper share it. The comparison uses the worker's clock (injected in tests) rather than SQL `now()`.
 >   - Scheduling uses whole minutes (HH:mm). The local time as entered and the UTC offset used are stored next to `scheduled_at_utc` and `schedule_tz`.
 >   - Execution-time checks (credentials, sending enabled, quota) remain in the dispatcher (M5) and block with a reason; Notion is not required.
 >   - Admin alerts (`admin_alerts`) for `held_overdue` and `blocked`: shown on the Dashboard and Scheduled list until acknowledged; emailed to active admins only when the sending guard allows (test-send rules outside production; never in `disabled`).
 >   - Worker-down banner on the Scheduled list after 2 minutes without a heartbeat.
-> - **M7 (tracking and analytics, implemented locally with mocks; see `reports/2026-11-13-m7/report.md`):**
+> - **M7 (tracking and analytics, implemented locally with mocks; see `reports/2026-11-13-m7/report_m7.md`):**
 >   - Tracking is decided per message at send time by the setting `tracking.mode` (`consented_only` by default — `email_tracking` consent required, pending counsel; `all`; `off`) and recorded on the message. Untracked messages keep direct links and get no pixel; their tokens produce no tracking events.
 >   - Links are rewritten on the frozen template before merge rendering, with the same selection as the snapshot link table (absolute http(s), no merge field; links inside comments such as MSO conditionals stay direct). The plain-text part is not rewritten. Test sends are never tracked.
 >   - **Unique openers include implied opens** (a click without a recorded open); "Opens (recorded)" stays the raw pixel count. CTOR therefore never exceeds 100%.
 >   - Automated-activity flags: scanner user agents / no user agent, HEAD requests, clicks < 10 s after delivery (or sending), different links within 2 s (all flagged). Google/Yahoo image-proxy opens are labelled `proxy_open` but not treated as automated. Scanner IP lists and Apple MPP detection are not implemented (no reliable signal without IP ranges).
 >   - The IP is stored only as an HMAC (keyed with `BETTER_AUTH_SECRET`); the user agent is truncated to 300 characters.
 >   - Both views (all recorded / automated filtered out) are shown side by side; a toggle selects the headline tiles and the link table.
-> - **M8 (Notion summaries, hardening, backups; mock environment; see `reports/2026-11-13-m8/report.md`):**
+> - **M8 (Notion summaries, hardening, backups; mock environment; see `reports/2026-11-13-m8/report_m8.md`):**
 >   - "Email Campaigns" Notion database with a fixed schema (Name, Campaign ID, Status, Summary stage, Scheduled/Started/Finished, Recipients, Sent, Delivered, Bounced, Complaints, Unsubscribes, Uncertain, Unique openers/clickers, open/click rate of Delivered, Last updated). Engagement figures are the filtered ones (automated activity removed).
 >   - Summary stages are tracked per campaign (`campaign_notion_summaries`); a run writes the latest due stage (covering missed ones). Contacts' "Last emailed" / "Last engagement" go through the outbox (`set_engagement`).
 >   - Public endpoints are rate limited in process memory (single instance assumed); client IP from `X-Forwarded-For` counted from the right (`TRUSTED_PROXY_HOPS`).

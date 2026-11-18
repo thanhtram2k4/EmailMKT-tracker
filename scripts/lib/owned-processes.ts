@@ -3,7 +3,7 @@
  *
  * Why: on Windows, killing a child process does not kill its own children (e.g. `tsx` spawns a
  * second node process; `next dev` spawns `start-server.js`). Orphans then keep ports open and
- * serve stale code to later checks (found in M2; see reports/2026-11-12-m2/report.md, F7).
+ * serve stale code to later checks (found in M2; see reports/2026-11-12-m2/report_m2.md, F7).
  *
  * Rules:
  *  - Only PIDs registered here (spawned through `spawnOwned`) and their descendants are targeted.

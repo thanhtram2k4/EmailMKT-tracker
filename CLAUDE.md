@@ -11,15 +11,15 @@ This is an internal email-marketing app for a single company. Campaigns go out t
 - How to run: `README.md`
 
 ## Status
-- **M1 (foundation) is implemented** and checkpointed as Git tag `m1-checkpoint`. See `reports/2026-11-12-m1/report.md`.
-- **M2 (Notion CRM) is implemented with mocks and synthetic data only.** Tag `m2-checkpoint`. See `reports/2026-11-12-m2/report.md`.
+- **M1 (foundation) is implemented** and checkpointed as Git tag `m1-checkpoint`. See `reports/2026-11-12-m1/report_m1.md`.
+- **M2 (Notion CRM) is implemented with mocks and synthetic data only.** Tag `m2-checkpoint`. See `reports/2026-11-12-m2/report_m2.md`.
 - **M3 (editor) is done, corrected in rev 2.** Branch `m3-editor-trial`; tags `m3-checkpoint` (trial) and `m3-rev2-checkpoint` (paste workflow). See `reports/2026-11-12-m3-rev2/report.md` (Vietnamese).
   - The primary workflow is **Paste HTML → Import → Preview → Edit → Save → Reopen**. Real templates are **not** a requirement; never search the user's folders for templates.
   - Browser (Chromium) validation only. Gmail, Outlook and mobile rendering are NOT RUN.
-- **M4 (UI redesign, personalization, test sends) is authorized for local work with mock/fake SES only.** Branch `m4-ui-testsend`. See `reports/2026-11-12-m4/report.md` (Vietnamese). A real SES test send needs separate approval.
-- **M5 (send-now engine and compliance) is authorized for local work with a mock transport or fake SES client only.** Branch `m5-send-engine` from `m4-checkpoint`. See `reports/2026-11-13-m5/report.md`. Real sends, AWS calls, deployment and push still need separate approval.
-- **M5 and M6 are committed** together on branch `m6-scheduling`; tags `m5-checkpoint` and `m6-checkpoint` point to the same commit. See `reports/2026-11-13-m5/report.md` and `reports/2026-11-13-m6/report.md`.
-- **M7 (tracking and analytics) is committed**, tag `m7-checkpoint`. See `reports/2026-11-13-m7/report.md`.
+- **M4 (UI redesign, personalization, test sends) is authorized for local work with mock/fake SES only.** Branch `m4-ui-testsend`. See `reports/2026-11-12-m4/report_m4.md` (Vietnamese). A real SES test send needs separate approval.
+- **M5 (send-now engine and compliance) is authorized for local work with a mock transport or fake SES client only.** Branch `m5-send-engine` from `m4-checkpoint`. See `reports/2026-11-13-m5/report_m5.md`. Real sends, AWS calls, deployment and push still need separate approval.
+- **M5 and M6 are committed** together on branch `m6-scheduling`; tags `m5-checkpoint` and `m6-checkpoint` point to the same commit. See `reports/2026-11-13-m5/report_m5.md` and `reports/2026-11-13-m6/report_m6.md`.
+- **M7 (tracking and analytics) is committed**, tag `m7-checkpoint`. See `reports/2026-11-13-m7/report_m7.md`.
 - **M8 (Notion summaries, hardening, backups, release) is authorized in the mock environment** (2026-11-13). Branch `m8-release` from `m7-checkpoint`. The live controlled campaign is BLOCKED until the user provides the M0 accounts and legal answers. Commit each milestone before starting the next.
 - **Roles (confirmed by the user):** only admins approve, schedule and send campaigns and resolve uncertain sends; members create, edit, review and pause.
 - **No Claude API.** The app uses no LLM API. Never add one; if an AI feature is ever needed, only the free Gemini API, after asking the user (keys never in Git).
