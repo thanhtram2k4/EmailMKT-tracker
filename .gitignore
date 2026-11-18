@@ -15,3 +15,7 @@ coverage/
 
 # Redacted test evidence under reports/ is committed on purpose (see reports/README.md)
 !reports/**/*.log
+
+# Python bytecode
+__pycache__/
+*.pyc
